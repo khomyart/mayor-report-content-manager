@@ -21060,6 +21060,45 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/css/login_page.css":
+/*!**************************************!*\
+  !*** ./resources/css/login_page.css ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/css/control_panel.css":
+/*!*****************************************!*\
+  !*** ./resources/css/control_panel.css ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/css/dashboard_page.css":
+/*!******************************************!*\
+  !*** ./resources/css/dashboard_page.css ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
 /***/ "./node_modules/process/browser.js":
 /*!*****************************************!*\
   !*** ./node_modules/process/browser.js ***!
@@ -21365,6 +21404,9 @@ process.umask = function() { return 0; };
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
 /******/ 			"/js/app": 0,
+/******/ 			"css/dashboard_page": 0,
+/******/ 			"css/control_panel": 0,
+/******/ 			"css/login_page": 0,
 /******/ 			"css/app": 0
 /******/ 		};
 /******/ 		
@@ -21413,8 +21455,11 @@ process.umask = function() { return 0; };
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	__webpack_require__.O(undefined, ["css/app"], () => (__webpack_require__("./resources/js/app.js")))
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/app"], () => (__webpack_require__("./resources/css/app.css")))
+/******/ 	__webpack_require__.O(undefined, ["css/dashboard_page","css/control_panel","css/login_page","css/app"], () => (__webpack_require__("./resources/js/app.js")))
+/******/ 	__webpack_require__.O(undefined, ["css/dashboard_page","css/control_panel","css/login_page","css/app"], () => (__webpack_require__("./resources/css/app.css")))
+/******/ 	__webpack_require__.O(undefined, ["css/dashboard_page","css/control_panel","css/login_page","css/app"], () => (__webpack_require__("./resources/css/login_page.css")))
+/******/ 	__webpack_require__.O(undefined, ["css/dashboard_page","css/control_panel","css/login_page","css/app"], () => (__webpack_require__("./resources/css/control_panel.css")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/dashboard_page","css/control_panel","css/login_page","css/app"], () => (__webpack_require__("./resources/css/dashboard_page.css")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()
