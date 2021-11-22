@@ -16,13 +16,21 @@
     text-decoration: none;
 }
 
+.active-menu-element {
+    width: 100%;
+    padding: 10px 10px 10px 20px;
+    text-decoration: none;
+    background: rgb(197, 105, 105);
+    color: white;
+}
+
 .menu-element:hover {
     background-color: azure;
     padding-left: 25px;
 }
 
 .content-container {
-    background-color: rgb(255, 226, 190);
+    background-color: rgb(255, 255, 255);
     height: 100%;
     width: 100%;
 }

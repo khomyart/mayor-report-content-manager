@@ -47,7 +47,7 @@ $menu = [
 
                 </div>
                 @foreach ($menu as $menu_item)
-                    <a class="menu-element" href="{{ route($menu_item['redirects_to']) }}">
+                    <a class="{{$currentPage == $menu_item['redirects_to'] ? 'active-menu-element' : 'menu-element'}}" href="{{ route($menu_item['redirects_to']) }}">
                         {{$menu_item['display_name']}}
                     </a>
                 @endforeach

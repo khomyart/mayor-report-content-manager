@@ -18,23 +18,18 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::post('/login', [AuthenticatedSessionController::class, 'store'])
-    ->middleware('guest')
-    ->name('login');
+Route::get('/login', function () {
+    return redirect('/');
+});
 
 Route::get('/dashboard', function () {
     return view('app.dashboard');
 })->middleware('auth')->name('dashboard');
 
-Route::get('/reports', function () {
-    return view('app.reports');
-})->middleware('auth')->name('reports');
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+    ->middleware('guest')
+    ->name('login');
 
-Route::get('/articles', function () {
-    return view('app.articles');
-})->middleware('auth')->name('articles');
-
-Route::get('/presentations', function () {
-    return view('app.presentations');
-})->middleware('auth')->name('presentations');
-  
+require __DIR__.'/reports.php';
+require __DIR__.'/presentation.php';
+require __DIR__.'/articles.php';

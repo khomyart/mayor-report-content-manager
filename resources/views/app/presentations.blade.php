@@ -6,6 +6,10 @@
     - презентації
 @endsection
 
+@php
+    $currentPage = "presentations";
+@endphp
+
 @section('content')
 
     123 презентації

@@ -6,6 +6,10 @@
     - статті
 @endsection
 
+@php
+    $currentPage = "articles";
+@endphp
+
 @section('content')
 
     123 статті

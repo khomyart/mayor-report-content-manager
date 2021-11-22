@@ -6,6 +6,10 @@
     - дешборд
 @endsection
 
+@php
+    $currentPage = "dashboard";
+@endphp
+
 @section('content')
 
     123 дешборд
