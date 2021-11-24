@@ -20,35 +20,48 @@
         </ol>
     </nav>
     <div class="col-8 p-4">
-        <form action="{{ route('create_report_action') }}" method="POST" class="mt-5 col-12" enctype="multipart/form-data">
+        <form action="{{ isset($data) ? url('/reports/update/'.$data['id']) : route('create_report_action') }}" method="POST" class="mt-5 col-12" enctype="multipart/form-data">
             @csrf
-            <div class="row">
-                <div class="mb-3 col-6">
+            <div class="row mb-3">
+                <div class="col-6">
                     <label for="year" class="form-label">Рік звіту</label>
-                    <input type="number" class="form-control" id="year" placeholder="" name="year">
+                    <input type="number" class="form-control" id="year" placeholder="" name="year" value="{{ isset($data) ? $data["year"] : '' }}">
                 </div>
-                <div class="mb-3 col-6">
+                <div class="col-6">
                     <label for="published_at" class="form-label">Дата публікації</label>
-                    <input type="date" class="form-control" id="published_at" placeholder="" name="published_at">
+                    <input type="date" class="form-control" id="published_at" placeholder="" name="published_at" value="{{ isset($data) ? $data["published_at"] : '' }}">
                 </div>
             </div>
-            <div class="row">
-                <div class="mb-3 col-6">
+            <div class="row mb-3">
+                <div class="col-6">
                     <label for="report_image" class="form-label">Зображення звіту</label>
                     <input class="form-control" type="file" id="report_image" name="report_image">
                 </div>
-                <div class="mb-3 col-6">
+                <div class="col-6">
                     <label for="report_book" class="form-label">PDF книжка звіту</label>
                     <input class="form-control" type="file" id="report_book" name="report_book">
                 </div>
             </div>
+
+            @if (isset($data))
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <img src="{{ Storage::url($data["img_src"]); }}" alt="" style="width: 100%;">
+                    </div>
+                    <div class="col-6">
+                        
+                    </div>
+                </div>
+            @endif
+  
             <div class="d-flex flex-row mt-3 align-items-center justify-content-start">
-                <button type="submit" class="btn btn-primary">Зберегти</button> 
+
+                <button type="submit" class="btn btn-primary">Зберегти {{ isset($data) ? 'зміни' : '' }}</button> 
                 <div class="form-check ps-5">
                     <label class="form-check-label" for="is_active">
                         Активний
                     </label>
-                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active">
+                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {{ isset($data) && $data["is_active"] == "true" ? 'checked' : '' }}>
                 </div>
             </div>
         </form>

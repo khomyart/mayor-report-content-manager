@@ -26,7 +26,7 @@ class Reports extends Controller
         $published_at = $request->post("published_at");
 
         switch ($request->post("is_active")) {
-            case 'On':
+            case 'on':
                 $is_active = "true";
                 break;
             
@@ -55,6 +55,26 @@ class Reports extends Controller
             "path_to_report_book" => $report_book_path,
         ]);
 
-        return back()->with('message', 'Звіт успішно створено');
+        return redirect()->route('reports')->with('message', 'Звіт успішно створено');
+    }
+
+    public function update(Request $request, $id) {
+        $report = Report::find($id);
+        $report->year = $request->post("year") ?: $report->year = $request->post("year");
+        $report->published_at = $request->post("published_at") ?: $report->published_at = $request->post("published_at");
+        $report->is_active = $request->post("is_active") == 'on' ? 'true' : 'false';
+        if ($request->hasFile("report_image")) {$report->img_src = $this->saveImage($request->file("report_image"));}
+        if ($request->hasFile("report_book")) {$report->reportBook->path_to_report_book = $this->saveImage($request->file("report_book"));}
+
+        $report->save();
+        $report->reportBook->save();
+
+        return back();
+    }
+
+    public function delete(Request $request, $id) {
+        $report = Report::find($id);
+        $report->delete();
+        return back();
     }
 }
