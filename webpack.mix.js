@@ -16,5 +16,6 @@ mix.js('resources/js/app.js', 'public/js')
     .postCss('resources/css/login_page.css', 'public/css')
     .postCss('resources/css/control_panel.css', 'public/css')
     .postCss('resources/css/reports.css', 'public/css')
+    .postCss('resources/css/articles.css', 'public/css')
     .postCss('resources/css/dashboard_page.css', 'public/css');
 

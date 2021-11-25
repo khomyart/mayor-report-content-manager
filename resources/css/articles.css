@@ -1,0 +1,23 @@
+.articles {
+    overflow-y: auto;
+    position: relative;
+    background-color: rgb(245, 248, 248);
+
+}
+
+.button-holder {
+    position: sticky;
+    top: 0;
+    background-color: rgb(149, 236, 236);
+}
+
+.collapse-trigger {
+    cursor: pointer;
+    user-select: none;
+    transition: 0.2s all ease-in-out;
+}
+
+.collapse-trigger:hover >span  {
+    font-weight: bold;
+}
+
