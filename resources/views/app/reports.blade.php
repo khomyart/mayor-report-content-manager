@@ -57,7 +57,7 @@
 
 @endsection
 
-@section('style')
+@section('css_import')
     @parent
 
     <link rel="stylesheet" href="{{asset('css/reports.css')}}">
