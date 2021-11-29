@@ -60,6 +60,7 @@
         </form> 
         <!-- Modal -->
         <div class="modal fade" id="diagramModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="diagramModalLabel" aria-hidden="true">
+            {{-- modal-lg --}}
             <div class="modal-dialog modal-dialog-scrollable ">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -67,6 +68,9 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <ul id="chart_errors" hidden class="alert alert-danger ps-5">
+
+                        </ul>
                         <div class="mb-3">
                             <label for="chart_title" class="form-label">Назва графіка</label>
                             <input type="text" class="form-control" id="chart_title" name="chart_title">
@@ -126,6 +130,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" id="debug" class="btn btn-primary">Debug</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відміна</button>
                         <button type="button" id="submit_chart_data" class="btn btn-primary">Зберегти</button>
                     </div>
@@ -166,9 +171,9 @@
         src="https://code.jquery.com/jquery-3.6.0.js"
         integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
         crossorigin="anonymous"></script>
-    <script defer src="{{ asset('js/create_article.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+    <script defer src="{{ asset('js/create_article.js') }}"></script>
 @show
 
 

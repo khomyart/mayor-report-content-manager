@@ -2109,7 +2109,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function datasetHTMLTemplate(currentChartDataset) {
-  return "\n    <div class=\"row mb-3 d-flex align-items-end\" id=\"dataset_".concat(currentChartDataset, "\">\n        <div class=\"col-4\">\n            <label for=\"label_").concat(currentChartDataset, "\" class=\"form-label\">\u041D\u0430\u0437\u0432\u0430 \u043F\u043E\u043B\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element\" id=\"label_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-5\">\n            <label for=\"value_").concat(currentChartDataset, "\" class=\"form-label\">\u0417\u043D\u0430\u0447\u0435\u043D\u043D\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element\" id=\"value_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-3\">\n            <button class=\"btn btn-primary\" onclick=\"document.querySelector('#dataset_").concat(currentChartDataset, "').remove()\">\n                \u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438\n            </button>\n        </div>\n    </div>\n    ");
+  return "\n    <div class=\"row mb-3 d-flex align-items-end dataset\" id=\"dataset_".concat(currentChartDataset, "\">\n        <div class=\"col-4\">\n            <label for=\"label_").concat(currentChartDataset, "\" class=\"form-label\">\u041D\u0430\u0437\u0432\u0430 \u043F\u043E\u043B\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element dataset_label\" id=\"label_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-5\">\n            <label for=\"value_").concat(currentChartDataset, "\" class=\"form-label\">\u0417\u043D\u0430\u0447\u0435\u043D\u043D\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element dataset_value\" id=\"value_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-3\">\n            <button class=\"btn btn-primary col-12\" onclick=\"document.querySelector('#dataset_").concat(currentChartDataset, "').remove()\">\n                \u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438\n            </button>\n        </div>\n    </div>\n    ");
 }
 
 var datasetContainer = document.querySelector('#datasets_container');
@@ -2123,9 +2123,138 @@ document.querySelector('#add_dataset_button').onclick = function () {
 
 
 var chartFieldsIDs = ['chart_title', 'chart_legend', 'chart_type', 'chart_axis_x', 'chart_axis_y', 'chart_sufix', 'chart_verbal_rounding', 'chart_verbal_rounding_when_hovered'];
+var rules = {
+  'requeried': function requeried(string) {
+    return string.length > 0 ? true : false;
+  },
+  'numbers': function numbers(string) {
+    var re = /^[0-9]+$/gmi;
+    return string.match(re) != null ? true : false;
+  },
+  'letters': function letters(string) {
+    var re = /^[a-zA-Zа-яА-ЯґҐїЇіІ\s`"’'.]+$/gmi;
+    return string.match(re) != null ? true : false;
+  },
+  'datasets': function datasets() {
+    var amountOfDatasets = document.querySelectorAll('.dataset');
+    return amountOfDatasets.length > 0 ? true : false;
+  }
+};
+var elementsForValidation = [{
+  selector: '#chart_title',
+  rules: ['requeried'],
+  errorMessage: 'Поле "Назва графіка" повинно бути заповнене'
+}, {
+  selector: '#chart_legend',
+  rules: ['requeried'],
+  errorMessage: 'Поле "Додаткова назва графіка" повинне бути заповнене'
+}, {
+  selector: '#chart_type',
+  rules: ['requeried'],
+  errorMessage: 'Необхідно обрати тип графіку'
+}, {
+  selector: '#chart_axis_x',
+  rules: ['requeried', 'letters'],
+  errorMessage: 'Поле "Назва осі Х" повинно бути заповнене та не може містити цифри'
+}, {
+  selector: '#chart_axis_y',
+  rules: ['requeried', 'letters'],
+  errorMessage: 'Поле "Назва осі Y" повинно бути заповнене та не може містити цифри'
+}, {
+  selector: '#chart_sufix',
+  rules: ['requeried', 'letters'],
+  errorMessage: 'Поле "Суфікс показників" повинно заповнене та містити лише літери'
+}, {
+  selector: '.dataset_label',
+  rules: ['requeried'],
+  errorMessage: 'Назва набору даних повнинна бути заповнена'
+}, {
+  selector: '.dataset_value',
+  rules: ['requeried', 'numbers'],
+  errorMessage: 'Значення набору даних повинне бути заповнене та містити лише літери'
+}, {
+  selector: '#add_dataset_button',
+  rules: ['datasets'],
+  errorMessage: 'Додайте хоча б один набір данних!'
+}];
 var charts = [];
+/**
+ * do errors validation of html inputs
+ * 
+ * 1) gets all fields wich are needed to be validated
+ * 2) checks it value, if it match required rule (basically regexp based)
+ * 3) fills error array with invalid inputs IDs and error messages
+ * 4) returns this array to further proceed
+ */
+
+function doFieldsValidation(elementsForValidation, rules) {
+  var errors = [],
+      nodesFromHTML;
+  elementsForValidation.forEach(function (element) {
+    nodesFromHTML = document.querySelectorAll(element.selector);
+    nodesFromHTML.forEach(function (node) {
+      element.rules.every(function (rule) {
+        if (!rules[rule](node.value)) {
+          errors.push({
+            nodeID: node.id,
+            message: element.errorMessage
+          });
+          return false;
+        } else {
+          return true;
+        }
+      });
+    });
+  });
+  return errors;
+}
+/**
+ * Removes old error displaying, generate new depends on needs 
+ * 
+ * returns true, if errors is still on the page, false - if there is no errors left
+ */
+
+
+function handleErrorDisplaying(errors, errorsContainerSelector) {
+  var chartErrorsContainer = document.querySelector(errorsContainerSelector);
+  chartErrorsContainer.hidden = true;
+  chartErrorsContainer.innerHTML = '';
+  document.querySelectorAll('.is-invalid').forEach(function (errorNode) {
+    errorNode.classList.remove('is-invalid');
+  });
+
+  if (errors.length > 0) {
+    chartErrorsContainer.hidden = false;
+    errors.forEach(function (error) {
+      chartErrorsContainer.innerHTML += "<li>".concat(error.message, "</li>");
+      document.querySelector("#".concat(error.nodeID)).classList.add('is-invalid');
+    });
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function clearModal() {
+  chartFieldsIDs.forEach(function (ID) {
+    if (ID == 'chart_verbal_rounding' || ID == 'chart_verbal_rounding_when_hovered') {
+      document.querySelector("#".concat(ID)).checked = false;
+    } else {
+      document.querySelector("#".concat(ID)).value = '';
+    }
+  });
+  currentChartDataset = 0;
+  datasetContainer.innerHTML = '';
+  var myModalEl = document.getElementById('diagramModal');
+  var modal = bootstrap.Modal.getInstance(myModalEl);
+  modal.hide();
+}
 
 document.querySelector('#submit_chart_data').onclick = function () {
+  // if (handleErrorDisplaying(doFieldsValidation(elementsForValidation, rules), '#chart_errors')) {
+  //     return false;
+  // }
+
   /* Defining and filling chart fields with values */
   var chartFields = {};
   chartFieldsIDs.forEach(function (ID) {
@@ -2162,6 +2291,7 @@ document.querySelector('#submit_chart_data').onclick = function () {
   /* Defining and filling chart itself */
 
   var chart = {
+    // numberInList: charts.length,
     title: chartFields.chart_title,
     legend: chartFields.chart_legend,
     type: chartFields.chart_type,
@@ -2174,8 +2304,12 @@ document.querySelector('#submit_chart_data').onclick = function () {
     isVerbalRoundingEnabledForHoveredLabels: chartFields.chart_verbal_rounding_when_hovered,
     dataset: dataset
   };
-  console.log(chart);
+  charts.push(chart);
+  clearModal();
+  console.log(charts);
 };
+
+document.querySelector('#debug').onclick = function () {}; // console.log(charts);
 })();
 
 /******/ })()
