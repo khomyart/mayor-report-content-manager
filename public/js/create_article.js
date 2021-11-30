@@ -2122,67 +2122,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
 
 
-function findClosestSpaceToIndexInString(lengthPerLine, string) {
-  var spaceIndexes = [];
-  var closestSpaces = [];
-  var previousDifference;
-  var currentClosestSpaceIndex;
-
-  for (var i = 0; i < streng.length; i++) {
-    if (string[i] === ' ') {
-      spaceIndexes.push(i);
-    }
-  }
-
-  var _loop = function _loop(_i) {
-    lengthPerLine = lengthPerLine * _i;
-    spaceIndexes.forEach(function (spaceIndex, index) {
-      if (index == 0) {
-        previousDifference = Math.abs(lengthPerLine - spaceIndex);
-      } else if (previousDifference > Math.abs(lengthPerLine - spaceIndex)) {
-        currentClosestSpaceIndex = spaceIndex;
-        previousDifference = Math.abs(lengthPerLine - spaceIndex);
-        closestSpaces[_i - 1] = spaceIndex;
-      }
-    });
-  };
-
-  for (var _i = 1; spaceIndexes[spaceIndexes.length - 1] > lengthPerLine; _i++) {
-    _loop(_i);
-  } //deletes last space
-
-
-  closestSpaces.pop();
-  return closestSpaces;
-}
-
-function devideStringBySpaceIndexes(closestSpaceIndexes, string) {
-  var devidedString = [];
-  var tempString;
-  closestSpaceIndexes.unshift(0);
-  closestSpaceIndexes.push(string.length);
-
-  for (var i = 0; i < closestSpaceIndexes.length - 1; i++) {
-    tempString = '';
-
-    for (var j = i == 0 ? closestSpaceIndexes[i] : closestSpaceIndexes[i] + 1; j < closestSpaceIndexes[i + 1]; j++) {
-      tempString += string[j];
-    }
-
-    devidedString[i] = tempString;
-  }
-
-  return devidedString;
-}
-
-function stringCut(symbolsPerLine, string) {
-  if (string.length < symbolsPerLine * 1.5) {
-    return string;
-  } else {
-    return devideStringBySpaceIndexes(findClosestSpaceToIndexInString(symbolsPerLine, string), string);
-  }
-}
-
 function datasetHTMLTemplate(currentChartDataset) {
   return "\n    <div class=\"row mb-3 d-flex align-items-end dataset\" id=\"dataset_".concat(currentChartDataset, "\">\n        <div class=\"col-4\">\n            <label for=\"label_").concat(currentChartDataset, "\" class=\"form-label\">\u041D\u0430\u0437\u0432\u0430 \u043F\u043E\u043B\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element dataset_label\" id=\"label_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-5\">\n            <label for=\"value_").concat(currentChartDataset, "\" class=\"form-label\">\u0417\u043D\u0430\u0447\u0435\u043D\u043D\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element dataset_value\" id=\"value_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-3\">\n            <button class=\"btn btn-primary col-12\" onclick=\"document.querySelector('#dataset_").concat(currentChartDataset, "').remove()\">\n                \u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438\n            </button>\n        </div>\n    </div>\n    ");
 }
@@ -2249,206 +2188,97 @@ var elementsForValidation = [{
 }, {
   selector: '.dataset_value',
   rules: ['requeried', 'numbers'],
-  errorMessage: 'Значення набору даних повинне бути заповнене та містити лише літери'
+  errorMessage: 'Значення набору даних повинне бути заповнене та містити лише цифри'
 }, {
   selector: '#add_dataset_button',
   rules: ['datasets'],
   errorMessage: 'Додайте хоча б один набір данних!'
 }];
+var chartHTMLTemplate = "\n<div class=\"col-12 col-lg-10 col-xxl-6 mb-3\"> <canvas class=\"chart\"></canvas> </div>\n<hr class=\"mb-3\"/>\n";
+var chartContainerSelector = '.charts-container';
+var chartSelector = '.chart';
 var charts = [];
 var articleChartsInstances = [];
 /**
- * do errors validation of html inputs
+ * Cuts incoming string into pieces with length wich are close to "symbolsPerLine" number and places them into array 
  * 
- * 1) gets all fields wich are needed to be validated
- * 2) checks it value, if it match required rule (basically regexp based)
- * 3) fills error array with invalid inputs IDs and error messages
- * 4) returns this array to further proceed
+ * @param {number} symbolsPerLine 
+ * @param {string} string 
+ * @returns 
  */
 
-function doFieldsValidation(elementsForValidation, rules) {
-  var errors = [],
-      nodesFromHTML;
-  elementsForValidation.forEach(function (element) {
-    nodesFromHTML = document.querySelectorAll(element.selector);
-    nodesFromHTML.forEach(function (node) {
-      element.rules.every(function (rule) {
-        if (!rules[rule](node.value)) {
-          errors.push({
-            nodeID: node.id,
-            message: element.errorMessage
-          });
-          return false;
-        } else {
-          return true;
+function stringCut(symbolsPerLine, string) {
+  function findClosestSpaceToSymbolsPerLineNumberInString(lengthPerLine, string) {
+    var spaceIndexes = [];
+    var closestSpaces = [];
+    var previousDifference;
+    var currentClosestSpaceIndex;
+
+    for (var i = 0; i < string.length; i++) {
+      if (string[i] === ' ') {
+        spaceIndexes.push(i);
+      }
+    }
+
+    var _loop = function _loop(_i) {
+      lengthPerLine = lengthPerLine * _i;
+      spaceIndexes.forEach(function (spaceIndex, index) {
+        if (index == 0) {
+          previousDifference = Math.abs(lengthPerLine - spaceIndex);
+        } else if (previousDifference > Math.abs(lengthPerLine - spaceIndex)) {
+          currentClosestSpaceIndex = spaceIndex;
+          previousDifference = Math.abs(lengthPerLine - spaceIndex);
+          closestSpaces[_i - 1] = spaceIndex;
         }
       });
-    });
-  });
-  return errors;
+    };
+
+    for (var _i = 1; spaceIndexes[spaceIndexes.length - 1] > lengthPerLine; _i++) {
+      _loop(_i);
+    } //deletes last space
+
+
+    closestSpaces.pop();
+    return closestSpaces;
+  }
+
+  function devideStringBySpaceIndexes(closestSpaceIndexes, string) {
+    var devidedString = [];
+    var tempString;
+    closestSpaceIndexes.unshift(0);
+    closestSpaceIndexes.push(string.length);
+
+    for (var i = 0; i < closestSpaceIndexes.length - 1; i++) {
+      tempString = '';
+
+      for (var j = i == 0 ? closestSpaceIndexes[i] : closestSpaceIndexes[i] + 1; j < closestSpaceIndexes[i + 1]; j++) {
+        tempString += string[j];
+      }
+
+      devidedString[i] = tempString;
+    }
+
+    return devidedString;
+  }
+
+  if (string.length < symbolsPerLine * 1.5) {
+    return string;
+  } else {
+    return devideStringBySpaceIndexes(findClosestSpaceToSymbolsPerLineNumberInString(symbolsPerLine, string), string);
+  }
 }
 /**
- * Removes old error displaying, generate new depends on needs 
  * 
- * returns true, if errors is still on the page, false - if there is no errors left
+ * @param {string} chartHTMLTemplate template for chart's canvas, actually chart holder template
+ * @param {string} chartSelector chart's canvas selector
+ * @param {string} chartContainerSelector place, where templates located
+ * @param {array} chartsArray array with charts params like title, legend, values, etc
+ * @returns 
  */
 
 
-function handleErrorDisplaying(errors, errorsContainerSelector) {
-  var chartErrorsContainer = document.querySelector(errorsContainerSelector);
-  chartErrorsContainer.hidden = true;
-  chartErrorsContainer.innerHTML = '';
-  document.querySelectorAll('.is-invalid').forEach(function (errorNode) {
-    errorNode.classList.remove('is-invalid');
-  });
-
-  if (errors.length > 0) {
-    chartErrorsContainer.hidden = false;
-    errors.forEach(function (error) {
-      chartErrorsContainer.innerHTML += "<li>".concat(error.message, "</li>");
-      document.querySelector("#".concat(error.nodeID)).classList.add('is-invalid');
-    });
-    return true;
-  } else {
-    return false;
-  }
-}
-
-function clearModal() {
-  chartFieldsIDs.forEach(function (ID) {
-    if (ID == 'chart_verbal_rounding' || ID == 'chart_verbal_rounding_when_hovered') {
-      document.querySelector("#".concat(ID)).checked = false;
-    } else {
-      document.querySelector("#".concat(ID)).value = '';
-    }
-  });
-  currentChartDataset = 0;
-  datasetContainer.innerHTML = '';
-  var myModalEl = document.getElementById('diagramModal');
-  var modal = bootstrap.Modal.getInstance(myModalEl);
-  modal.hide();
-}
-
-document.querySelector('#submit_chart_data').onclick = function () {
-  // if (handleErrorDisplaying(doFieldsValidation(elementsForValidation, rules), '#chart_errors')) {
-  //     return false;
-  // }
-
-  /* Defining and filling chart fields with values */
-  var chartFields = {};
-  chartFieldsIDs.forEach(function (ID) {
-    var chartFieldValue = document.querySelector("#".concat(ID)).value;
-
-    if (ID == 'chart_verbal_rounding') {
-      chartFields[ID] = chartFieldValue == 'on' ? 'true' : 'false';
-    } else if (ID == 'chart_verbal_rounding_when_hovered') {
-      chartFields[ID] = chartFieldValue == 'on' ? 'true' : 'false';
-    } else {
-      chartFields[ID] = document.querySelector("#".concat(ID)).value;
-    }
-  });
-  /* Defining and filling chart datasets with values */
-
-  var dataset = [];
-  var datasetElement = {};
-  var datasetElements = document.querySelectorAll('.dataset_element');
-  datasetElements.forEach(function (element, index) {
-    if (index % 2 == 0) {
-      datasetElement.label = element.value;
-    }
-
-    if (index % 2 == 1) {
-      datasetElement.value = element.value;
-      dataset.push(datasetElement);
-      datasetElement = {};
-    }
-  });
-  /* Defining and filling chart itself */
-
-  var chartInstance = {
-    // numberInList: charts.length,
-    title: stringCut(45, chartFields.chart_title),
-    legend: chartFields.chart_legend,
-    type: chartFields.chart_type,
-    axis: {
-      x: chartFields.chart_axis_x,
-      y: chartFields.chart_axis_y
-    },
-    suffix: chartFields.chart_sufix,
-    isVerbalRoundingEnabled: chartFields.chart_verbal_rounding,
-    isVerbalRoundingEnabledForHoveredLabels: chartFields.chart_verbal_rounding_when_hovered,
-    dataset: dataset
-  };
-  charts.push(chartInstance);
-  clearModal();
-  console.log(charts);
-}; // charts = [
-//     {
-//         title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
-//         legend: 'План',
-//         type: 'pie',
-//         axis: {
-//             x: 'назва фонду',
-//             y: 'грн'
-//         },
-//         suffix: 'грн',
-//         isVerbalRoundingEnabled: 'true',
-//         isVerbalRoundingEnabledForHoveredLabels: 'true',
-//         dataset: [
-//             {label: 'Загальний фонд', value: '1701400000'},
-//             {label: 'Міжбюджетні трансферти', value: '492900000'},
-//             {label: 'Спеціальний фонд', value: '134200000'},
-//             {label: 'Бюджет розвитку', value: '33000000'},
-//             {label: 'Міжбюджетні трансферти', value: '492900000'},
-//             {label: 'Спеціальний фонд', value: '134200000'},
-//             {label: 'Бюджет розвитку', value: '33000000'},
-//             {label: 'Міжбюджетні трансферти', value: '492900000'},
-//             {label: 'Спеціальний фонд', value: '134200000'},
-//             {label: 'Бюджет розвитку', value: '33000000'}
-//         ] 
-//     },
-//     {
-//         title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
-//         legend: 'План',
-//         type: 'doughnut',
-//         axis: {
-//             x: 'назва фонду',
-//             y: 'грн'
-//         },
-//         suffix: 'грн',
-//         isVerbalRoundingEnabled: 'true',
-//         isVerbalRoundingEnabledForHoveredLabels: 'true',
-//         dataset: [
-//             {label: 'Загальний фонд', value: '1701400000'},
-//             {label: 'Міжбюджетні трансферти', value: '492900000'},
-//             {label: 'Спеціальний фонд', value: '134200000'},
-//             {label: 'Бюджет розвитку', value: '33000000'}
-//         ] 
-//     },
-//     {
-//         title: 'Виконання бюджету',
-//         legend: 'План',
-//         type: 'bar',
-//         axis: {
-//             x: 'назва фонду',
-//             y: 'грн'
-//         },
-//         suffix: 'грн',
-//         isVerbalRoundingEnabled: 'true',
-//         isVerbalRoundingEnabledForHoveredLabels: 'true',
-//         dataset: [
-//             {label: 'Загальний фонд', value: '1701400000'},
-//             {label: 'Міжбюджетні трансферти', value: '492900000'},
-//             {label: 'Спеціальний фонд', value: '134200000'},
-//             {label: 'Бюджет розвитку', value: '33000000'}
-//         ] 
-//     }
-// ]
-
-
-document.querySelector('#debug').onclick = function () {
-  var chartContainer = document.querySelector('.charts-container');
-  var chartHTMLTemplate = "\n<div class=\"col-12 col-lg-10 col-xxl-6 mb-3\"> <canvas class=\"chart\"></canvas> </div>\n<hr class=\"mb-3\"/>\n";
+function buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, chartsArray) {
+  var chartContainer = document.querySelector(chartContainerSelector);
   chartContainer.innerHTML = '';
   charts.forEach(function (chart) {
     chartContainer.innerHTML += chartHTMLTemplate;
@@ -2570,7 +2400,7 @@ document.querySelector('#debug').onclick = function () {
                 currentItemData = data.datasets[0].data[currentItemIndex],
                 label = "".concat(data.labels[currentItemIndex], ": ");
 
-            if (showVerbalRoundingForHoveredLabels) {
+            if (showVerbalRoundingForHoveredLabels == 'true') {
               if (currentItemData >= 1000 && currentItemData < 1000000) {
                 return "".concat(label).concat((currentItemData / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
               } else if (currentItemData >= 1000000 && currentItemData < 1000000000) {
@@ -2726,16 +2556,15 @@ document.querySelector('#debug').onclick = function () {
     }
   }
 
-  function buildCharts(chartSelector, chartContainerSelector) {}
+  var chartCanvases = document.querySelectorAll(chartSelector),
+      articleChartsInstances = [];
 
-  var chartCanvases = document.querySelectorAll('.chart');
-
-  if (chartCanvases.length <= charts.length) {
+  if (chartCanvases.length <= chartsArray.length) {
     /*
         Building a chart according to amount of canvases (chart holders)
     */
     chartCanvases.forEach(function (canvas, index) {
-      var currentChartData = charts[index],
+      var currentChartData = chartsArray[index],
           chart = new ChartPrototype();
       chart.type = currentChartData.type;
       chart.data.datasets[0].label = currentChartData.label;
@@ -2761,7 +2590,7 @@ document.querySelector('#debug').onclick = function () {
     /*
         Building a chart according to amount of datasets
     */
-    charts.forEach(function (currentChartData, index) {
+    chartsArray.forEach(function (currentChartData, index) {
       var canvas = chartCanvases[index],
           chart = new ChartPrototype();
       chart.type = currentChartData.type;
@@ -2786,6 +2615,200 @@ document.querySelector('#debug').onclick = function () {
     });
   }
 
+  return articleChartsInstances;
+}
+/**
+ * do errors validation of html inputs
+ * 
+ * 1) gets all fields wich are needed to be validated
+ * 2) checks it value, if it match required rule (basically regexp based)
+ * 3) fills error array with invalid inputs IDs and error messages
+ * 4) returns this array to further proceed
+ */
+
+
+function doFieldsValidation(elementsForValidation, rules) {
+  var errors = [],
+      nodesFromHTML;
+  elementsForValidation.forEach(function (element) {
+    nodesFromHTML = document.querySelectorAll(element.selector);
+    nodesFromHTML.forEach(function (node) {
+      element.rules.every(function (rule) {
+        if (!rules[rule](node.value)) {
+          errors.push({
+            nodeID: node.id,
+            message: element.errorMessage
+          });
+          return false;
+        } else {
+          return true;
+        }
+      });
+    });
+  });
+  return errors;
+}
+/**
+ * Removes old error displaying, generate new depends on needs 
+ * 
+ * returns true, if errors is still on the page, false - if there is no errors left
+ */
+
+
+function handleErrorDisplaying(errors, errorsContainerSelector) {
+  var chartErrorsContainer = document.querySelector(errorsContainerSelector);
+  chartErrorsContainer.hidden = true;
+  chartErrorsContainer.innerHTML = '';
+  document.querySelectorAll('.is-invalid').forEach(function (errorNode) {
+    errorNode.classList.remove('is-invalid');
+  });
+
+  if (errors.length > 0) {
+    chartErrorsContainer.hidden = false;
+    errors.forEach(function (error) {
+      chartErrorsContainer.innerHTML += "<li>".concat(error.message, "</li>");
+      document.querySelector("#".concat(error.nodeID)).classList.add('is-invalid');
+    });
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function clearModal() {
+  chartFieldsIDs.forEach(function (ID) {
+    if (ID == 'chart_verbal_rounding' || ID == 'chart_verbal_rounding_when_hovered') {
+      document.querySelector("#".concat(ID)).checked = false;
+    } else {
+      document.querySelector("#".concat(ID)).value = '';
+    }
+  });
+  currentChartDataset = 0;
+  datasetContainer.innerHTML = '';
+  var myModalEl = document.getElementById('diagramModal');
+  var modal = bootstrap.Modal.getInstance(myModalEl);
+  modal.hide();
+}
+
+document.querySelector('#submit_chart_data').onclick = function () {
+  if (handleErrorDisplaying(doFieldsValidation(elementsForValidation, rules), '#chart_errors')) {
+    return false;
+  }
+  /* Defining and filling chart fields with values */
+
+
+  var chartFields = {};
+  chartFieldsIDs.forEach(function (ID) {
+    var chartFieldValue = document.querySelector("#".concat(ID)).value;
+
+    if (ID == 'chart_verbal_rounding') {
+      chartFields[ID] = chartFieldValue == 'on' ? 'true' : 'false';
+    } else if (ID == 'chart_verbal_rounding_when_hovered') {
+      chartFields[ID] = chartFieldValue == 'on' ? 'true' : 'false';
+    } else {
+      chartFields[ID] = document.querySelector("#".concat(ID)).value;
+    }
+  });
+  /* Defining and filling chart datasets with values */
+
+  var dataset = [];
+  var datasetElement = {};
+  var datasetElements = document.querySelectorAll('.dataset_element');
+  datasetElements.forEach(function (element, index) {
+    if (index % 2 == 0) {
+      datasetElement.label = element.value;
+    }
+
+    if (index % 2 == 1) {
+      datasetElement.value = element.value;
+      dataset.push(datasetElement);
+      datasetElement = {};
+    }
+  });
+  /* Defining and filling chart itself */
+
+  var chartInstance = {
+    // numberInList: charts.length,
+    title: stringCut(40, chartFields.chart_title),
+    legend: chartFields.chart_legend,
+    type: chartFields.chart_type,
+    axis: {
+      x: chartFields.chart_axis_x,
+      y: chartFields.chart_axis_y
+    },
+    suffix: chartFields.chart_sufix,
+    isVerbalRoundingEnabled: chartFields.chart_verbal_rounding,
+    isVerbalRoundingEnabledForHoveredLabels: chartFields.chart_verbal_rounding_when_hovered,
+    dataset: dataset
+  };
+  charts.push(chartInstance);
+  clearModal();
+  articleChartsInstances = buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, charts);
+}; // charts = [
+//     {
+//         title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
+//         legend: 'План',
+//         type: 'pie',
+//         axis: {
+//             x: 'назва фонду',
+//             y: 'грн'
+//         },
+//         suffix: 'грн',
+//         isVerbalRoundingEnabled: 'true',
+//         isVerbalRoundingEnabledForHoveredLabels: 'true',
+//         dataset: [
+//             {label: 'Загальний фонд', value: '1701400000'},
+//             {label: 'Міжбюджетні трансферти', value: '492900000'},
+//             {label: 'Спеціальний фонд', value: '134200000'},
+//             {label: 'Бюджет розвитку', value: '33000000'},
+//             {label: 'Міжбюджетні трансферти', value: '492900000'},
+//             {label: 'Спеціальний фонд', value: '134200000'},
+//             {label: 'Бюджет розвитку', value: '33000000'},
+//             {label: 'Міжбюджетні трансферти', value: '492900000'},
+//             {label: 'Спеціальний фонд', value: '134200000'},
+//             {label: 'Бюджет розвитку', value: '33000000'}
+//         ] 
+//     },
+//     {
+//         title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
+//         legend: 'План',
+//         type: 'doughnut',
+//         axis: {
+//             x: 'назва фонду',
+//             y: 'грн'
+//         },
+//         suffix: 'грн',
+//         isVerbalRoundingEnabled: 'true',
+//         isVerbalRoundingEnabledForHoveredLabels: 'true',
+//         dataset: [
+//             {label: 'Загальний фонд', value: '1701400000'},
+//             {label: 'Міжбюджетні трансферти', value: '492900000'},
+//             {label: 'Спеціальний фонд', value: '134200000'},
+//             {label: 'Бюджет розвитку', value: '33000000'}
+//         ] 
+//     },
+//     {
+//         title: 'Виконання бюджету',
+//         legend: 'План',
+//         type: 'bar',
+//         axis: {
+//             x: 'назва фонду',
+//             y: 'грн'
+//         },
+//         suffix: 'грн',
+//         isVerbalRoundingEnabled: 'true',
+//         isVerbalRoundingEnabledForHoveredLabels: 'true',
+//         dataset: [
+//             {label: 'Загальний фонд', value: '1701400000'},
+//             {label: 'Міжбюджетні трансферти', value: '492900000'},
+//             {label: 'Спеціальний фонд', value: '134200000'},
+//             {label: 'Бюджет розвитку', value: '33000000'}
+//         ] 
+//     }
+// ]
+
+
+document.querySelector('#debug').onclick = function () {
   console.log(articleChartsInstances);
 };
 })();
