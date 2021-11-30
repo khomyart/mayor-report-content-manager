@@ -2106,7 +2106,82 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+
+
+function findClosestSpaceToIndexInString(lengthPerLine, string) {
+  var spaceIndexes = [];
+  var closestSpaces = [];
+  var previousDifference;
+  var currentClosestSpaceIndex;
+
+  for (var i = 0; i < streng.length; i++) {
+    if (string[i] === ' ') {
+      spaceIndexes.push(i);
+    }
+  }
+
+  var _loop = function _loop(_i) {
+    lengthPerLine = lengthPerLine * _i;
+    spaceIndexes.forEach(function (spaceIndex, index) {
+      if (index == 0) {
+        previousDifference = Math.abs(lengthPerLine - spaceIndex);
+      } else if (previousDifference > Math.abs(lengthPerLine - spaceIndex)) {
+        currentClosestSpaceIndex = spaceIndex;
+        previousDifference = Math.abs(lengthPerLine - spaceIndex);
+        closestSpaces[_i - 1] = spaceIndex;
+      }
+    });
+  };
+
+  for (var _i = 1; spaceIndexes[spaceIndexes.length - 1] > lengthPerLine; _i++) {
+    _loop(_i);
+  } //deletes last space
+
+
+  closestSpaces.pop();
+  return closestSpaces;
+}
+
+function devideStringBySpaceIndexes(closestSpaceIndexes, string) {
+  var devidedString = [];
+  var tempString;
+  closestSpaceIndexes.unshift(0);
+  closestSpaceIndexes.push(string.length);
+
+  for (var i = 0; i < closestSpaceIndexes.length - 1; i++) {
+    tempString = '';
+
+    for (var j = i == 0 ? closestSpaceIndexes[i] : closestSpaceIndexes[i] + 1; j < closestSpaceIndexes[i + 1]; j++) {
+      tempString += string[j];
+    }
+
+    devidedString[i] = tempString;
+  }
+
+  return devidedString;
+}
+
+function stringCut(symbolsPerLine, string) {
+  if (string.length < symbolsPerLine * 1.5) {
+    return string;
+  } else {
+    return devideStringBySpaceIndexes(findClosestSpaceToIndexInString(symbolsPerLine, string), string);
+  }
+}
 
 function datasetHTMLTemplate(currentChartDataset) {
   return "\n    <div class=\"row mb-3 d-flex align-items-end dataset\" id=\"dataset_".concat(currentChartDataset, "\">\n        <div class=\"col-4\">\n            <label for=\"label_").concat(currentChartDataset, "\" class=\"form-label\">\u041D\u0430\u0437\u0432\u0430 \u043F\u043E\u043B\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element dataset_label\" id=\"label_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-5\">\n            <label for=\"value_").concat(currentChartDataset, "\" class=\"form-label\">\u0417\u043D\u0430\u0447\u0435\u043D\u043D\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element dataset_value\" id=\"value_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-3\">\n            <button class=\"btn btn-primary col-12\" onclick=\"document.querySelector('#dataset_").concat(currentChartDataset, "').remove()\">\n                \u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438\n            </button>\n        </div>\n    </div>\n    ");
@@ -2152,19 +2227,22 @@ var elementsForValidation = [{
   selector: '#chart_type',
   rules: ['requeried'],
   errorMessage: 'Необхідно обрати тип графіку'
-}, {
-  selector: '#chart_axis_x',
-  rules: ['requeried', 'letters'],
-  errorMessage: 'Поле "Назва осі Х" повинно бути заповнене та не може містити цифри'
-}, {
-  selector: '#chart_axis_y',
-  rules: ['requeried', 'letters'],
-  errorMessage: 'Поле "Назва осі Y" повинно бути заповнене та не може містити цифри'
-}, {
-  selector: '#chart_sufix',
-  rules: ['requeried', 'letters'],
-  errorMessage: 'Поле "Суфікс показників" повинно заповнене та містити лише літери'
-}, {
+}, // {
+//     selector: '#chart_axis_x', 
+//     rules: ['requeried', 'letters'], 
+//     errorMessage: 'Поле "Назва осі Х" повинно бути заповнене та не може містити цифри'
+// },
+// {
+//     selector: '#chart_axis_y', 
+//     rules: ['requeried', 'letters'], 
+//     errorMessage: 'Поле "Назва осі Y" повинно бути заповнене та не може містити цифри'
+// },
+// {
+//     selector: '#chart_sufix', 
+//     rules: ['requeried', 'letters'], 
+//     errorMessage: 'Поле "Суфікс показників" повинно заповнене та містити лише літери'
+// },
+{
   selector: '.dataset_label',
   rules: ['requeried'],
   errorMessage: 'Назва набору даних повнинна бути заповнена'
@@ -2178,6 +2256,7 @@ var elementsForValidation = [{
   errorMessage: 'Додайте хоча б один набір данних!'
 }];
 var charts = [];
+var articleChartsInstances = [];
 /**
  * do errors validation of html inputs
  * 
@@ -2259,10 +2338,6 @@ document.querySelector('#submit_chart_data').onclick = function () {
   var chartFields = {};
   chartFieldsIDs.forEach(function (ID) {
     var chartFieldValue = document.querySelector("#".concat(ID)).value;
-    /* Validation rules write down below 
-    (return if something is incorrect) */
-
-    /* Validation rules ends */
 
     if (ID == 'chart_verbal_rounding') {
       chartFields[ID] = chartFieldValue == 'on' ? 'true' : 'false';
@@ -2279,20 +2354,20 @@ document.querySelector('#submit_chart_data').onclick = function () {
   var datasetElements = document.querySelectorAll('.dataset_element');
   datasetElements.forEach(function (element, index) {
     if (index % 2 == 0) {
-      datasetElement.name = element.value;
+      datasetElement.label = element.value;
     }
 
     if (index % 2 == 1) {
-      datasetElement.label = element.value;
+      datasetElement.value = element.value;
       dataset.push(datasetElement);
       datasetElement = {};
     }
   });
   /* Defining and filling chart itself */
 
-  var chart = {
+  var chartInstance = {
     // numberInList: charts.length,
-    title: chartFields.chart_title,
+    title: stringCut(45, chartFields.chart_title),
     legend: chartFields.chart_legend,
     type: chartFields.chart_type,
     axis: {
@@ -2304,12 +2379,415 @@ document.querySelector('#submit_chart_data').onclick = function () {
     isVerbalRoundingEnabledForHoveredLabels: chartFields.chart_verbal_rounding_when_hovered,
     dataset: dataset
   };
-  charts.push(chart);
+  charts.push(chartInstance);
   clearModal();
   console.log(charts);
-};
+}; // charts = [
+//     {
+//         title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
+//         legend: 'План',
+//         type: 'pie',
+//         axis: {
+//             x: 'назва фонду',
+//             y: 'грн'
+//         },
+//         suffix: 'грн',
+//         isVerbalRoundingEnabled: 'true',
+//         isVerbalRoundingEnabledForHoveredLabels: 'true',
+//         dataset: [
+//             {label: 'Загальний фонд', value: '1701400000'},
+//             {label: 'Міжбюджетні трансферти', value: '492900000'},
+//             {label: 'Спеціальний фонд', value: '134200000'},
+//             {label: 'Бюджет розвитку', value: '33000000'},
+//             {label: 'Міжбюджетні трансферти', value: '492900000'},
+//             {label: 'Спеціальний фонд', value: '134200000'},
+//             {label: 'Бюджет розвитку', value: '33000000'},
+//             {label: 'Міжбюджетні трансферти', value: '492900000'},
+//             {label: 'Спеціальний фонд', value: '134200000'},
+//             {label: 'Бюджет розвитку', value: '33000000'}
+//         ] 
+//     },
+//     {
+//         title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
+//         legend: 'План',
+//         type: 'doughnut',
+//         axis: {
+//             x: 'назва фонду',
+//             y: 'грн'
+//         },
+//         suffix: 'грн',
+//         isVerbalRoundingEnabled: 'true',
+//         isVerbalRoundingEnabledForHoveredLabels: 'true',
+//         dataset: [
+//             {label: 'Загальний фонд', value: '1701400000'},
+//             {label: 'Міжбюджетні трансферти', value: '492900000'},
+//             {label: 'Спеціальний фонд', value: '134200000'},
+//             {label: 'Бюджет розвитку', value: '33000000'}
+//         ] 
+//     },
+//     {
+//         title: 'Виконання бюджету',
+//         legend: 'План',
+//         type: 'bar',
+//         axis: {
+//             x: 'назва фонду',
+//             y: 'грн'
+//         },
+//         suffix: 'грн',
+//         isVerbalRoundingEnabled: 'true',
+//         isVerbalRoundingEnabledForHoveredLabels: 'true',
+//         dataset: [
+//             {label: 'Загальний фонд', value: '1701400000'},
+//             {label: 'Міжбюджетні трансферти', value: '492900000'},
+//             {label: 'Спеціальний фонд', value: '134200000'},
+//             {label: 'Бюджет розвитку', value: '33000000'}
+//         ] 
+//     }
+// ]
 
-document.querySelector('#debug').onclick = function () {}; // console.log(charts);
+
+document.querySelector('#debug').onclick = function () {
+  var chartContainer = document.querySelector('.charts-container');
+  var chartHTMLTemplate = "\n<div class=\"col-12 col-lg-10 col-xxl-6 mb-3\"> <canvas class=\"chart\"></canvas> </div>\n<hr class=\"mb-3\"/>\n";
+  chartContainer.innerHTML = '';
+  charts.forEach(function (chart) {
+    chartContainer.innerHTML += chartHTMLTemplate;
+  });
+  /* ITEMS FOR CHART DISPLAYING */
+
+  var ChartPrototype = function ChartPrototype() {
+    this.type = '';
+    this.data = {
+      labels: [],
+      datasets: [{
+        label: '',
+        data: [],
+        backgroundColor: [],
+        borderColor: []
+      }]
+    };
+  };
+
+  function optimizeCanvasSize(canvas, chartData) {
+    var chartsDefaultHeight = {
+      more0less300: 120,
+      more300less370: 93,
+      more370less450: 80,
+      more450less580: 65,
+      more580less768: 65,
+      more768less1365: 55,
+      more1365: 55
+    };
+
+    function optimizeCanvasHeight(chartHeight, multiplier) {
+      if (chartData.type === 'pie' || chartData.type === 'doughnut') {
+        canvas.width = '100';
+        canvas.height = (chartHeight + chartData.dataset.length * multiplier).toString();
+      } else {
+        //if chart has additional strings to their title, height of canvas will be increased
+        if (_typeof(chartData.title) === 'object') {
+          canvas.height = (chartHeight + chartData.title.length * multiplier).toString();
+          canvas.width = '80';
+        } else {
+          canvas.height = chartHeight.toString();
+          canvas.width = '80';
+        }
+      }
+    }
+
+    if (window.innerWidth > 0 && window.innerWidth <= 300) {
+      optimizeCanvasHeight(chartsDefaultHeight.more0less300, 4);
+    }
+
+    if (window.innerWidth > 300 && window.innerWidth <= 370) {
+      optimizeCanvasHeight(chartsDefaultHeight.more300less370, 4);
+    }
+
+    if (window.innerWidth > 370 && window.innerWidth <= 450) {
+      optimizeCanvasHeight(chartsDefaultHeight.more370less450, 4);
+    }
+
+    if (window.innerWidth > 450 && window.innerWidth <= 580) {
+      optimizeCanvasHeight(chartsDefaultHeight.more450less580, 3);
+    }
+
+    if (window.innerWidth > 580 && window.innerWidth <= 768) {
+      optimizeCanvasHeight(chartsDefaultHeight.more580less768, 3);
+    }
+
+    if (window.innerWidth > 768 && window.innerWidth <= 1365) {
+      optimizeCanvasHeight(chartsDefaultHeight.more768less1365, 3);
+    }
+
+    if (window.innerWidth > 1365) {
+      optimizeCanvasHeight(chartsDefaultHeight.more1365, 3);
+    }
+  }
+
+  function getRandomColor() {
+    var r = Math.floor(Math.random() * 256);
+    var g = Math.floor(Math.random() * 256);
+    var b = Math.floor(Math.random() * 256);
+    return {
+      r: r,
+      g: g,
+      b: b
+    };
+  }
+
+  function proceedAdditionalOptionsToChart(chartInstance, chartData) {
+    var type = chartInstance.type,
+        legend = chartData.legend,
+        name = chartData.title,
+        axisNames = chartData.axis,
+        dataLabelSuffix = chartData.suffix,
+        arrayWithData = chartInstance.data.datasets[0].data.map(function (element) {
+      return parseInt(element);
+    }),
+        showVerbalRounding = chartData.isVerbalRoundingEnabled === 'true',
+        showVerbalRoundingForHoveredLabels = chartData.isVerbalRoundingEnabledForHoveredLabels === 'true',
+        barsBackgroundsColors = [];
+    chartInstance.data.datasets[0].barPercentage = 0.7;
+    chartInstance.type = type;
+    chartInstance.data.datasets[0].label = legend;
+    chartInstance.options = {
+      //here chart's title can be enabled
+      title: {
+        display: true,
+        text: name,
+        fontSize: 16,
+        fontColor: 'black',
+        fontFamily: '\'Open Sans\', sans-serif',
+        padding: chartInstance.type === 'pie' || chartInstance.type === 'doughnut' ? 0 : 20
+      },
+      tooltips: {
+        titleFontSize: 14,
+        bodyFontSize: 12,
+        footerFontSize: 12,
+        callbacks: {
+          label: function label(tooltipItem, data) {
+            var currentItemIndex = tooltipItem.index,
+                currentItemData = data.datasets[0].data[currentItemIndex],
+                label = "".concat(data.labels[currentItemIndex], ": ");
+
+            if (showVerbalRoundingForHoveredLabels) {
+              if (currentItemData >= 1000 && currentItemData < 1000000) {
+                return "".concat(label).concat((currentItemData / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
+              } else if (currentItemData >= 1000000 && currentItemData < 1000000000) {
+                return "".concat(label).concat((currentItemData / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
+              } else if (currentItemData >= 1000000000 && currentItemData < 1000000000000) {
+                return "".concat(label).concat((currentItemData / 1000000000).toFixed(1), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+              } else {
+                return "".concat(label).concat(currentItemData).concat(dataLabelSuffix);
+              }
+            } else {
+              return "".concat(label).concat(currentItemData).concat(dataLabelSuffix);
+            }
+          }
+        }
+      },
+      legend: {
+        display: chartInstance.type === 'pie' || chartInstance.type === 'doughnut' || legend !== '',
+        labels: {
+          display: true,
+          fontFamily: '\'Open Sans\', sans-serif',
+          fontColor: 'black',
+          fontSize: 14
+        }
+      },
+      plugins: {
+        datalabels: {
+          display: !(chartInstance.type === 'pie' || chartInstance.type === 'doughnut'),
+          anchor: chartInstance.type === 'pie' || chartInstance.type === 'doughnut' ? 'center' : 'end',
+          align: chartInstance.type === 'pie' || chartInstance.type === 'doughnut' ? 'end' : chartInstance.type === 'horizontalBar' ? 'end' : 'top',
+          formatter: function formatter(value, context) {
+            if (showVerbalRounding) {
+              if (value >= 1000 && value < 1000000) {
+                return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
+              } else if (value >= 1000000 && value < 1000000000) {
+                return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
+              } else if (value >= 1000000000 && value < 1000000000000) {
+                return "".concat((value / 1000000000).toFixed(1), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+              } else {
+                return "".concat(value).concat(dataLabelSuffix);
+              }
+            } else {
+              return "".concat(value).concat(dataLabelSuffix);
+            }
+          },
+          font: {
+            family: '\'Open Sans\', sans-serif',
+            size: 14
+          },
+          color: 'black'
+        }
+      }
+    };
+
+    if (chartInstance.type === 'line') {
+      chartInstance.data.datasets[0].fill = false;
+      /*
+      fill chart elements with color according to amount of incoming data
+          */
+
+      for (var i = 0; i < arrayWithData.length; i++) {
+        chartInstance.data.datasets[0].pointBorderColor.push('rgba(0, 0, 0, 1)');
+        chartInstance.data.datasets[0].pointBackgroundColor.push('rgba(255, 99, 132, 1)');
+        chartInstance.data.datasets[0].borderColor.push('rgba(255, 99, 132, 1)');
+      }
+
+      chartInstance.data.datasets[0].pointBorderWidth = 2;
+    }
+
+    if (chartInstance.type === 'bar' || chartInstance.type === 'horizontalBar') {
+      for (var _i2 = 0; _i2 < arrayWithData.length; _i2++) {
+        chartInstance.data.datasets[0].backgroundColor.push('rgba(255, 0, 0, 1)');
+      }
+
+      chartInstance.data.datasets[0].borderWidth = 0;
+    }
+
+    if (chartInstance.type === 'doughnut' || chartInstance.type === 'pie') {
+      chartInstance.options.legend.position = window.innerWidth < 768 ? 'top' : 'top';
+
+      for (var _i3 = 0; _i3 < arrayWithData.length; _i3++) {
+        var randomColor = getRandomColor();
+        chartInstance.data.datasets[0].backgroundColor.push("rgba(".concat(randomColor.r, ",").concat(randomColor.g, ",").concat(randomColor.b, ", 0.4)"));
+        chartInstance.data.datasets[0].borderColor.push("rgba(".concat(randomColor.r, ",").concat(randomColor.g, ",").concat(randomColor.b, ", 0.8)"));
+      }
+
+      chartInstance.data.datasets[0].borderWidth = 1;
+    }
+
+    if (chartInstance.type === 'bar' || chartInstance.type === 'horizontalBar' || chartInstance.type === 'line') {
+      chartInstance.options.scales = {
+        xAxes: [{
+          scaleLabel: {
+            labelString: axisNames.x,
+            display: axisNames.x !== '',
+            fontFamily: '\'Open Sans\', sans-serif',
+            fontSize: 14,
+            fontColor: 'black',
+            padding: 0
+          },
+          offset: chartInstance.type !== 'horizontalBar',
+          ticks: {
+            callback: function callback(value, index, values) {
+              if (showVerbalRounding) {
+                if (value >= 1000 && value < 1000000) {
+                  return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
+                } else if (value >= 1000000 && value < 1000000000) {
+                  return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
+                } else if (value >= 1000000000 && value < 1000000000000) {
+                  return "".concat((value / 1000000000).toFixed(1), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+                } else {
+                  return "".concat(value).concat(dataLabelSuffix);
+                }
+              } else {
+                return "".concat(value).concat(dataLabelSuffix);
+              }
+            },
+            beginAtZero: true,
+            fontSize: 14,
+            suggestedMax: Math.max.apply(Math, _toConsumableArray(arrayWithData)) * 1.25
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            labelString: axisNames.y,
+            display: axisNames.y !== '',
+            fontFamily: '\'Open Sans\', sans-serif',
+            fontSize: 14,
+            fontColor: 'black',
+            padding: 0
+          },
+          ticks: {
+            callback: function callback(value, index, values) {
+              if (showVerbalRounding) {
+                if (value >= 1000 && value < 1000000) {
+                  return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
+                } else if (value >= 1000000 && value < 1000000000) {
+                  return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
+                } else if (value >= 1000000000 && value < 1000000000000) {
+                  return "".concat((value / 1000000000).toFixed(1), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+                } else {
+                  return "".concat(value).concat(dataLabelSuffix);
+                }
+              } else {
+                return "".concat(value).concat(dataLabelSuffix);
+              }
+            },
+            beginAtZero: true,
+            fontSize: 14,
+            suggestedMax: Math.max.apply(Math, _toConsumableArray(arrayWithData)) * 1.25
+          }
+        }]
+      };
+    }
+  }
+
+  function buildCharts(chartSelector, chartContainerSelector) {}
+
+  var chartCanvases = document.querySelectorAll('.chart');
+
+  if (chartCanvases.length <= charts.length) {
+    /*
+        Building a chart according to amount of canvases (chart holders)
+    */
+    chartCanvases.forEach(function (canvas, index) {
+      var currentChartData = charts[index],
+          chart = new ChartPrototype();
+      chart.type = currentChartData.type;
+      chart.data.datasets[0].label = currentChartData.label;
+      /*
+          optimizing canvas size depends on incoming data and other information,
+          before assigning it as a chart holder
+      */
+
+      optimizeCanvasSize(canvas, currentChartData);
+      /*
+          fills chart prototype with data according to it's structure
+      */
+
+      currentChartData.dataset.forEach(function (data) {
+        chart.data.datasets[0].data.push(data.value); //[0,1,2,3,4,N,...,Nx]
+
+        chart.data.labels.push(data.label); //[label1,label2,label3,...,labelN]
+      });
+      proceedAdditionalOptionsToChart(chart, currentChartData);
+      articleChartsInstances.push(new Chart(canvas, chart));
+    });
+  } else {
+    /*
+        Building a chart according to amount of datasets
+    */
+    charts.forEach(function (currentChartData, index) {
+      var canvas = chartCanvases[index],
+          chart = new ChartPrototype();
+      chart.type = currentChartData.type;
+      chart.data.datasets[0].label = currentChartData.label;
+      /*
+          optimizing canvas size depends on incoming data and other information,
+          before assigning it as a chart holder
+      */
+      // optimizeCanvasSize(canvas, currentChartData);
+
+      /*
+          fills chart prototype with data according to it's structure
+      */
+
+      currentChartData.dataset.forEach(function (data) {
+        chart.data.datasets[0].data.push(data.value); //[data1,data2,data3,...,dataN]
+
+        chart.data.labels.push(data.label); //[label1,label2,label3,...,labelN]
+      });
+      proceedAdditionalOptionsToChart(chart, currentChartData);
+      articleChartsInstances.push(new Chart(canvas, chart));
+    });
+  }
+
+  console.log(articleChartsInstances);
+};
 })();
 
 /******/ })()

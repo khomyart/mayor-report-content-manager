@@ -14,7 +14,7 @@
 <script src="https://cdn.ckeditor.com/ckeditor5/31.0.0/classic/ckeditor.js"></script>
 
 
-<div class="reports container-fluid p-0 d-flex flex-column align-items-center col-12" style="height: 100%">
+<div class="articles container-fluid p-0 d-flex flex-column align-items-center col-12" style="height: 100%">
     <nav class="button-holder col-12 d-flex p-3">
         <ol class="breadcrumb p-0 m-0">
             <li class="breadcrumb-item"><a href="{{ route('articles') }}">Статті</a></li>
@@ -22,7 +22,7 @@
         </ol>
     </nav>
     <div class="col-9 p-4">
-        <form id="article_form" action="{{ route('create_article') }}" method="POST">
+        <form id="article_form" action="{{ route('create_article') }}" method="POST" class="mb-5">
             @csrf
             <div class="row mb-4">
                 <div class="col-3">
@@ -58,6 +58,10 @@
                 </div>
             </div>
         </form> 
+        <div class="charts-container d-flex flex-row col-12 px-3 mb-3">
+            
+        </div>
+
         <!-- Modal -->
         <div class="modal fade" id="diagramModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="diagramModalLabel" aria-hidden="true">
             {{-- modal-lg --}}
@@ -158,7 +162,7 @@
 @section('css_import')
     @parent
 
-    <link rel="stylesheet" href="{{asset('css/reports.css')}}">
+    <link rel="stylesheet" href="{{asset('css/articles.css')}}">
 
     {{-- change place for this libs after template setup --}}
     
