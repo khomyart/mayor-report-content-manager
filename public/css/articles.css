@@ -27,4 +27,14 @@
     max-height: 500px;
 }
 
+.chart-holder {
+    position: relative;
+}
+
+.chart-menu-buttons-holder {
+    position: absolute;
+    top: 3%;
+    right: 2%;
+}
+
 

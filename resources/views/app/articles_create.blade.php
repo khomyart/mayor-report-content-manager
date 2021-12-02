@@ -58,7 +58,8 @@
                 </div>
             </div>
         </form> 
-        <div class="charts-container d-flex flex-row col-12 px-3 mb-3">
+        <h4 style="text-align: center;">Діаграми</h4>
+        <div class="charts-container col-12 shadow d-flex flex-column align-items-center pt-4">
             
         </div>
 

@@ -19,7 +19,7 @@ function datasetHTMLTemplate(currentChartDataset) {
     </div>
     `
 }
-
+let isValidationEnabled = false;
 let datasetContainer = document.querySelector('#datasets_container')
 let currentChartDataset = 0;
 
@@ -106,12 +106,26 @@ let elementsForValidation = [
     },
 ]
 
-let chartHTMLTemplate = `
-<div class="col-12 col-lg-10 col-xxl-6 mb-3"> <canvas class="chart"></canvas> </div>
-<hr class="mb-3"/>
-`
-let chartContainerSelector = '.charts-container'
-let chartSelector = '.chart'
+function chartHTMLTemplate (chartArrayId) {
+    return `
+    <div class="col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder"> 
+        <div class="chart-menu-buttons-holder d-flex flex-column">
+            <button class="btn btn-primary edit-chart-button mb-2" chart_array_id="${chartArrayId}">Редагувати</button>
+            <button class="btn btn-danger remove-chart-button" chart_array_id="${chartArrayId}">Видалити</button>
+        </div>
+        <canvas class="chart"></canvas> 
+    </div>
+    <hr class="mb-3"/>
+    `
+}
+
+let selectors = {
+    chartContainer: '.charts-container',
+    chart: '.chart',
+    editChartButton: '.edit-chart-button',
+    removeChartButton: '.remove-chart-button'
+}
+
 let charts = [];
 let articleChartsInstances = [];
 
@@ -179,20 +193,24 @@ let articleChartsInstances = [];
     }
 }
 
+
+function removeElementFromChartArray(chartArrayIndex) {
+    charts.splice(chartArrayIndex, 1);
+}
+
 /**
  * 
  * @param {string} chartHTMLTemplate template for chart's canvas, actually chart holder template
- * @param {string} chartSelector chart's canvas selector
- * @param {string} chartContainerSelector place, where templates located
+ * @param {object} selectors object wich contains selectors for main elements
  * @param {array} chartsArray array with charts params like title, legend, values, etc
  * @returns 
  */
-function buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, chartsArray) {
-    let chartContainer = document.querySelector(chartContainerSelector)
+function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
+    let chartContainer = document.querySelector(selectors.chartContainer)
 
     chartContainer.innerHTML = ''
-    charts.forEach(chart => {
-        chartContainer.innerHTML += chartHTMLTemplate;
+    charts.forEach((chart, index) => {
+        chartContainer.innerHTML += chartHTMLTemplate(index);
     })
     /* ITEMS FOR CHART DISPLAYING */
     const
@@ -275,7 +293,7 @@ function buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, c
         let
             type = chartInstance.type,
             legend = chartData.legend,
-            name = chartData.title,
+            name = stringCut(35, chartData.title),
             axisNames = chartData.axis,
             dataLabelSuffix = chartData.suffix,
             arrayWithData = chartInstance.data.datasets[0].data.map(element => parseInt(element)),
@@ -305,12 +323,13 @@ function buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, c
                             currentItemIndex = tooltipItem.index,
                             currentItemData = data.datasets[0].data[currentItemIndex],
                             label = `${data.labels[currentItemIndex]}: `;
-                        if (showVerbalRoundingForHoveredLabels == 'true') {
+                        if (showVerbalRoundingForHoveredLabels == 'true' ||
+                            showVerbalRoundingForHoveredLabels == true) {
                             if (currentItemData >= 1000 && currentItemData < 1000000) {
                                 return `${label}${(currentItemData/1000).toFixed(1)} тис.${dataLabelSuffix}`;
                             } else if (currentItemData >= 1000000 && currentItemData < 1000000000) {
                                 return `${label}${(currentItemData/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
-                            } else if (currentItemData >= 1000000000 && currentItemData < 1000000000000) {
+                            } else if (currentItemData >= 1000000000) {
                                 return `${label}${(currentItemData/1000000000).toFixed(1)} млрд.${dataLabelSuffix}`;
                             } else {
                                 return `${label}${currentItemData}${dataLabelSuffix}`;
@@ -337,12 +356,13 @@ function buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, c
                     align: (chartInstance.type === 'pie' || chartInstance.type === 'doughnut') ? 'end' :
                             chartInstance.type === 'horizontalBar' ? 'end' : 'top',
                     formatter: function(value, context) {
-                        if (showVerbalRounding) {
+                        if (showVerbalRounding == 'true' ||
+                            showVerbalRounding == true) {
                             if (value >= 1000 && value < 1000000) {
                                 return `${(value/1000).toFixed(1)} тис.${dataLabelSuffix}`;
                             } else if (value >= 1000000 && value < 1000000000) {
                                 return `${(value/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
-                            } else if (value >= 1000000000 && value < 1000000000000) {
+                            } else if (value >= 1000000000) {
                                 return `${(value/1000000000).toFixed(1)} млрд.${dataLabelSuffix}`;
                             } else {
                                 return `${value}${dataLabelSuffix}`;
@@ -404,12 +424,13 @@ function buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, c
                     offset: chartInstance.type !== 'horizontalBar',
                     ticks: {
                         callback: function(value, index, values) {
-                            if (showVerbalRounding) {
+                            if (showVerbalRounding == 'true' ||
+                                showVerbalRounding == true) {
                                 if (value >= 1000 && value < 1000000) {
                                     return `${(value/1000).toFixed(1)} тис.${dataLabelSuffix}`;
                                 } else if (value >= 1000000 && value < 1000000000) {
                                     return `${(value/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
-                                } else if (value >= 1000000000 && value < 1000000000000) {
+                                } else if (value >= 1000000000) {
                                     return `${(value/1000000000).toFixed(1)} млрд.${dataLabelSuffix}`;
                                 } else {
                                     return `${value}${dataLabelSuffix}`;
@@ -434,12 +455,13 @@ function buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, c
                     },
                     ticks: {
                         callback: function(value, index, values) {
-                            if (showVerbalRounding) {
+                            if (showVerbalRounding == 'true' ||
+                                showVerbalRounding == true) {
                                 if (value >= 1000 && value < 1000000) {
                                     return `${(value/1000).toFixed(1)} тис.${dataLabelSuffix}`;
                                 } else if (value >= 1000000 && value < 1000000000) {
                                     return `${(value/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
-                                } else if (value >= 1000000000 && value < 1000000000000) {
+                                } else if (value >= 1000000000) {
                                     return `${(value/1000000000).toFixed(1)} млрд.${dataLabelSuffix}`;
                                 } else {
                                     return `${value}${dataLabelSuffix}`;
@@ -458,7 +480,7 @@ function buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, c
     }
 
     let
-        chartCanvases = document.querySelectorAll(chartSelector),
+        chartCanvases = document.querySelectorAll(selectors.chart),
         articleChartsInstances = [];
 
     if (chartCanvases.length <= chartsArray.length) {
@@ -510,6 +532,16 @@ function buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, c
             })
             proceedAdditionalOptionsToChart(chart, currentChartData);
             articleChartsInstances.push(new Chart(canvas, chart));
+        })
+    }
+
+    //assign to chart keys some actions (edit, remove, etc)
+    if (articleChartsInstances.length > 0) {
+        document.querySelectorAll('.remove-chart-button').forEach(button => {
+            button.onclick = (event) => {
+                removeElementFromChartArray(event.target.getAttribute('chart_array_id'));
+                buildCharts(chartHTMLTemplate, selectors, charts);
+            }
         })
     }
 
@@ -592,23 +624,26 @@ function clearModal() {
 }
 
 document.querySelector('#submit_chart_data').onclick = () => {
-    if (handleErrorDisplaying(doFieldsValidation(elementsForValidation, rules), '#chart_errors')) {
+    if (isValidationEnabled == true && handleErrorDisplaying(doFieldsValidation(elementsForValidation, rules), '#chart_errors')) {
         return false
     }
 
     /* Defining and filling chart fields with values */
     let chartFields = {};
-    chartFieldsIDs.forEach(ID => {
-        let chartFieldValue = document.querySelector(`#${ID}`).value;
-
+    chartFieldsIDs.every(ID => {
         if (ID == 'chart_verbal_rounding') {
-            chartFields[ID] = chartFieldValue == 'on' ? 'true' : 'false';
-        } else if (ID == 'chart_verbal_rounding_when_hovered') {
-            chartFields[ID] = chartFieldValue == 'on' ? 'true' : 'false';
-        } else {
-            chartFields[ID] = document.querySelector(`#${ID}`).value;
+            chartFields[ID] = document.querySelector(`#${ID}`).checked ? 'true' : 'false';
+            return true
         }
+        if (ID == 'chart_verbal_rounding_when_hovered') {
+            chartFields[ID] = document.querySelector(`#${ID}`).checked  ? 'true' : 'false';
+            return true
+        } 
+
+        chartFields[ID] = document.querySelector(`#${ID}`).value;
+        return true
     });
+
     /* Defining and filling chart datasets with values */
     let dataset = [];
     let datasetElement = {};
@@ -629,7 +664,7 @@ document.querySelector('#submit_chart_data').onclick = () => {
     /* Defining and filling chart itself */
     let chartInstance = {
         // numberInList: charts.length,
-        title: stringCut(40 ,chartFields.chart_title),
+        title: chartFields.chart_title,
         legend: chartFields.chart_legend,
         type: chartFields.chart_type,
         axis: {
@@ -644,77 +679,83 @@ document.querySelector('#submit_chart_data').onclick = () => {
 
     charts.push(chartInstance);
     clearModal();
+    console.log(chartInstance)
 
-    articleChartsInstances = buildCharts(chartHTMLTemplate, chartSelector, chartContainerSelector, charts);
+    /* */
+    charts = [
+        {
+            title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
+            legend: 'План',
+            type: 'horizontalBar',
+            axis: {
+                x: 'назва фонду',
+                y: 'грн'
+            },
+            suffix: 'грн',
+            isVerbalRoundingEnabled: 'false',
+            isVerbalRoundingEnabledForHoveredLabels: 'true',
+            dataset: [
+                {label: 'Загальний фонд', value: '1701400000'},
+                {label: 'Міжбюджетні трансферти', value: '492900000'},
+                {label: 'Спеціальний фонд', value: '134200000'},
+                {label: 'Бюджет розвитку', value: '33000000'},
+                {label: 'Міжбюджетні трансферти', value: '492900000'},
+                {label: 'Спеціальний фонд', value: '134200000'},
+                {label: 'Бюджет розвитку', value: '33000000'},
+                {label: 'Міжбюджетні трансферти', value: '492900000'},
+                {label: 'Спеціальний фонд', value: '134200000'},
+                {label: 'Бюджет розвитку', value: '33000000'}
+                
+            ] 
+        },
+        {
+            title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
+            legend: 'План',
+            type: 'doughnut',
+            axis: {
+                x: 'назва фонду',
+                y: 'грн'
+            },
+            suffix: 'грн',
+            isVerbalRoundingEnabled: 'true',
+            isVerbalRoundingEnabledForHoveredLabels: 'true',
+            dataset: [
+                {label: 'Загальний фонд', value: '1701400000'},
+                {label: 'Міжбюджетні трансферти', value: '492900000'},
+                {label: 'Спеціальний фонд', value: '134200000'},
+                {label: 'Бюджет розвитку', value: '33000000'}
+            ] 
+        },
+        {
+            title: 'Виконання бюджету',
+            legend: 'План',
+            type: 'bar',
+            axis: {
+                x: 'назва фонду',
+                y: 'грн'
+            },
+            suffix: 'грн',
+            isVerbalRoundingEnabled: 'true',
+            isVerbalRoundingEnabledForHoveredLabels: 'true',
+            dataset: [
+                {label: 'Загальний фонд', value: '1701400000'},
+                {label: 'Міжбюджетні трансферти', value: '492900000'},
+                {label: 'Спеціальний фонд', value: '134200000'},
+                {label: 'Бюджет розвитку', value: '33000000'}
+            ] 
+        }
+    ]
+
+     /* */
+
+    articleChartsInstances = buildCharts(chartHTMLTemplate, selectors, charts);
+
+    
 }
 
-
-// charts = [
-//     {
-//         title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
-//         legend: 'План',
-//         type: 'pie',
-//         axis: {
-//             x: 'назва фонду',
-//             y: 'грн'
-//         },
-//         suffix: 'грн',
-//         isVerbalRoundingEnabled: 'true',
-//         isVerbalRoundingEnabledForHoveredLabels: 'true',
-//         dataset: [
-//             {label: 'Загальний фонд', value: '1701400000'},
-//             {label: 'Міжбюджетні трансферти', value: '492900000'},
-//             {label: 'Спеціальний фонд', value: '134200000'},
-//             {label: 'Бюджет розвитку', value: '33000000'},
-//             {label: 'Міжбюджетні трансферти', value: '492900000'},
-//             {label: 'Спеціальний фонд', value: '134200000'},
-//             {label: 'Бюджет розвитку', value: '33000000'},
-//             {label: 'Міжбюджетні трансферти', value: '492900000'},
-//             {label: 'Спеціальний фонд', value: '134200000'},
-//             {label: 'Бюджет розвитку', value: '33000000'}
-            
-//         ] 
-//     },
-//     {
-//         title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
-//         legend: 'План',
-//         type: 'doughnut',
-//         axis: {
-//             x: 'назва фонду',
-//             y: 'грн'
-//         },
-//         suffix: 'грн',
-//         isVerbalRoundingEnabled: 'true',
-//         isVerbalRoundingEnabledForHoveredLabels: 'true',
-//         dataset: [
-//             {label: 'Загальний фонд', value: '1701400000'},
-//             {label: 'Міжбюджетні трансферти', value: '492900000'},
-//             {label: 'Спеціальний фонд', value: '134200000'},
-//             {label: 'Бюджет розвитку', value: '33000000'}
-//         ] 
-//     },
-//     {
-//         title: 'Виконання бюджету',
-//         legend: 'План',
-//         type: 'bar',
-//         axis: {
-//             x: 'назва фонду',
-//             y: 'грн'
-//         },
-//         suffix: 'грн',
-//         isVerbalRoundingEnabled: 'true',
-//         isVerbalRoundingEnabledForHoveredLabels: 'true',
-//         dataset: [
-//             {label: 'Загальний фонд', value: '1701400000'},
-//             {label: 'Міжбюджетні трансферти', value: '492900000'},
-//             {label: 'Спеціальний фонд', value: '134200000'},
-//             {label: 'Бюджет розвитку', value: '33000000'}
-//         ] 
-//     }
-// ]
-
 document.querySelector('#debug').onclick = () => {
-    
     console.log(articleChartsInstances)
+    removeElementFromChartArray(1);
+    buildCharts(chartHTMLTemplate, selectors, charts);
 }
 
