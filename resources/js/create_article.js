@@ -21,10 +21,16 @@ function datasetHTMLTemplate(currentChartDataset) {
 }
 let isValidationEnabled = false;
 let datasetContainer = document.querySelector('#datasets_container')
+let editDatasetContainer = document.querySelector('#edit_datasets_container')
 let currentChartDataset = 0;
 
 document.querySelector('#add_dataset_button').onclick = () => {
     datasetContainer.innerHTML += datasetHTMLTemplate(currentChartDataset);
+    currentChartDataset += 1;
+}
+
+document.querySelector('#edit_add_dataset_button').onclick = () => {
+    editDatasetContainer.innerHTML += datasetHTMLTemplate(currentChartDataset);
     currentChartDataset += 1;
 }
 
@@ -38,6 +44,18 @@ let chartFieldsIDs = [
     'chart_sufix',
     'chart_verbal_rounding',
     'chart_verbal_rounding_when_hovered',
+];
+
+let editChartFieldsIDs = [
+    'edit_chart_id',
+    'edit_chart_title',
+    'edit_chart_legend',
+    'edit_chart_type',
+    'edit_chart_axis_x',
+    'edit_chart_axis_y',
+    'edit_chart_sufix',
+    'edit_chart_verbal_rounding',
+    'edit_chart_verbal_rounding_when_hovered',
 ];
 
 let rules = {
@@ -64,16 +82,31 @@ let elementsForValidation = [
         rules: ['requeried'], 
         errorMessage: 'Поле "Назва графіка" повинно бути заповнене'
     },
+    // {
+    //     selector: '#edit_chart_title', 
+    //     rules: ['requeried'], 
+    //     errorMessage: 'Поле "Назва графіка" повинно бути заповнене'
+    // },
     {
         selector: '#chart_legend', 
         rules: ['requeried'], 
         errorMessage: 'Поле "Додаткова назва графіка" повинне бути заповнене'
     },
+    // {
+    //     selector: '#edit_chart_legend', 
+    //     rules: ['requeried'], 
+    //     errorMessage: 'Поле "Додаткова назва графіка" повинне бути заповнене'
+    // },
     {
         selector: '#chart_type', 
         rules: ['requeried'], 
         errorMessage: 'Необхідно обрати тип графіку'
     },
+    // {
+    //     selector: '#edit_chart_type', 
+    //     rules: ['requeried'], 
+    //     errorMessage: 'Необхідно обрати тип графіку'
+    // },
     // {
     //     selector: '#chart_axis_x', 
     //     rules: ['requeried', 'letters'], 
@@ -104,6 +137,11 @@ let elementsForValidation = [
         rules: ['datasets'], 
         errorMessage: 'Додайте хоча б один набір данних!'
     },
+    // {
+    //     selector: '#edit_add_dataset_button', 
+    //     rules: ['datasets'], 
+    //     errorMessage: 'Додайте хоча б один набір данних!'
+    // },
 ]
 
 function chartHTMLTemplate (chartArrayId) {
@@ -196,6 +234,58 @@ let articleChartsInstances = [];
 
 function removeElementFromChartArray(chartArrayIndex) {
     charts.splice(chartArrayIndex, 1);
+    articleChartsInstances.splice(chartArrayIndex, 1);
+}
+
+/**
+ * Show edit chart modal with filled inputs
+ * 
+ * @param {number} id id of a particular chart in charts array
+ */
+function showEditChartModal(id) {
+    function element(selector) {
+        return document.querySelector(selector)
+    }
+
+    let modal = new bootstrap.Modal(document.getElementById('editChartModal'))
+    let chartElement = charts[id];
+    modal.show();
+
+    let chartTitle = ''
+
+    if (typeof chartElement.title == 'object') {
+        chartElement.title.forEach((titleFragment, index) => {
+            chartTitle += index == 0 ? titleFragment : ' ' + titleFragment
+        })
+    } else {
+        chartTitle =  chartElement.title;
+    }
+
+    element('#edit_chart_id').value = id;
+    element('#edit_chart_title').value = chartTitle;
+    element('#edit_chart_legend').value = chartElement.legend;
+    element('#edit_chart_type').value = chartElement.type;
+    element('#edit_chart_axis_x').value = chartElement.axis.x;
+    element('#edit_chart_axis_y').value = chartElement.axis.y;
+    element('#edit_chart_sufix').value = chartElement.suffix;
+
+    element('#edit_chart_verbal_rounding').checked = 
+    chartElement.isVerbalRoundingEnabled == 'true' ? true : false
+    element('#edit_chart_verbal_rounding_when_hovered').checked = 
+    chartElement.isVerbalRoundingEnabledForHoveredLabels == 'true' ? true : false
+    
+    editDatasetContainer.innerHTML = '';
+    chartElement.dataset.forEach((data, index)=>{
+        editDatasetContainer.innerHTML += datasetHTMLTemplate(index);
+    })  
+
+    document.querySelectorAll('.dataset_label').forEach((element, index) => {
+        element.value = chartElement.dataset[index].label
+    })
+
+    document.querySelectorAll('.dataset_value').forEach((element, index) => {
+        element.value = chartElement.dataset[index].value
+    })
 }
 
 /**
@@ -537,10 +627,18 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
 
     //assign to chart keys some actions (edit, remove, etc)
     if (articleChartsInstances.length > 0) {
+        //remove button asignment
         document.querySelectorAll('.remove-chart-button').forEach(button => {
             button.onclick = (event) => {
                 removeElementFromChartArray(event.target.getAttribute('chart_array_id'));
                 buildCharts(chartHTMLTemplate, selectors, charts);
+            }
+        })
+
+        //edit button asignment
+        document.querySelectorAll('.edit-chart-button').forEach(button => {
+            button.onclick = (event) => {
+                showEditChartModal(event.target.getAttribute('chart_array_id'))
             }
         })
     }
@@ -607,7 +705,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
     }
 }
 
-function clearModal() {  
+function clearCreateChartModal() {  
     chartFieldsIDs.forEach(ID => {
         if (ID == 'chart_verbal_rounding' || ID == 'chart_verbal_rounding_when_hovered') {
             document.querySelector(`#${ID}`).checked = false;
@@ -623,26 +721,68 @@ function clearModal() {
     modal.hide();
 }
 
-document.querySelector('#submit_chart_data').onclick = () => {
+function clearEditChartModal() {  
+    editChartFieldsIDs.forEach(ID => {
+        if (ID == 'edit_chart_verbal_rounding' || ID == 'edit_chart_verbal_rounding_when_hovered') {
+            document.querySelector(`#${ID}`).checked = false;
+        } else {
+            document.querySelector(`#${ID}`).value = '';
+        }
+    })
+    currentChartDataset = 0;
+    editDatasetContainer.innerHTML = '';
+
+    let modalEl = document.getElementById('editChartModal')
+    let modal = bootstrap.Modal.getInstance(modalEl)
+    modal.hide();
+
+    //clear black backscreens
+    document.querySelectorAll('.modal-backdrop').forEach(element => {
+        element.remove()
+    })
+}
+
+//TODO: need to work on mode 'edit'
+function submitChartData(mode, chartID) {
     if (isValidationEnabled == true && handleErrorDisplaying(doFieldsValidation(elementsForValidation, rules), '#chart_errors')) {
         return false
     }
 
     /* Defining and filling chart fields with values */
     let chartFields = {};
-    chartFieldsIDs.every(ID => {
-        if (ID == 'chart_verbal_rounding') {
-            chartFields[ID] = document.querySelector(`#${ID}`).checked ? 'true' : 'false';
-            return true
-        }
-        if (ID == 'chart_verbal_rounding_when_hovered') {
-            chartFields[ID] = document.querySelector(`#${ID}`).checked  ? 'true' : 'false';
-            return true
-        } 
+    switch (mode) {
+        case 'create':
+            chartFieldsIDs.every(ID => {
+                if (ID == 'chart_verbal_rounding') {
+                    chartFields[ID] = document.querySelector(`#${ID}`).checked ? 'true' : 'false';
+                    return true
+                }
+                if (ID == 'chart_verbal_rounding_when_hovered') {
+                    chartFields[ID] = document.querySelector(`#${ID}`).checked  ? 'true' : 'false';
+                    return true
+                } 
+        
+                chartFields[ID] = document.querySelector(`#${ID}`).value;
+                return true
+            });      
+            break;
+        case 'edit':
+            editChartFieldsIDs.every(ID => {
+                if (ID == 'edit_chart_verbal_rounding') {
+                    chartFields[ID] = document.querySelector(`#${ID}`).checked ? 'true' : 'false';
+                    return true
+                }
+                if (ID == 'edit_chart_verbal_rounding_when_hovered') {
+                    chartFields[ID] = document.querySelector(`#${ID}`).checked  ? 'true' : 'false';
+                    return true
+                } 
+        
+                chartFields[ID] = document.querySelector(`#${ID}`).value;
+                return true
+            }); 
+            break;
 
-        chartFields[ID] = document.querySelector(`#${ID}`).value;
-        return true
-    });
+    }
 
     /* Defining and filling chart datasets with values */
     let dataset = [];
@@ -661,101 +801,127 @@ document.querySelector('#submit_chart_data').onclick = () => {
         }        
     });
 
-    /* Defining and filling chart itself */
-    let chartInstance = {
-        // numberInList: charts.length,
-        title: chartFields.chart_title,
-        legend: chartFields.chart_legend,
-        type: chartFields.chart_type,
-        axis: {
-            x: chartFields.chart_axis_x,
-            y: chartFields.chart_axis_y
-        },
-        suffix: chartFields.chart_sufix,
-        isVerbalRoundingEnabled: chartFields.chart_verbal_rounding,
-        isVerbalRoundingEnabledForHoveredLabels: chartFields.chart_verbal_rounding_when_hovered,
-        dataset: dataset
-    }
+    let chartInstance = {}
+    switch (mode) {
+        case 'create':
+            chartInstance = {
+                // numberInList: charts.length,
+                title: chartFields.chart_title,
+                legend: chartFields.chart_legend,
+                type: chartFields.chart_type,
+                axis: {
+                    x: chartFields.chart_axis_x,
+                    y: chartFields.chart_axis_y
+                },
+                suffix: chartFields.chart_sufix,
+                isVerbalRoundingEnabled: chartFields.chart_verbal_rounding,
+                isVerbalRoundingEnabledForHoveredLabels: chartFields.chart_verbal_rounding_when_hovered,
+                dataset: dataset
+            }
 
-    charts.push(chartInstance);
-    clearModal();
-    console.log(chartInstance)
+            charts.push(chartInstance);
+            clearCreateChartModal();
+            break;
+        case 'edit':
+            chartInstance = {
+                // numberInList: charts.length,
+                title: chartFields.edit_chart_title,
+                legend: chartFields.edit_chart_legend,
+                type: chartFields.edit_chart_type,
+                axis: {
+                    x: chartFields.edit_chart_axis_x,
+                    y: chartFields.edit_chart_axis_y
+                },
+                suffix: chartFields.edit_chart_sufix,
+                isVerbalRoundingEnabled: chartFields.edit_chart_verbal_rounding,
+                isVerbalRoundingEnabledForHoveredLabels: chartFields.edit_chart_verbal_rounding_when_hovered,
+                dataset: dataset
+            }
+
+            charts[chartID] = chartInstance;
+            clearEditChartModal();
+            break;
+    }
 
     /* */
     charts = [
-        {
-            title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
-            legend: 'План',
-            type: 'horizontalBar',
-            axis: {
-                x: 'назва фонду',
-                y: 'грн'
-            },
-            suffix: 'грн',
-            isVerbalRoundingEnabled: 'false',
-            isVerbalRoundingEnabledForHoveredLabels: 'true',
-            dataset: [
-                {label: 'Загальний фонд', value: '1701400000'},
-                {label: 'Міжбюджетні трансферти', value: '492900000'},
-                {label: 'Спеціальний фонд', value: '134200000'},
-                {label: 'Бюджет розвитку', value: '33000000'},
-                {label: 'Міжбюджетні трансферти', value: '492900000'},
-                {label: 'Спеціальний фонд', value: '134200000'},
-                {label: 'Бюджет розвитку', value: '33000000'},
-                {label: 'Міжбюджетні трансферти', value: '492900000'},
-                {label: 'Спеціальний фонд', value: '134200000'},
-                {label: 'Бюджет розвитку', value: '33000000'}
+    //    {
+    //         title: 'Виконання бюджету',
+    //         legend: 'План',
+    //         type: 'horizontalBar',
+    //         axis: {
+    //             x: 'назва фонду',
+    //             y: 'грн'
+    //         },
+    //         suffix: 'грн',
+    //         isVerbalRoundingEnabled: 'false',
+    //         isVerbalRoundingEnabledForHoveredLabels: 'true',
+    //         dataset: [
+    //             {label: 'Загальний фонд', value: '1701400000'},
+    //             {label: 'Міжбюджетні трансферти', value: '492900000'},
+    //             {label: 'Спеціальний фонд', value: '134200000'},
+    //             {label: 'Бюджет розвитку', value: '33000000'},
+    //             {label: 'Міжбюджетні трансферти', value: '492900000'},
+    //             {label: 'Спеціальний фонд', value: '134200000'},
+    //             {label: 'Бюджет розвитку', value: '33000000'},
+    //             {label: 'Міжбюджетні трансферти', value: '492900000'},
+    //             {label: 'Спеціальний фонд', value: '134200000'},
+    //             {label: 'Бюджет розвитку', value: '33000000'}
                 
-            ] 
-        },
+    //         ] 
+    //     },
         {
-            title: ['Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету', 'Виконання бюджету'],
-            legend: 'План',
+            title: 'Назва діаграми',
+            legend: 'Додаткова назва діаграми',
             type: 'doughnut',
             axis: {
                 x: 'назва фонду',
-                y: 'грн'
+                y: 'назва фонду'
             },
             suffix: 'грн',
-            isVerbalRoundingEnabled: 'true',
-            isVerbalRoundingEnabledForHoveredLabels: 'true',
+            isVerbalRoundingEnabled: 'false',
+            isVerbalRoundingEnabledForHoveredLabels: 'false',
             dataset: [
-                {label: 'Загальний фонд', value: '1701400000'},
-                {label: 'Міжбюджетні трансферти', value: '492900000'},
-                {label: 'Спеціальний фонд', value: '134200000'},
-                {label: 'Бюджет розвитку', value: '33000000'}
+                {label: 'Назва діаграми', value: '123'},
+                {label: 'Назва діаграми 2', value: '321'},
             ] 
         },
-        {
-            title: 'Виконання бюджету',
-            legend: 'План',
-            type: 'bar',
-            axis: {
-                x: 'назва фонду',
-                y: 'грн'
-            },
-            suffix: 'грн',
-            isVerbalRoundingEnabled: 'true',
-            isVerbalRoundingEnabledForHoveredLabels: 'true',
-            dataset: [
-                {label: 'Загальний фонд', value: '1701400000'},
-                {label: 'Міжбюджетні трансферти', value: '492900000'},
-                {label: 'Спеціальний фонд', value: '134200000'},
-                {label: 'Бюджет розвитку', value: '33000000'}
-            ] 
-        }
+        // {
+        //     title: 'Виконання бюджету',
+        //     legend: 'План',
+        //     type: 'bar',
+        //     axis: {
+        //         x: 'назва фонду',
+        //         y: 'грн'
+        //     },
+        //     suffix: 'грн',
+        //     isVerbalRoundingEnabled: 'true',
+        //     isVerbalRoundingEnabledForHoveredLabels: 'true',
+        //     dataset: [
+        //         {label: 'Загальний фонд', value: '1701400000'},
+        //         {label: 'Міжбюджетні трансферти', value: '492900000'},
+        //         {label: 'Спеціальний фонд', value: '134200000'},
+        //         {label: 'Бюджет розвитку', value: '33000000'}
+        //     ] 
+        // }
     ]
 
      /* */
+    console.log(charts)
 
-    articleChartsInstances = buildCharts(chartHTMLTemplate, selectors, charts);
-
-    
+    articleChartsInstances = buildCharts(chartHTMLTemplate, selectors, charts);    
 }
 
+document.querySelector('#submit_chart_data').onclick = () => {
+    submitChartData('create');
+}
+
+document.querySelector('#submit_edited_chart_data').onclick = () => {
+    submitChartData('edit', document.querySelector('#edit_chart_id').value);
+}
+
+
 document.querySelector('#debug').onclick = () => {
-    console.log(articleChartsInstances)
-    removeElementFromChartArray(1);
-    buildCharts(chartHTMLTemplate, selectors, charts);
+
 }
 

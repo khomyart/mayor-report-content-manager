@@ -63,7 +63,7 @@
             
         </div>
 
-        <!-- Modal -->
+        <!-- Create chart modal -->
         <div class="modal fade" id="diagramModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="diagramModalLabel" aria-hidden="true">
             {{-- modal-lg --}}
             <div class="modal-dialog modal-dialog-scrollable ">
@@ -142,6 +142,85 @@
                 </div>
             </div>
         </div>
+
+        <!-- Edit chart modal -->
+        <div class="modal fade" id="editChartModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editChartModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable ">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editChartModalLabel">Редагувати діаграму</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul id="edit_chart_errors" hidden class="alert alert-danger ps-5">
+
+                        </ul>
+                        <div class="mb-3">
+                            <input type="hidden" id="edit_chart_id">
+                            <label for="edit_chart_title" class="form-label">Назва графіка</label>
+                            <input type="text" class="form-control" id="edit_chart_title" name="edit_chart_title">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_chart_legend" class="form-label">Додаткова назва графіка</label>
+                            <input type="text" class="form-control" id="edit_chart_legend" name="edit_chart_legend">
+                        </div>
+                        <div class="mb-3">
+                            <select class="form-select" id="edit_chart_type" aria-label="edit_chart_type" name="edit_chart_type">
+                                <option selected value="">Оберіть тип графіку</option>
+                                <option value="pie">Пиріг</option>
+                                <option value="doughnut">Пончик</option>
+                                <option value="bar">Стовп</option>
+                                <option value="horizontalBar">Горизонтальний стовп</option>
+                            </select>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="edit_chart_axis_x" class="form-label">Назва осі X</label>
+                                <input type="text" class="form-control" id="edit_chart_axis_x" name="edit_chart_axis_x[x]">
+                            </div>
+                            <div class="col-6">
+                                <label for="edit_chart_axis_y" class="form-label">Назва осі Y</label>
+                                <input type="text" class="form-control" id="edit_chart_axis_y" name="edit_chart_axis_y[y]">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="edit_chart_sufix" class="form-label">Суфікс показників</label>
+                                <input type="text" class="form-control" id="edit_chart_sufix" name="edit_chart_sufix">
+                            </div>
+                            <div class="col-6 d-flex flex-column align-items-start justify-content-evenly">
+                                <div>
+                                    <input class="form-check-input" type="checkbox" name="edit_chart_verbal_rounding" id="edit_chart_verbal_rounding">
+                                    <label class="form-check-label" for="edit_chart_verbal_rounding">
+                                        Вербальне скорочення
+                                    </label>
+                                </div>
+                                <div>
+                                    <input class="form-check-input" type="checkbox" name="edit_chart_verbal_rounding_when_hovered" id="edit_chart_verbal_rounding_when_hovered">
+                                    <label class="form-check-label" for="edit_chart_verbal_rounding_when_hovered">
+                                        при наведенні
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <h5>Набори даних</h5>
+                        <hr class="mb-3">
+                        <div class="row mb-3 px-3">
+                            <a id="edit_add_dataset_button" class="btn btn-primary">
+                                Додати набір даних
+                            </a>
+                        </div>
+                        <div id="edit_datasets_container">
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="edit_debug" class="btn btn-primary">Debug</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відміна</button>
+                        <button type="button" id="submit_edited_chart_data" class="btn btn-primary">Зберегти</button>
+                    </div>
+                </div>
+            </div>
     </div>
 </div>
 
