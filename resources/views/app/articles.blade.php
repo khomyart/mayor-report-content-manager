@@ -16,7 +16,7 @@
     <nav class="button-holder col-12 d-flex flex-row p-3">
         <a href="{{ route('create_article_form') }}">
             <button class="btn btn-primary p-1 px-2">
-                Створити нову статтю
+                Створити статтю
             </button>
         </a>
     </nav>

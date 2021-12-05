@@ -19,7 +19,7 @@ function datasetHTMLTemplate(currentChartDataset) {
     </div>
     `
 }
-let isValidationEnabled = false;
+let isValidationEnabled = true;
 let datasetContainer = document.querySelector('#datasets_container')
 let editDatasetContainer = document.querySelector('#edit_datasets_container')
 let currentChartDataset = 0;
@@ -35,6 +35,13 @@ document.querySelector('#edit_add_dataset_button').onclick = () => {
 }
 
 /* ************************************************************************ */
+let articleFieldsIDs = [
+    'report_id',
+    'article_name',
+    'article_text',
+    'additional_file'
+];
+
 let chartFieldsIDs = [
     'chart_title',
     'chart_legend',
@@ -76,52 +83,41 @@ let rules = {
     }
 }
 
-let elementsForValidation = [
+
+let elementsForArticlesValidation = [
+    {
+        selector: '#report_id', 
+        rules: ['requeried'], 
+        errorMessage: 'Оберіть звіт, до якого відноситься стаття'
+    },
+    {
+        selector: '#article_name', 
+        rules: ['requeried'], 
+        errorMessage: 'Поле "Назва статті" повинно бути заповнене'
+    },
+    {
+        selector: '#article_text', 
+        rules: ['requeried'], 
+        errorMessage: 'Заповніть текст статті'
+    },
+];
+
+let elementsForChartCreateValidation = [
     {
         selector: '#chart_title', 
         rules: ['requeried'], 
         errorMessage: 'Поле "Назва графіка" повинно бути заповнене'
     },
-    // {
-    //     selector: '#edit_chart_title', 
-    //     rules: ['requeried'], 
-    //     errorMessage: 'Поле "Назва графіка" повинно бути заповнене'
-    // },
     {
         selector: '#chart_legend', 
         rules: ['requeried'], 
         errorMessage: 'Поле "Додаткова назва графіка" повинне бути заповнене'
     },
-    // {
-    //     selector: '#edit_chart_legend', 
-    //     rules: ['requeried'], 
-    //     errorMessage: 'Поле "Додаткова назва графіка" повинне бути заповнене'
-    // },
     {
         selector: '#chart_type', 
         rules: ['requeried'], 
         errorMessage: 'Необхідно обрати тип графіку'
     },
-    // {
-    //     selector: '#edit_chart_type', 
-    //     rules: ['requeried'], 
-    //     errorMessage: 'Необхідно обрати тип графіку'
-    // },
-    // {
-    //     selector: '#chart_axis_x', 
-    //     rules: ['requeried', 'letters'], 
-    //     errorMessage: 'Поле "Назва осі Х" повинно бути заповнене та не може містити цифри'
-    // },
-    // {
-    //     selector: '#chart_axis_y', 
-    //     rules: ['requeried', 'letters'], 
-    //     errorMessage: 'Поле "Назва осі Y" повинно бути заповнене та не може містити цифри'
-    // },
-    // {
-    //     selector: '#chart_sufix', 
-    //     rules: ['requeried', 'letters'], 
-    //     errorMessage: 'Поле "Суфікс показників" повинно заповнене та містити лише літери'
-    // },
     {
         selector: '.dataset_label', 
         rules: ['requeried'], 
@@ -137,11 +133,39 @@ let elementsForValidation = [
         rules: ['datasets'], 
         errorMessage: 'Додайте хоча б один набір данних!'
     },
-    // {
-    //     selector: '#edit_add_dataset_button', 
-    //     rules: ['datasets'], 
-    //     errorMessage: 'Додайте хоча б один набір данних!'
-    // },
+]
+
+let elementsForChartEditValidation = [
+    {
+        selector: '#edit_chart_title', 
+        rules: ['requeried'], 
+        errorMessage: 'Поле "Назва графіка" повинно бути заповнене'
+    },
+    {
+        selector: '#edit_chart_legend', 
+        rules: ['requeried'], 
+        errorMessage: 'Поле "Додаткова назва графіка" повинне бути заповнене'
+    },
+    {
+        selector: '#edit_chart_type', 
+        rules: ['requeried'], 
+        errorMessage: 'Необхідно обрати тип графіку'
+    },
+    {
+        selector: '.dataset_label', 
+        rules: ['requeried'], 
+        errorMessage: 'Назва набору даних повнинна бути заповнена'
+    },
+    {
+        selector: '.dataset_value', 
+        rules: ['requeried', 'numbers'], 
+        errorMessage: 'Значення набору даних повинне бути заповнене та містити лише цифри'
+    },
+    {
+        selector: '#edit_add_dataset_button', 
+        rules: ['datasets'], 
+        errorMessage: 'Додайте хоча б один набір данних!'
+    },
 ]
 
 function chartHTMLTemplate (chartArrayId) {
@@ -157,7 +181,7 @@ function chartHTMLTemplate (chartArrayId) {
     `
 }
 
-let selectors = {
+let chartSelectors = {
     chartContainer: '.charts-container',
     chart: '.chart',
     editChartButton: '.edit-chart-button',
@@ -318,7 +342,6 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
         }
 
     function optimizeCanvasSize(canvas, chartData) {
-        console.log('optimized')
         function optimizeCanvasHeight(chartHeight, multiplier) {
             if (chartData.type === 'pie' ||
                 chartData.type === 'doughnut') {
@@ -714,10 +737,18 @@ function clearEditChartModal() {
     })
 }
 
-//TODO: need to work on mode 'edit'
 function submitChartData(mode, chartID) {
-    if (isValidationEnabled == true && handleErrorDisplaying(doFieldsValidation(elementsForValidation, rules), '#chart_errors')) {
-        return false
+    switch (mode) {
+        case 'create':
+            if (isValidationEnabled == true && handleErrorDisplaying(doFieldsValidation(elementsForChartCreateValidation, rules), '#chart_errors')) {
+                return false
+            }
+            break;
+        case 'edit':
+            if (isValidationEnabled == true && handleErrorDisplaying(doFieldsValidation(elementsForChartEditValidation, rules), '#edit_chart_errors')) {
+                return false
+            }
+            break;
     }
 
     /* Defining and filling chart fields with values */
@@ -815,10 +846,10 @@ function submitChartData(mode, chartID) {
             break;
     }
 
-    /*
+    /* 
     charts = [
        {
-            title: 'Виконання бюджету',
+            title: ['Виконання бюджету', 'виконання бюджету'],
             legend: 'План',
             type: 'pie',
             axis: {
@@ -881,7 +912,40 @@ function submitChartData(mode, chartID) {
      /* */
     console.log(charts)
 
-    articleChartsInstances = buildCharts(chartHTMLTemplate, selectors, charts);    
+    articleChartsInstances = buildCharts(chartHTMLTemplate, chartSelectors, charts);    
+}
+
+function submitArticleData() {
+    // editor.getData()
+    function element(selector) {
+        return document.querySelector(selector)
+    }
+
+    editor.updateSourceElement();
+
+    if (isValidationEnabled == true && handleErrorDisplaying(doFieldsValidation(elementsForArticlesValidation, rules), '#article_errors')) {
+        return false
+    }
+
+    let formData = new FormData();
+    formData.append('report_id', element('#report_id').value)
+    formData.append('article_name', element('#article_name').value)
+    formData.append('article_text', element('#article_text').value)
+    formData.append('additional_file', 
+                    element('#additional_file').files[0] == undefined ? null : element('#additional_file').files[0])
+    formData.append('charts', JSON.stringify(charts))
+
+    let options = {
+        headers: {'Content-Type': 'multipart/form-data'}
+    }
+
+    axios.post('/articles/create', formData, options)
+    .then(function (response) {
+        console.log(response)
+    })
+    .catch(function (errors) {
+        console.log(errors)
+    })
 }
 
 document.querySelector('#submit_chart_data').onclick = () => {
@@ -892,8 +956,13 @@ document.querySelector('#submit_edited_chart_data').onclick = () => {
     submitChartData('edit', document.querySelector('#edit_chart_id').value);
 }
 
-
 document.querySelector('#debug').onclick = () => {
 
+}
+
+/* Submiting article */
+document.querySelector('#submit_article_data').onclick = (event) => {
+    event.preventDefault()
+    submitArticleData();
 }
 

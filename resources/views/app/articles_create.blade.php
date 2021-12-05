@@ -22,30 +22,33 @@
         </ol>
     </nav>
     <div class="col-9 p-4">
+        <ul id="article_errors" hidden class="alert alert-danger ps-5">
+
+        </ul>
         <form id="article_form" action="{{ route('create_article') }}" method="POST" class="mb-5">
             @csrf
             <div class="row mb-4">
                 <div class="col-3">
-                    <select class="form-select" aria-label="form-select" name="report_year">
+                    <select class="form-select" aria-label="form-select" name="report_id" id="report_id">
                         <option selected value="">Рік звіту</option>
                         @foreach ($reports as $report)
-                            <option {{ isset($current_report_id) && $current_report_id == $report['id'] ? 'selected' : '' }} value="{{ $report['year'] }}"> 
+                            <option {{ isset($current_report_id) && $current_report_id == $report['id'] ? 'selected' : '' }} value="{{ $report['id'] }}"> 
                                 {{ $report['year'] }} 
                             </option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-9">
-                    <input class="form-control" type="text" placeholder="Назва статті" aria-label="article-name" name="article_name">
+                    <input class="form-control" type="text" placeholder="Назва статті" aria-label="article-name" name="article_name" id="article_name">
                 </div>
             </div>           
 
-            <textarea id="editor" name="article_text" placeholder="Текст статті"></textarea>
+            <textarea id="article_text" name="article_text" placeholder="Текст статті"></textarea>
 
             <div class="row mb-4">
                 <div class="col-6 pt-3">
-                    <label for="additional_files" class="form-label">Додатковий файл статті</label>
-                    <input class="form-control" type="file" id="additional_files" name="additional_files">
+                    <label for="additional_file" class="form-label">Додатковий файл статті</label>
+                    <input class="form-control" type="file" id="additional_file" name="additional_files">
                 </div>
                 <div class="col-4 pt-5 text-align-right">
                     <!-- Button trigger modal -->
@@ -54,7 +57,7 @@
                     </button>
                 </div>
                 <div class="col-2 pt-5">
-                    <button type="submit" class="btn btn-primary col-12"> Зберегти </button>
+                    <button type="submit" class="btn btn-primary col-12" id="submit_article_data"> Зберегти </button>
                 </div>
             </div>
         </form> 
@@ -225,8 +228,10 @@
 </div>
 
 <script>
-    ClassicEditor
-    .create( document.querySelector( '#editor' ), {
+let editor;
+
+ClassicEditor
+    .create( document.querySelector( '#article_text' ), {
         toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote' ],
         heading: {
             options: [
@@ -236,6 +241,12 @@
             ]
         }
     })
+    .then( newEditor => {
+        editor = newEditor;
+    })
+    .catch( error => {
+        console.error( error );
+    });
 </script>
 @endsection
 

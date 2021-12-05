@@ -19,7 +19,7 @@ class CreateChartsTable extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->unsignedInteger('number_in_list');
             $table->string('title',255);
-            $table->string('legend', 255);
+            $table->string('legend', 255)->nullable()->default(null);
             $table->enum('type', ['bar', 'horizontalBar', 'doughnut', 'pie', 'line'])->default('bar');
             $table->string('axis_x', 255)->nullable()->default(null);
             $table->string('axis_y', 255)->nullable()->default(null);
