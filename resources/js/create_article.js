@@ -147,7 +147,7 @@ let elementsForValidation = [
 function chartHTMLTemplate (chartArrayId) {
     return `
     <div class="col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder"> 
-        <div class="chart-menu-buttons-holder d-flex flex-column">
+        <div class="chart-menu-buttons-holder d-flex flex-column shadow p-2 rounded">
             <button class="btn btn-primary edit-chart-button mb-2" chart_array_id="${chartArrayId}">Редагувати</button>
             <button class="btn btn-danger remove-chart-button" chart_array_id="${chartArrayId}">Видалити</button>
         </div>
@@ -318,21 +318,12 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
         }
 
     function optimizeCanvasSize(canvas, chartData) {
-        let chartsDefaultHeight = {
-            more0less300: 120,
-            more300less370: 93,
-            more370less450: 80,
-            more450less580: 65,
-            more580less768: 65,
-            more768less1365: 55,
-            more1365: 55,
-        }
-
+        console.log('optimized')
         function optimizeCanvasHeight(chartHeight, multiplier) {
             if (chartData.type === 'pie' ||
                 chartData.type === 'doughnut') {
-                canvas.width = '100';
-                canvas.height = (chartHeight + chartData.dataset.length * multiplier).toString();
+                canvas.width = '120';
+                canvas.height = (chartHeight + chartData.dataset.length * 0.5 * multiplier).toString();
             } else {
                 //if chart has additional strings to their title, height of canvas will be increased
                 if (typeof chartData.title === 'object') {
@@ -344,7 +335,15 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                 }
             }
         }
-
+        let chartsDefaultHeight = {
+            more0less300: 55,
+            more300less370: 55,
+            more370less450: 55,
+            more450less580: 55,
+            more580less768: 55,
+            more768less1365: 55,
+            more1365: 55,
+        }
         if (window.innerWidth > 0 && window.innerWidth <= 300) {
             optimizeCanvasHeight(chartsDefaultHeight.more0less300, 4);
         }
@@ -573,32 +572,6 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
         chartCanvases = document.querySelectorAll(selectors.chart),
         articleChartsInstances = [];
 
-    if (chartCanvases.length <= chartsArray.length) {
-        /*
-            Building a chart according to amount of canvases (chart holders)
-        */
-        chartCanvases.forEach((canvas, index) => {
-            let
-                currentChartData = chartsArray[index],
-                chart = new ChartPrototype;
-            chart.type = currentChartData.type;
-            chart.data.datasets[0].label = currentChartData.label;
-            /*
-                optimizing canvas size depends on incoming data and other information,
-                before assigning it as a chart holder
-            */
-            optimizeCanvasSize(canvas, currentChartData);
-            /*
-                fills chart prototype with data according to it's structure
-            */
-            currentChartData.dataset.forEach((data) => {
-                chart.data.datasets[0].data.push(data.value); //[0,1,2,3,4,N,...,Nx]
-                chart.data.labels.push(data.label); //[label1,label2,label3,...,labelN]
-            })
-            proceedAdditionalOptionsToChart(chart, currentChartData);
-            articleChartsInstances.push(new Chart(canvas, chart));
-        })
-    } else {
         /*
             Building a chart according to amount of datasets
         */
@@ -612,7 +585,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                 optimizing canvas size depends on incoming data and other information,
                 before assigning it as a chart holder
             */
-            // optimizeCanvasSize(canvas, currentChartData);
+            optimizeCanvasSize(canvas, currentChartData);
             /*
                 fills chart prototype with data according to it's structure
             */
@@ -623,7 +596,6 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
             proceedAdditionalOptionsToChart(chart, currentChartData);
             articleChartsInstances.push(new Chart(canvas, chart));
         })
-    }
 
     //assign to chart keys some actions (edit, remove, etc)
     if (articleChartsInstances.length > 0) {
@@ -843,33 +815,33 @@ function submitChartData(mode, chartID) {
             break;
     }
 
-    /* */
+    /*
     charts = [
-    //    {
-    //         title: 'Виконання бюджету',
-    //         legend: 'План',
-    //         type: 'horizontalBar',
-    //         axis: {
-    //             x: 'назва фонду',
-    //             y: 'грн'
-    //         },
-    //         suffix: 'грн',
-    //         isVerbalRoundingEnabled: 'false',
-    //         isVerbalRoundingEnabledForHoveredLabels: 'true',
-    //         dataset: [
-    //             {label: 'Загальний фонд', value: '1701400000'},
-    //             {label: 'Міжбюджетні трансферти', value: '492900000'},
-    //             {label: 'Спеціальний фонд', value: '134200000'},
-    //             {label: 'Бюджет розвитку', value: '33000000'},
-    //             {label: 'Міжбюджетні трансферти', value: '492900000'},
-    //             {label: 'Спеціальний фонд', value: '134200000'},
-    //             {label: 'Бюджет розвитку', value: '33000000'},
-    //             {label: 'Міжбюджетні трансферти', value: '492900000'},
-    //             {label: 'Спеціальний фонд', value: '134200000'},
-    //             {label: 'Бюджет розвитку', value: '33000000'}
+       {
+            title: 'Виконання бюджету',
+            legend: 'План',
+            type: 'pie',
+            axis: {
+                x: 'назва фонду',
+                y: 'грн'
+            },
+            suffix: 'грн',
+            isVerbalRoundingEnabled: 'false',
+            isVerbalRoundingEnabledForHoveredLabels: 'true',
+            dataset: [
+                {label: 'Загальний фонд', value: '1701400000'},
+                {label: 'Міжбюджетні трансферти', value: '492900000'},
+                {label: 'Спеціальний фонд', value: '134200000'},
+                {label: 'Бюджет розвитку', value: '33000000'},
+                {label: 'Міжбюджетні трансферти', value: '492900000'},
+                {label: 'Спеціальний фонд', value: '134200000'},
+                {label: 'Бюджет розвитку', value: '33000000'},
+                {label: 'Міжбюджетні трансферти', value: '492900000'},
+                {label: 'Спеціальний фонд', value: '134200000'},
+                {label: 'Бюджет розвитку', value: '33000000'}
                 
-    //         ] 
-    //     },
+            ] 
+        },
         {
             title: 'Назва діаграми',
             legend: 'Додаткова назва діаграми',
@@ -886,24 +858,24 @@ function submitChartData(mode, chartID) {
                 {label: 'Назва діаграми 2', value: '321'},
             ] 
         },
-        // {
-        //     title: 'Виконання бюджету',
-        //     legend: 'План',
-        //     type: 'bar',
-        //     axis: {
-        //         x: 'назва фонду',
-        //         y: 'грн'
-        //     },
-        //     suffix: 'грн',
-        //     isVerbalRoundingEnabled: 'true',
-        //     isVerbalRoundingEnabledForHoveredLabels: 'true',
-        //     dataset: [
-        //         {label: 'Загальний фонд', value: '1701400000'},
-        //         {label: 'Міжбюджетні трансферти', value: '492900000'},
-        //         {label: 'Спеціальний фонд', value: '134200000'},
-        //         {label: 'Бюджет розвитку', value: '33000000'}
-        //     ] 
-        // }
+        {
+            title: 'Виконання бюджету',
+            legend: 'План',
+            type: 'bar',
+            axis: {
+                x: 'назва фонду',
+                y: 'грн'
+            },
+            suffix: 'грн',
+            isVerbalRoundingEnabled: 'true',
+            isVerbalRoundingEnabledForHoveredLabels: 'true',
+            dataset: [
+                {label: 'Загальний фонд', value: '1701400000'},
+                {label: 'Міжбюджетні трансферти', value: '492900000'},
+                {label: 'Спеціальний фонд', value: '134200000'},
+                {label: 'Бюджет розвитку', value: '33000000'}
+            ] 
+        }
     ]
 
      /* */
