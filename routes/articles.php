@@ -5,10 +5,8 @@ use App\Models\Report;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Articles;
 
-Route::get('/articles', function () {
-    $reports = Report::all();
-    return view('app.articles', ["reports" => $reports]);
-})->middleware('auth')->name('articles');
+Route::get('/articles', [Articles::class, 'show'])
+->middleware('auth')->name('articles');
 
 Route::get('/articles/create/{current_report_id?}', function ($current_report_id = null) {
 
@@ -17,3 +15,6 @@ Route::get('/articles/create/{current_report_id?}', function ($current_report_id
 
 Route::post('/articles/create', [Articles::class, 'create'])
 ->middleware('auth')->name('create_article');
+
+Route::post('/articles/remove/{id}', [Articles::class, 'remove'])
+->middleware('auth')->name('remove_article');

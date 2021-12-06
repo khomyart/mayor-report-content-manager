@@ -175,7 +175,7 @@ function chartHTMLTemplate (chartArrayId) {
             <button class="btn btn-primary edit-chart-button mb-2" chart_array_id="${chartArrayId}">Редагувати</button>
             <button class="btn btn-danger remove-chart-button" chart_array_id="${chartArrayId}">Видалити</button>
         </div>
-        <canvas class="chart"></canvas> 
+        <canvas class="__article_id___chart"></canvas> 
     </div>
     <hr class="mb-3"/>
     `
@@ -183,7 +183,7 @@ function chartHTMLTemplate (chartArrayId) {
 
 let chartSelectors = {
     chartContainer: '.charts-container',
-    chart: '.chart',
+    chart: '.__article_id___chart',
     editChartButton: '.edit-chart-button',
     removeChartButton: '.remove-chart-button'
 }
@@ -708,6 +708,12 @@ function clearCreateChartModal() {
             document.querySelector(`#${ID}`).value = '';
         }
     })
+
+    let datasetElements = document.querySelectorAll('.dataset_element');
+    datasetElements.forEach((elem) => {
+        elem.remove();
+    })
+
     currentChartDataset = 0;
     datasetContainer.innerHTML = '';
 
@@ -724,6 +730,12 @@ function clearEditChartModal() {
             document.querySelector(`#${ID}`).value = '';
         }
     })
+
+    let datasetElements = document.querySelectorAll('.dataset_element');
+    datasetElements.forEach((elem) => {
+        elem.remove();
+    })
+
     currentChartDataset = 0;
     editDatasetContainer.innerHTML = '';
 
@@ -807,6 +819,7 @@ function submitChartData(mode, chartID) {
     let chartInstance = {}
     switch (mode) {
         case 'create':
+            chartInstance = null;
             chartInstance = {
                 // numberInList: charts.length,
                 title: chartFields.chart_title,
@@ -826,6 +839,7 @@ function submitChartData(mode, chartID) {
             clearCreateChartModal();
             break;
         case 'edit':
+            chartInstance = null;
             chartInstance = {
                 // numberInList: charts.length,
                 title: chartFields.edit_chart_title,
@@ -927,10 +941,15 @@ function submitArticleData() {
         return false
     }
 
+    /* Replacer for article text '@@@' -> replaceWith variable value */
+    let articleText = element('#article_text').value
+    let replaceWith = '<div class="col-12 col-md-10 col-xxl-8 mb-4"><canvas class="__article_id___chart"></canvas></div>'
+    let re = /@@@/ig;
+
     let formData = new FormData();
     formData.append('report_id', element('#report_id').value)
     formData.append('article_name', element('#article_name').value)
-    formData.append('article_text', element('#article_text').value)
+    formData.append('article_text', articleText.replace(re, replaceWith))
     formData.append('additional_file', 
                     element('#additional_file').files[0] == undefined ? null : element('#additional_file').files[0])
     formData.append('charts', JSON.stringify(charts))

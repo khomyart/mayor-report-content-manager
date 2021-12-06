@@ -14,6 +14,22 @@ class Articles extends Controller
 {
     use Store;
 
+    public function show (Request $request) {
+        $reports = [];
+        $reportsInstances = Report::all();
+        
+        foreach ($reportsInstances as $key => $reportInstance) {
+            $reports[] = $reportInstance;
+            foreach ($reportInstance->articles as $key => $article) {
+                foreach($article->charts as $chart) {
+                    $chart->datasets;
+                }
+            }
+        }
+
+        return view('app.articles', ['reports' => $reports]);
+    }
+
     public function create (Request $request) {
         $validation_is_passed = true;
 
@@ -34,7 +50,8 @@ class Articles extends Controller
 
             $index = 0;
             foreach(json_decode($request->post('charts'), true) as $chart) {
-                $chart = Chart::create([
+
+                $chartInstance = Chart::create([
                     'article_id' => $createdArticle->id,
                     'number_in_list' => $index,
                     'title' => $chart['title'],
@@ -47,6 +64,16 @@ class Articles extends Controller
                     'is_verbal_rounding_enabled' => $chart['isVerbalRoundingEnabled'],
                     'is_verbal_rounding_enabled_for_hovered_labels' => $chart['isVerbalRoundingEnabledForHoveredLabels'],
                 ]);
+
+                if(count($chart['dataset']) > 0) {
+                    foreach($chart['dataset'] as $dataset) {
+                        ChartDataset::create([
+                            'chart_id' => $chartInstance -> id,
+                            'label' => $dataset['label'],
+                            'value' => $dataset['value']
+                        ]);
+                    }
+                }
 
                 $index++;
             }

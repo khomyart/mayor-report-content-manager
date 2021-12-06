@@ -2228,12 +2228,12 @@ var elementsForChartEditValidation = [{
 }];
 
 function chartHTMLTemplate(chartArrayId) {
-  return "\n    <div class=\"col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder\"> \n        <div class=\"chart-menu-buttons-holder d-flex flex-column shadow p-2 rounded\">\n            <button class=\"btn btn-primary edit-chart-button mb-2\" chart_array_id=\"".concat(chartArrayId, "\">\u0420\u0435\u0434\u0430\u0433\u0443\u0432\u0430\u0442\u0438</button>\n            <button class=\"btn btn-danger remove-chart-button\" chart_array_id=\"").concat(chartArrayId, "\">\u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438</button>\n        </div>\n        <canvas class=\"chart\"></canvas> \n    </div>\n    <hr class=\"mb-3\"/>\n    ");
+  return "\n    <div class=\"col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder\"> \n        <div class=\"chart-menu-buttons-holder d-flex flex-column shadow p-2 rounded\">\n            <button class=\"btn btn-primary edit-chart-button mb-2\" chart_array_id=\"".concat(chartArrayId, "\">\u0420\u0435\u0434\u0430\u0433\u0443\u0432\u0430\u0442\u0438</button>\n            <button class=\"btn btn-danger remove-chart-button\" chart_array_id=\"").concat(chartArrayId, "\">\u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438</button>\n        </div>\n        <canvas class=\"__article_id___chart\"></canvas> \n    </div>\n    <hr class=\"mb-3\"/>\n    ");
 }
 
 var chartSelectors = {
   chartContainer: '.charts-container',
-  chart: '.chart',
+  chart: '.__article_id___chart',
   editChartButton: '.edit-chart-button',
   removeChartButton: '.remove-chart-button'
 };
@@ -2759,6 +2759,10 @@ function clearCreateChartModal() {
       document.querySelector("#".concat(ID)).value = '';
     }
   });
+  var datasetElements = document.querySelectorAll('.dataset_element');
+  datasetElements.forEach(function (elem) {
+    elem.remove();
+  });
   currentChartDataset = 0;
   datasetContainer.innerHTML = '';
   var myModalEl = document.getElementById('diagramModal');
@@ -2773,6 +2777,10 @@ function clearEditChartModal() {
     } else {
       document.querySelector("#".concat(ID)).value = '';
     }
+  });
+  var datasetElements = document.querySelectorAll('.dataset_element');
+  datasetElements.forEach(function (elem) {
+    elem.remove();
   });
   currentChartDataset = 0;
   editDatasetContainer.innerHTML = '';
@@ -2862,6 +2870,7 @@ function submitChartData(mode, chartID) {
 
   switch (mode) {
     case 'create':
+      chartInstance = null;
       chartInstance = {
         // numberInList: charts.length,
         title: chartFields.chart_title,
@@ -2881,6 +2890,7 @@ function submitChartData(mode, chartID) {
       break;
 
     case 'edit':
+      chartInstance = null;
       chartInstance = {
         // numberInList: charts.length,
         title: chartFields.edit_chart_title,
@@ -2979,11 +2989,16 @@ function submitArticleData() {
   if (isValidationEnabled == true && handleErrorDisplaying(doFieldsValidation(elementsForArticlesValidation, rules), '#article_errors')) {
     return false;
   }
+  /* Replacer for article text '@@@' -> replaceWith variable value */
 
+
+  var articleText = element('#article_text').value;
+  var replaceWith = '<div class="col-12 col-md-10 col-xxl-8 mb-4"><canvas class="__article_id___chart"></canvas></div>';
+  var re = /@@@/ig;
   var formData = new FormData();
   formData.append('report_id', element('#report_id').value);
   formData.append('article_name', element('#article_name').value);
-  formData.append('article_text', element('#article_text').value);
+  formData.append('article_text', articleText.replace(re, replaceWith));
   formData.append('additional_file', element('#additional_file').files[0] == undefined ? null : element('#additional_file').files[0]);
   formData.append('charts', JSON.stringify(charts));
   var options = {

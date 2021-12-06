@@ -232,7 +232,7 @@ let editor;
 
 ClassicEditor
     .create( document.querySelector( '#article_text' ), {
-        toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote' ],
+        toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
         heading: {
             options: [
                 { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
@@ -243,10 +243,12 @@ ClassicEditor
     })
     .then( newEditor => {
         editor = newEditor;
+        console.log(Array.from( editor.ui.componentFactory.names()))
     })
     .catch( error => {
         console.error( error );
     });
+
 </script>
 @endsection
 
