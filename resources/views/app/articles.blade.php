@@ -31,10 +31,45 @@
                 <hr class="col-5">
             </div>
             <div class="collapse" id="articles{{ $report["id"] }}">
-                <a href="{{ route('create_article_form', ['current_report_id' => $report['id']]) }}" class="btn btn-primary mb-3">
-                    Створити статтю
-                </a>
-                <img src="{{ Storage::url($report["img_src"]) }}" alt="">
+                <div>
+                    <a href="{{ route('create_article_form', ['current_report_id' => $report['id']]) }}" class="btn btn-primary mb-3">
+                        Створити статтю
+                    </a>
+                </div>
+                <div>
+                    @foreach ($report["articles"] as $article)
+                    <div class="mb-4 p-3 article-element d-flex flex-row justify-content-between">
+                        <div class="d-flex align-items-center">
+                            {{ $article["name"] }}
+                        </div>
+                        <div>
+                            <a class="btn btn-primary" href="{{'/article/update/'.$article['id']}}"> Редагувати </a>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="{{'#articleRemovingModal'.$article['id']}}">
+                                Видалити
+                            </button>
+                            
+                            <div class="modal fade" id="{{'articleRemovingModal'.$article['id']}}" tabindex="-1" aria-labelledby="{{'articleRemovingModalLabel'.$article['id']}}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title" id="{{'articleRemovingModalLabel'.$article['id']}}">Видалення статті</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Ви дійсно бажаєте видалити статтю: "{{ $article['name'] }}"?
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відмінити</button>
+                                    <a class="btn btn-danger" href="{{route('remove_article', $article['id'])}}"> Видалити </a>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                {{-- <img src="{{ Storage::url($report["img_src"]) }}" alt=""> --}}
             </div>
         </div>
         @endforeach

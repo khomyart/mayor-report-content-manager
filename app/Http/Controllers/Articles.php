@@ -28,6 +28,7 @@ class Articles extends Controller
         }
 
         return view('app.articles', ['reports' => $reports]);
+        // return $reports;
     }
 
     public function create (Request $request) {
@@ -82,11 +83,62 @@ class Articles extends Controller
         }
     }
 
-    public function update (Request $request) {
-        
+    public function update (Request $request, $id) {
+        $validation_is_passed = true;
+        $currentArticle = Article::find($id);
+
+        if(!empty($currentArticle) && $validation_is_passed) {
+            $currentArticle->name = $request->post('article_name');
+            $currentArticle->content = $request->post('article_text');
+
+            if ($request->post('is_file_deleted') == "true") {
+                $currentArticle->path_to_additional_content = null;
+            } 
+
+            if ($request->hasFile('additional_file')) {
+                $currentArticle->path_to_additional_content = $this->saveFile($request->file('additional_file'));
+            }
+                
+            foreach($currentArticle->charts as $chart) {
+                $chart->delete();
+            }
+
+            $index = 0;
+            foreach(json_decode($request->post('charts'), true) as $chart) {
+                $chartInstance = Chart::create([
+                    'article_id' => $currentArticle->id,
+                    'number_in_list' => $index,
+                    'title' => $chart['title'],
+                    'legend' => $chart['legend'],
+                    'type' => $chart['type'],
+                    'axis_x' => $chart['axis']['x'],
+                    'axis_y' => $chart['axis']['y'],
+                    'suffix' => $chart['suffix'],
+                    // 'is_data_labels_shown' => ?,
+                    'is_verbal_rounding_enabled' => $chart['isVerbalRoundingEnabled'],
+                    'is_verbal_rounding_enabled_for_hovered_labels' => $chart['isVerbalRoundingEnabledForHoveredLabels'],
+                ]);
+
+                if(count($chart['dataset']) > 0) {
+                    foreach($chart['dataset'] as $dataset) {
+                        ChartDataset::create([
+                            'chart_id' => $chartInstance -> id,
+                            'label' => $dataset['label'],
+                            'value' => $dataset['value']
+                        ]);
+                    }
+                }
+
+                $index++;
+            }
+            $currentArticle->save();
+            return $currentArticle;
+        }
     }
 
-    public function delete (Request $request) {
-        
+    public function delete (Request $request, $id) {
+        $article = Article::find($id);
+        $article->path_to_additional_content != null ?:  Storage::delete($article->path_to_additional_content);
+        return back();
     }
 }

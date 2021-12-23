@@ -38,4 +38,10 @@
     background-color: white;
 }
 
+.article-element {
+    background-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    box-shadow: 8px 10px 8px 0px rgba(34, 60, 80, 0.2);
+}
+
 

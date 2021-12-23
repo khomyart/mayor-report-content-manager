@@ -1,6 +1,7 @@
 {
     "/js/app.js": "/js/app.js",
     "/js/create_article.js": "/js/create_article.js",
+    "/js/update_article.js": "/js/update_article.js",
     "/css/articles.css": "/css/articles.css",
     "/css/reports.css": "/css/reports.css",
     "/css/control_panel.css": "/css/control_panel.css",
