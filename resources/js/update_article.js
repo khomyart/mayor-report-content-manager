@@ -963,6 +963,7 @@ function submitArticleData() {
     axios.post(`/article/update/${incomingArticle.id}`, formData, options)
     .then(function (response) {
         console.log(response)
+        document.location.reload();
     })
     .catch(function (errors) {
         console.log(errors)
@@ -1002,18 +1003,19 @@ function initIncomingData(incomingArticle) {
     }
    
     charts = incomingArticle.charts;
-    charts.map((el)=>{
-        el.dataset = el.datasets
-        el.axis = {
-            x: el.axis_x,
-            y: el.axis_y
-        }
-        el.isVerbalRoundingEnabled = el.is_verbal_rounding_enabled;
-        el.isVerbalRoundingEnabledForHoveredLabels = el.is_verbal_rounding_enabled_for_hovered_labels;
+    if (charts.length > 0) {
+        charts.map((el)=>{
+            el.dataset = el.datasets
+            el.axis = {
+                x: el.axis_x,
+                y: el.axis_y
+            }
+            el.isVerbalRoundingEnabled = el.is_verbal_rounding_enabled;
+            el.isVerbalRoundingEnabledForHoveredLabels = el.is_verbal_rounding_enabled_for_hovered_labels;
 
-        // delete el.datasets
-        return el
-    })
+            return el
+        })
+    }
 
     let replaceWith = `@@@`;
     let re = chartSpawnerPattern;

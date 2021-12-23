@@ -16,19 +16,20 @@ class Articles extends Controller
 
     public function show (Request $request) {
         $reports = [];
-        $reportsInstances = Report::all();
-        
-        foreach ($reportsInstances as $key => $reportInstance) {
+        $reportsInstances = Report::where('id', '>', 0)->orderByDesc("year")->get()->toArray();
+
+        foreach ($reportsInstances as $reportKey => $reportInstance) {
             $reports[] = $reportInstance;
-            foreach ($reportInstance->articles as $key => $article) {
-                foreach($article->charts as $chart) {
-                    $chart->datasets;
-                }
-            }
+            $reports[$reportKey]["articles"] = Article::where('report_id', $reportInstance["id"])->orderBy("number_in_list")->get()->toArray();
+            // foreach($reports[$reportKey]["articles"] as $articleKey => $article) {
+            //     $reports[$reportKey]["articles"][$articleKey]["charts"] = Chart::where('article_id', $article["id"])->orderBy("number_in_list")->get()->toArray();
+            //     foreach($reports[$reportKey]["articles"][$articleKey]["charts"] as $chartKey => $chart) {
+            //         $reports[$reportKey]["articles"][$articleKey]["charts"][$chartKey]["datasets"] = ChartDataset::where('chart_id', $chart["id"])->get()->toArray();
+            //     }
+            // }
         }
 
         return view('app.articles', ['reports' => $reports]);
-        // return $reports;
     }
 
     public function create (Request $request) {
@@ -88,10 +89,12 @@ class Articles extends Controller
         $currentArticle = Article::find($id);
 
         if(!empty($currentArticle) && $validation_is_passed) {
+            $currentArticle->report_id = $request->post('report_id');
             $currentArticle->name = $request->post('article_name');
             $currentArticle->content = $request->post('article_text');
 
             if ($request->post('is_file_deleted') == "true") {
+                $this->deleteFile($currentArticle->path_to_additional_content);
                 $currentArticle->path_to_additional_content = null;
             } 
 
@@ -131,14 +134,16 @@ class Articles extends Controller
 
                 $index++;
             }
+
             $currentArticle->save();
-            return $currentArticle;
+            return 'OK';
         }
     }
 
     public function delete (Request $request, $id) {
         $article = Article::find($id);
-        $article->path_to_additional_content != null ?:  Storage::delete($article->path_to_additional_content);
-        return back();
+        $article->path_to_additional_content != null ?: $this->deleteFile($article->path_to_additional_content);
+        $article->delete();
+        return redirect()->route('articles');
     }
 }

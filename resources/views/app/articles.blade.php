@@ -30,10 +30,10 @@
                 </span>
                 <hr class="col-5">
             </div>
-            <div class="collapse" id="articles{{ $report["id"] }}">
+            <div class="collapse show" id="articles{{ $report["id"] }}">
                 <div>
                     <a href="{{ route('create_article_form', ['current_report_id' => $report['id']]) }}" class="btn btn-primary mb-3">
-                        Створити статтю
+                        Створити статтю ({{ $report['year'] }})
                     </a>
                 </div>
                 <div>
@@ -43,6 +43,8 @@
                             {{ $article["name"] }}
                         </div>
                         <div>
+                            <a class="btn btn-primary text-align-center" href="{{ '' }}">+</a>
+                            <a class="btn btn-primary" href="{{ '' }}">-</a>
                             <a class="btn btn-primary" href="{{'/article/update/'.$article['id']}}"> Редагувати </a>
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="{{'#articleRemovingModal'.$article['id']}}">
                                 Видалити

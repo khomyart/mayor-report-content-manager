@@ -1,9 +1,12 @@
 <?php
+use App\Http\Controllers\Articles;
 
 use App\Models\Article;
 use App\Models\Report;
+use App\Models\Chart;
+use App\Models\ChartDataset;
+
 use Illuminate\Http\Request;
-use App\Http\Controllers\Articles;
 
 Route::get('/articles', [Articles::class, 'show'])
 ->middleware('auth')->name('articles');
@@ -19,10 +22,11 @@ Route::get('/articles/remove/{id}', [Articles::class, 'delete'])
 ->whereNumber('id')->middleware('auth')->name('remove_article');
 
 Route::get('/article/update/{id}', function ($id) {
-    $article = Article::find($id);
-    
-    foreach ($article->charts as $chart) {
-        $chart->datasets;
+   
+    $article = Article::find($id)->toArray();
+    $article["charts"] = Chart::where('article_id', $article["id"])->orderBy("number_in_list")->get()->toArray();
+    foreach($article["charts"] as $chartKey => $chart) {
+        $article["charts"][$chartKey]["datasets"] = ChartDataset::where('chart_id', $chart["id"])->get()->toArray();
     }
 
     return view('app.articles_update', ['article' => $article, 'reports' => Report::all()]);

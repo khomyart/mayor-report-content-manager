@@ -15,11 +15,38 @@
 
 
 <div class="articles container-fluid p-0 d-flex flex-column align-items-center col-12" style="height: 100%">
-    <nav class="button-holder col-12 d-flex p-3">
+    <nav class="button-holder col-12 d-flex justify-content-between p-3">
         <ol class="breadcrumb p-0 m-0">
-            <li class="breadcrumb-item"><a href="{{ route('articles') }}">Статті</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Редагувати статтю</li>
+            <li class="breadcrumb-item d-flex align-items-center"><a href="{{ route('articles') }}">Статті</a></li>
+            <li class="breadcrumb-item d-flex align-items-center active" aria-current="page">Редагувати статтю</li>
         </ol>
+        <div>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="{{'#articleRemovingModal'.$article['id']}}">
+                Видалити
+            </button>
+            
+            <div class="modal fade" id="{{'articleRemovingModal'.$article['id']}}" tabindex="-1" aria-labelledby="{{'articleRemovingModalLabel'.$article['id']}}" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="{{'articleRemovingModalLabel'.$article['id']}}">Видалення статті</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Ви дійсно бажаєте видалити статтю: "{{ $article['name'] }}"?
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відмінити</button>
+                    <a class="btn btn-danger" href="{{route('remove_article', $article['id'])}}"> Видалити </a>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <a href="{{ route('create_article_form', ['current_report_id' => $article["report_id"]]) }}" class="btn btn-primary">
+                Створити статтю
+            </a>
+        </div>
     </nav>
     <div class="col-9 p-4">
         <ul id="article_errors" hidden class="alert alert-danger ps-5">
@@ -70,7 +97,7 @@
                     </button>
                 </div>
                 <div class="col-2 pt-5">
-                    <button type="submit" class="btn btn-primary col-12" id="submit_article_data"> Зберегти </button>
+                    <button type="submit" class="btn btn-primary col-12" id="submit_article_data"> Зберегти зміни</button>
                 </div>
             </div>
         </form> 
@@ -242,7 +269,7 @@
 
 <script>
 let editor;
-let incomingArticle = {!! $article !!}
+let incomingArticle = {!! json_encode($article) !!}
 
 ClassicEditor
     .create( document.querySelector( '#article_text' ), {

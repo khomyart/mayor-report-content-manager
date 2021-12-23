@@ -14,4 +14,8 @@ trait Store {
         $path = Storage::putFile('public', $file_from_request);
         return $path;
     }
+
+    public function deleteFile($file_name) {
+        Storage::delete($file_name);
+    }
 }   
