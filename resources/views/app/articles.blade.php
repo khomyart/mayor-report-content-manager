@@ -43,8 +43,13 @@
                             {{ $article["name"] }}
                         </div>
                         <div>
-                            <a class="btn btn-primary text-align-center" href="{{ '' }}">+</a>
-                            <a class="btn btn-primary" href="{{ '' }}">-</a>
+                            @if (!$loop->first)
+                                <a class="btn btn-primary text-align-center" href="{{ route('move_article', ['id' => $article["id"], 'direction' => 'down']) }}">+</a>
+                            @endif
+                            @if (!$loop->last)
+                                <a class="btn btn-primary text-align-center" href="{{ route('move_article', ['id' => $article["id"], 'direction' => 'up']) }}">-</a>
+                            @endif
+                        
                             <a class="btn btn-primary" href="{{'/article/update/'.$article['id']}}"> Редагувати </a>
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="{{'#articleRemovingModal'.$article['id']}}">
                                 Видалити

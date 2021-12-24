@@ -7,6 +7,7 @@ use App\Models\Report;
 use App\Models\Article;
 use App\Models\Chart;
 use App\Models\ChartDataset;
+use Illuminate\Support\Facades\DB;
 
 use App\Traits\Store;
 
@@ -21,12 +22,6 @@ class Articles extends Controller
         foreach ($reportsInstances as $reportKey => $reportInstance) {
             $reports[] = $reportInstance;
             $reports[$reportKey]["articles"] = Article::where('report_id', $reportInstance["id"])->orderBy("number_in_list")->get()->toArray();
-            // foreach($reports[$reportKey]["articles"] as $articleKey => $article) {
-            //     $reports[$reportKey]["articles"][$articleKey]["charts"] = Chart::where('article_id', $article["id"])->orderBy("number_in_list")->get()->toArray();
-            //     foreach($reports[$reportKey]["articles"][$articleKey]["charts"] as $chartKey => $chart) {
-            //         $reports[$reportKey]["articles"][$articleKey]["charts"][$chartKey]["datasets"] = ChartDataset::where('chart_id', $chart["id"])->get()->toArray();
-            //     }
-            // }
         }
 
         return view('app.articles', ['reports' => $reports]);
@@ -39,6 +34,8 @@ class Articles extends Controller
         $articles = $report->articles;
 
         if(Report::find($request->post('report_id')) && $validation_is_passed) {
+            $lastNumberInList = DB::table('articles')->orderByDesc('number_in_list')->first();
+            $lastNumberInList = $lastNumberInList->number_in_list;
             $createdArticle = Article::create(
                 [
                     'report_id' => $request->post('report_id'),
@@ -46,7 +43,8 @@ class Articles extends Controller
                     'content' => $request->post('article_text'),
                     'path_to_additional_content' => 
                         $request->hasFile('additional_file') ? $this->saveFile($request->file('additional_file')) : null,
-                    'number_in_list' => count($articles),
+                    // 'number_in_list' => count($articles),
+                    'number_in_list' => $lastNumberInList + 1,
                 ]
             );
 
@@ -145,5 +143,32 @@ class Articles extends Controller
         $article->path_to_additional_content != null ?: $this->deleteFile($article->path_to_additional_content);
         $article->delete();
         return redirect()->route('articles');
+    }
+
+    public function move (Request $request, $id, $direction) {
+        $currentArticle = Article::find($id);
+        $currentArticleNumberInList = $currentArticle->number_in_list;
+        $closestAboveArticle = Article::where('number_in_list', '>', $currentArticle->number_in_list)->orderBy('number_in_list')->first();
+        $closestBelowArticle = Article::where('number_in_list', '<', $currentArticle->number_in_list)->orderByDesc('number_in_list')->first();
+
+        if ($direction == "up") {
+            if ($closestAboveArticle != null) {
+                $currentArticle->number_in_list = $closestAboveArticle->number_in_list;
+                $currentArticle->save();
+                $closestAboveArticle->number_in_list = $currentArticleNumberInList;
+                $closestAboveArticle->save();
+            }
+        }
+
+        if ($direction == "down") {
+            if ($closestBelowArticle != null) {
+                $currentArticle->number_in_list = $closestBelowArticle->number_in_list;
+                $currentArticle->save();
+                $closestBelowArticle->number_in_list = $currentArticleNumberInList;
+                $closestBelowArticle->save();
+            }
+        }
+
+        return back();
     }
 }

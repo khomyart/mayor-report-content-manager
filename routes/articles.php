@@ -33,3 +33,6 @@ Route::get('/article/update/{id}', function ($id) {
 })->whereNumber('id')->middleware('auth')->name('update_article');
 
 Route::post('/article/update/{id}', [Articles::class, 'update']);
+
+Route::get('/article/move/{id}/{direction}', [Articles::class, 'move'])
+->name('move_article');
