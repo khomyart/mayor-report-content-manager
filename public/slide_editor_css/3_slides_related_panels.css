@@ -1,0 +1,302 @@
+:root {
+    --slidesPanelWidth: 250px;
+    --templatesPanelWidth: 250px;
+    --imagesPanelWidth: 250px;
+}
+
+/* SLIDE PANEL */
+.slides-panel-holder {
+    display: none;
+    
+    min-width: var(--slidesPanelWidth);
+    max-width: var(--slidesPanelWidth);
+    
+    height: 100%;
+    background-color: rgb(219, 219, 219);
+    align-items: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow-y: auto;
+    /* padding: 5px 0px; */
+}
+
+.slides-panel-buttons {
+    height: auto;
+    width: 100%;
+    background-color: rgb(219, 219, 219);
+    padding: 14px 8px 0px 8px;
+    display: flex;
+    justify-content: space-evenly;
+    z-index: 999;
+}
+
+.slides-panel-button {
+    width: 80px;
+}
+
+.slides-panel {
+    display: flex;
+    max-width: 100%;
+    margin: 10px 0px;
+    height: 100%;
+    background-color: rgb(219, 219, 219);
+    align-items: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.slides-related-panels-buttons-holder {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 1.5%;
+    transform: translate(0, -50%);
+}
+
+
+.slides-related-panels-button {
+    background-color: rgb(127, 122, 122);
+    border-radius: 3px;
+    color: white;
+    font-size: 1.5rem;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    transition: all 0.2s ease-in-out;
+    margin-right: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.slides-related-panels-button:hover {
+    background-color: rgb(158, 57, 119);
+}
+
+.slides-related-panels-button-activated {
+    background-color: rgb(158, 57, 119);
+}
+
+.slide {
+    padding: 12px 15px 0px;
+    max-width: 90%;
+    min-width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+.slide:hover {
+    background-color: rgb(180, 180, 180);
+}
+
+.selected-slide {
+    background-color: rgb(180, 180, 180);
+    border-radius: 3px;
+    cursor: default;
+}
+
+.main-slide {
+    border-radius: 3px;
+    border: 3px solid rgba(99, 32, 93, 0.623);
+}
+
+.slide-content {
+    width: calc(var(--slidesPanelWidth) - 50px);
+    height: calc(calc(var(--slidesPanelWidth) - 50px) / 1.4);
+    background-color: rgb(255, 255, 255);
+    margin-bottom: 10px;
+    border-radius: 3px;
+    border: 1px solid black;
+    position: relative;
+    overflow: hidden;
+}
+
+.slide-control-buttons {
+    width: calc(var(--slidesPanelWidth) - 50px);
+    margin-bottom: 9px;
+    background-color: white;
+    height: fit-content;
+    display: flex;
+    justify-content: space-between;
+    padding: 7px;
+    border-radius: 2px;
+    border: 1px solid black;
+}
+
+.slide-control-button {
+    width: 20%;
+    padding: 2px 0;
+    border: 1px solid black;
+    border-radius: 2px;
+    background-color: rgb(126, 126, 126);
+    color: white;
+}
+
+.slide-name {
+    font-size: 1.3rem;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    width: 95%;
+    display: inline-block;
+    word-break: break-word;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* TEMPLATE PANEL */
+.templates-panel-holder {
+    display: none;
+
+    min-width: var(--templatesPanelWidth);
+    max-width: var(--templatesPanelWidth);
+
+    height: 100%;
+    background-color: rgb(219, 219, 219);
+    align-items: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.templates-panel {
+    display: flex;
+    max-width: 100%;
+    margin: 10px 0px;
+    height: 100%;
+    background-color: rgb(219, 219, 219);
+    align-items: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.template {
+    padding: 12px 15px 0px;
+    max-width: 90%;
+    min-width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+.template:hover {
+    background-color: rgb(180, 180, 180);
+}
+
+.template-content {
+    width: calc(var(--templatesPanelWidth) - 50px);
+    height: calc(calc(var(--templatesPanelWidth) - 50px) / 1.4);
+    background-color: rgb(255, 255, 255);
+    margin-bottom: 10px;
+    border-radius: 3px;
+    border: 1px solid black;
+    position: relative;
+    overflow: hidden;
+}
+
+.template-name {
+    font-size: 1.3rem;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    width: 95%;
+    display: inline-block;
+    word-break: break-word;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* IMAGE PANEL */
+.images-panel-holder {
+    display: none;
+
+    min-width: var(--imagesPanelWidth);
+    max-width: var(--imagesPanelWidth);
+
+    height: 100%;
+    background-color: rgb(219, 219, 219);
+    align-items: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.images-panel-buttons {
+    height: auto;
+    width: 100%;
+    background-color: rgb(219, 219, 219);
+    padding: 14px 8px 0px 8px;
+    display: flex;
+    justify-content: space-evenly;
+    z-index: 999;
+}
+
+.images-panel {
+    display: flex;
+    max-width: 100%;
+    margin: 10px 0px;
+    height: 100%;
+    background-color: rgb(219, 219, 219);
+    align-items: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.image {
+    padding: 12px 15px 0px;
+    max-width: 90%;
+    min-width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+    cursor: default;
+}
+
+.image:hover {
+    background-color: rgb(180, 180, 180);
+}
+
+.image-content {
+    width: calc(var(--templatesPanelWidth) - 50px);
+    height: auto;
+    background-color: rgb(255, 255, 255);
+    margin-bottom: 10px;
+    border-radius: 3px;
+    border: 1px solid black;
+    position: relative;
+    overflow: hidden;
+}
+
+.image-control-buttons {
+    width: calc(var(--slidesPanelWidth) - 50px);
+    margin-bottom: 9px;
+    background-color: white;
+    height: fit-content;
+    display: flex;
+    justify-content: space-between;
+    padding: 7px;
+    border-radius: 2px;
+    border: 1px solid black;
+}
+
+.image-control-button {
+    width: 45%;
+    padding: 2px 0;
+    border: 1px solid black;
+    border-radius: 2px;
+    background-color: rgb(126, 126, 126);
+    color: white;
+}
+
+.image-name {
+    font-size: 1.3rem;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    width: 95%;
+    display: inline-block;
+    word-break: break-word;
+    text-align: center;
+    margin-bottom: 10px;
+}

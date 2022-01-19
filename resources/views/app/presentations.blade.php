@@ -111,7 +111,7 @@
                                 <a class="btn btn-primary text-align-center" href="{{ route('move_presentation', ['id' => $presentation["id"], 'direction' => 'up']) }}">-</a>
                             @endif
                         
-                            <a class="btn btn-warning">
+                            <a class="btn btn-primary" href="{{ route('show_slides', $presentation["id"]) }}">
                                 Слайди
                             </a>
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="{{'#presentationUpdateingModal'.$presentation['id']}}">

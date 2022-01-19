@@ -18,7 +18,7 @@ class CreateSlidesTable extends Migration
             $table->foreignId('presentation_id')->references('id')->on('presentations')
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->string('name', 255);
-            $table->string('content')->nullable();
+            $table->mediumText('content')->nullable();
             $table->timestamps();
         });
     }
