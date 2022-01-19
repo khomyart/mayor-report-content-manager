@@ -32,4 +32,4 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 
 require __DIR__.'/reports.php';
 require __DIR__.'/articles.php';
-require __DIR__.'/presentation.php';
+require __DIR__.'/presentations.php';

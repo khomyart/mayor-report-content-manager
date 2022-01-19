@@ -148,8 +148,12 @@ class Articles extends Controller
     public function move (Request $request, $id, $direction) {
         $currentArticle = Article::find($id);
         $currentArticleNumberInList = $currentArticle->number_in_list;
-        $closestAboveArticle = Article::where('number_in_list', '>', $currentArticle->number_in_list)->orderBy('number_in_list')->first();
-        $closestBelowArticle = Article::where('number_in_list', '<', $currentArticle->number_in_list)->orderByDesc('number_in_list')->first();
+
+        $closestAboveArticle = Article::where('number_in_list', '>', $currentArticle->number_in_list)
+        ->where('report_id', $currentArticle->report_id)->orderBy('number_in_list')->first();
+        
+        $closestBelowArticle = Article::where('number_in_list', '<', $currentArticle->number_in_list)
+        ->where('report_id', $currentArticle->report_id)->orderByDesc('number_in_list')->first();
 
         if ($direction == "up") {
             if ($closestAboveArticle != null) {

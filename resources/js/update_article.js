@@ -86,7 +86,6 @@ let rules = {
     }
 }
 
-
 let elementsForArticlesValidation = [
     {
         selector: '#report_id', 
