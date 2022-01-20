@@ -44,7 +44,7 @@ let CONFIG = {
       },
     },
     itemTemplates: {
-      imageSrcTemplate: 'http://127.0.0.1:5500/icons/image_placeholder.png',
+      imageSrcTemplate: null,
       block: {
         get: () => {    
           let itemTemplate = document.createElement('div');
@@ -148,6 +148,10 @@ let CONFIG = {
           itemTemplate.setAttribute('newly-created', 'true');
 
           itemTemplate.src = CONFIG.UI.itemTemplates.imageSrcTemplate;
+          setTimeout(()=>{
+            itemTemplate.setAttribute('heightMultiplier', 'auto');
+            itemTemplate.style.height = 'auto';
+          }, 10);
 
           return itemTemplate;
         },

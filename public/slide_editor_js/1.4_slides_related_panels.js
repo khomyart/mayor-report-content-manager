@@ -56,7 +56,6 @@ const srpConfig = {
 
 const slidesConfig = {
     getList: function(isRebuildNeeded = false) {
-        //use this if statemant with rebuild as a callback
         if (isRebuildNeeded) {
             this.rebuildSlidesList(this.slideList)
             this.select(this.selectedSlideNumber, false);
@@ -64,26 +63,6 @@ const slidesConfig = {
         return this.slideList;
     },
     slideList: [
-        // {
-        //     name: '123',
-        //     content: '<div class="block-elem-template field-item" i-name="block" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 60px; height: 60px; border-width: 0px; border-radius: 0px; transform: translate(0%, 0%); font-size: 11.94px; padding: 1px; z-index: 101; left: 3.8526%; top: 3.74707%; display: block; transition: all 0s ease-in-out 0s;" cy="3.7471%" cx="3.8526%" i-is-selectable="true"></div><div class="text-elem-template field-item" i-name="text" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0.15" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 60px; height: 60px; border-width: 0.8955px; border-radius: 0px; transform: translate(0%, 0%); font-size: 11.94px; padding: 1px; z-index: 102; left: 10.2178%; top: 12.4122%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%);" cy="12.4122%" cx="10.2178%" i-is-selectable="true"><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">123</p><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">456</p><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">789</p></div>',
-        // },
-        // {
-        //     name: '321',
-        //     content: '<div class="block-elem-template field-item" i-name="block" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 60px; height: 60px; border-width: 0px; border-radius: 0px; transform: translate(0%, 0%); font-size: 11.94px; padding: 1px; z-index: 101; left: 3.8526%; top: 3.74707%; display: block; transition: all 0s ease-in-out 0s;" cy="3.7471%" cx="3.8526%" i-is-selectable="true"></div><div class="text-elem-template field-item" i-name="text" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0.15" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 60px; height: 60px; border-width: 0.8955px; border-radius: 0px; transform: translate(0%, 0%); font-size: 11.94px; padding: 1px; z-index: 102; left: 10.2178%; top: 12.4122%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%);" cy="12.4122%" cx="10.2178%" i-is-selectable="true"><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">123</p><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">456</p><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">789</p></div>',
-        // },
-        // {
-        //     name: '456',
-        //     content: '<div class="block-elem-template field-item" i-name="block" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 60px; height: 60px; border-width: 0px; border-radius: 0px; transform: translate(0%, 0%); font-size: 11.94px; padding: 1px; z-index: 101; left: 3.8526%; top: 3.74707%; display: block; transition: all 0s ease-in-out 0s;" cy="3.7471%" cx="3.8526%" i-is-selectable="true"></div><div class="text-elem-template field-item" i-name="text" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0.15" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 60px; height: 60px; border-width: 0.8955px; border-radius: 0px; transform: translate(0%, 0%); font-size: 11.94px; padding: 1px; z-index: 102; left: 10.2178%; top: 12.4122%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%);" cy="12.4122%" cx="10.2178%" i-is-selectable="true"><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">123</p><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">456</p><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">789</p></div>',
-        // },
-        // {
-        //     name: '456',
-        //     content: '<div class="block-elem-template field-item" i-name="block" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 60px; height: 60px; border-width: 0px; border-radius: 0px; transform: translate(0%, 0%); font-size: 11.94px; padding: 1px; z-index: 101; left: 3.8526%; top: 3.74707%; display: block; transition: all 0s ease-in-out 0s;" cy="3.7471%" cx="3.8526%" i-is-selectable="true"></div><div class="text-elem-template field-item" i-name="text" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0.15" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 60px; height: 60px; border-width: 0.8955px; border-radius: 0px; transform: translate(0%, 0%); font-size: 11.94px; padding: 1px; z-index: 102; left: 10.2178%; top: 12.4122%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%);" cy="12.4122%" cx="10.2178%" i-is-selectable="true"><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">123</p><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">456</p><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">789</p></div>',
-        // },
-        // {
-        //     name: '456',
-        //     content: '<div class="block-elem-template field-item" i-name="block" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 60px; height: 60px; border-width: 0px; border-radius: 0px; transform: translate(0%, 0%); font-size: 11.94px; padding: 1px; z-index: 101; left: 3.8526%; top: 3.74707%; display: block; transition: all 0s ease-in-out 0s;" cy="3.7471%" cx="3.8526%" i-is-selectable="true"></div><div class="text-elem-template field-item" i-name="text" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0.15" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 60px; height: 60px; border-width: 0.8955px; border-radius: 0px; transform: translate(0%, 0%); font-size: 11.94px; padding: 1px; z-index: 102; left: 10.2178%; top: 12.4122%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%);" cy="12.4122%" cx="10.2178%" i-is-selectable="true"><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">123</p><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">456</p><p marginbottommultiplier="0.2" style="margin-bottom: 0.854px;">789</p></div>',
-        // },
     ],
     buttons: {
         removeSlide: document.querySelector('#remove_slide'),
@@ -316,12 +295,6 @@ const slidesConfig = {
     clearSelection: function() {
         document.querySelector('.selected-slide').classList.remove('selected-slide')
     },
-    // makeMainSign: function(slideNumber) {
-
-    // },
-    // removeMainSign: function(slideNumber) {
-
-    // },
     slideTemplate: function(isSelected, isMain, slideNumber, slideName) {
         let buttonsTemplate = `
         <div class="slide-control-buttons">
@@ -352,19 +325,39 @@ const slidesConfig = {
     },
     //send slides to backend
     save() {
-        $.post( `${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/slides/create`, 
-            {
-                presentationId: CONFIG.presentationId,
-                slides: JSON.stringify(this.slideList)
-            })
-            .done((data) => {
-                this.slideList = data;
-                console.log(data)
-                this.getList(true);
-            })
-            .fail(() => {
-                alert( "error" );
-            })
+        let options = {
+            // headers: {'Content-Type': 'multipart/form-data'}
+        }
+        let dataObject = {
+            presentationId: CONFIG.presentationId,
+            slides: JSON.stringify(this.slideList)
+        }
+
+        axios.post(`${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/slides/create`, dataObject, options)
+        .then((response) => {
+            // this.slideList = response.data;
+            // console.log(response)
+            // this.getList(true);
+            alert('Збережено')
+        })
+        .catch((errors) => {
+            console.log(errors)
+            alert('Сталася помилка')
+        })
+
+        // $.post( `${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/slides/create`, 
+        //     {
+        //         presentationId: CONFIG.presentationId,
+        //         slides: JSON.stringify(this.slideList)
+        //     })
+        //     .done((data) => {
+        //         this.slideList = data;
+        //         console.log(data)
+        //         this.getList(true);
+        //     })
+        //     .fail(() => {
+        //         alert( "error" );
+        //     })
 
         console.log('sent')
     }
@@ -479,21 +472,6 @@ const imagesConfig = {
         return this.imageList;
     },
     imageList: [
-        // {
-        //     id: '12',
-        //     name: 'Дерево 1',
-        //     src: 'http://127.0.0.1:5500/images/DSC_0124.JPG'
-        // },
-        // {
-        //     id: '13',
-        //     name: 'Дерево 2',
-        //     src: 'http://127.0.0.1:5500/images/DSC_0138.JPG'
-        // },
-        // {
-        //     id: '14',
-        //     name: 'Дерево 3',
-        //     src: 'http://127.0.0.1:5500/images/DSC_0147.JPG'
-        // },
     ],
     //buttons of image list itself
     buttons: {
@@ -505,11 +483,11 @@ const imagesConfig = {
     selectedImageIndex: null,
 
     rebuildList: function(imageList) {
+        this.imageContainer.innerHTML = '';
+        
         if (imageList.length == 0) {
             return null;
         }
-
-        this.imageContainer.innerHTML = '';
 
         imageList.forEach((image, index) => {
             this.imageContainer.innerHTML += 
@@ -547,22 +525,23 @@ const imagesConfig = {
         let isSuccess = true;
         
         if (isSuccess) {    
+            let options = {
+                headers: {'Content-Type': 'multipart/form-data'}
+            }
+
             let formData = new FormData();
-            // formData.append('name', imageNameInput.value),
-            formData.append('file', imageFileInput.length == 0 ? null : imageFileInput.files[0])
-            console.log(formData)
-                            
-            $.post( `${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/create`, formData)
-            .done((data) => {
-                this.imageList = data;
-                console.log(data)
+            formData.append('name', imageNameInput.value),
+            formData.append('image', imageFileInput.length == 0 ? null : imageFileInput.files[0])
+
+            axios.post(`${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/create`, formData, options)
+            .then((response) => {
+                this.imageList = response.data;
                 this.getList(true);
             })
-            .fail(() => {
-                alert( "error" );
+            .catch((errors) => {
+                console.log(errors)
+                alert('Сталася помилка')
             })
-
-            console.log('created')
 
             return true;
         } else {
@@ -570,12 +549,31 @@ const imagesConfig = {
         }
     },
     remove: function() {
-        let isSuccess = true;
+        let isSuccess = false;
         let imageId = this.imageList[this.selectedImageIndex].id;
+        let imageElement = document.querySelector(`img.field-item[src="${this.imageList[this.selectedImageIndex].src}"]`)
+        
+        console.log(imageElement)
 
         if (isSuccess) {
-            console.log('removed')
-            console.log(imageId)
+            axios.post(`${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/${imageId}/delete`)
+            .then((response) => {
+                this.imageList = response.data;
+                this.getList(true);
+                this.rebuildInputImageList();
+
+                if(imageElement.classList.contains('selected-item')) {
+                    clearItemSelection();
+                }
+
+                imageElement.remove();
+                slidesConfig.updateCurrent(slidesConfig.selectedSlideNumber);
+                slidesConfig.save();
+            })
+            .catch((errors) => {
+                console.log(errors)
+                alert('Сталася помилка')
+            })
 
             return true;
         } else {
@@ -586,17 +584,46 @@ const imagesConfig = {
         let isSuccess = true;
         let imageId = this.imageList[this.selectedImageIndex].id;
         let renameImageNameInput = document.querySelector('#edited_image_name');
+        
         let newImageName = renameImageNameInput.value;
 
         if (isSuccess) {
-            console.log('renamed')
-            console.log(imageId)
-            console.log(newImageName)
+            axios.post(`${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/${imageId}/rename`, 
+            {name: newImageName})
+            .then((response) => {
+                this.imageList = response.data;
+                this.getList(true);
+
+                this.rebuildInputImageList();
+            })
+            .catch((errors) => {
+                console.log(errors)
+                alert('Сталася помилка')
+            })
 
             return true;
         } else {
             return false;
         }
+    },
+    rebuildInputImageList: function() {
+        function optionTemplate (name, value, isSelected, isDisabled = false) {
+            console.log(isSelected)
+            let optionTemplate = `
+                <option ${isDisabled ? 'disabled ' : ''} ${isSelected ? 'selected ' : ''} value="${value}">${name}</option>
+            `
+            return optionTemplate;
+        }
+
+        // let imageElement = document.querySelector(`img.field-item.selected-item[src="${this.imageList[this.selectedImageIndex].src}"]`)
+        let itemImageSrc = this.imageList[this.selectedImageIndex].src;
+        let imageSelectInput = document.querySelector('#panel_image_name_select');
+        imageSelectInput.innerHTML = '';
+
+        this.getList().forEach(imageItem => {
+            imageSelectInput.innerHTML += 
+            optionTemplate(imageItem.name, imageItem.src, itemImageSrc.match(imageItem.src) != null)
+        })   
     },
     imageTemplate: function(imageListIndex, imageName, imageSrc) {
         let imageTemplate = `

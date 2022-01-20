@@ -300,16 +300,16 @@ function configureContextPanel(mode) {
                 imageSelectInput.innerHTML = 
                     optionTemplate('Оберіть зображення', CONFIG.UI.itemTemplates.imageSrcTemplate, CONFIG.UI.itemTemplates.imageSrcTemplate == itemImageSrc, true);
 
+                    
+
                 imagesConfig.getList().forEach(imageItem => {
                     imageSelectInput.innerHTML += 
-                    optionTemplate(imageItem.name, imageItem.src, imageItem.src == itemImageSrc)
+                    optionTemplate(imageItem.name, imageItem.src, itemImageSrc.match(imageItem.src) != null)
                 })               
 
                 imageSelectInput.oninput = () => {
                     selectedItemForModification.src = imageSelectInput.value;
                 }
-
-                console.log(fieldHolder)
             }
         },
         href: {

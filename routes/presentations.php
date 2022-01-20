@@ -22,23 +22,42 @@ Route::post('/presentation/update', [Presentations::class, 'update'])
 ->middleware('auth')->name('update_presentation');
 
 Route::get('/presentation/move/{id}/{direction}', [Presentations::class, 'move'])
-->middleware('auth')->name('move_presentation');
+->whereNumber('id')->middleware('auth')->name('move_presentation');
 
 // SLIDES
 Route::get('/presentation/{id}/slides', function($id) {
-    $currentPresentation = Presentation::find($id);
+    function getConvertedImagesSrc($imageList) {
+        $index = 0;
+        foreach ($imageList as $key => $image) {
+            $imageList[$index]['src'] = Storage::url($image["src"]);
+            $index++;
+        }
+
+        return $imageList;
+    }
+
     return view('app.slides', 
     [
         'presentationId' => $id,
         'serverUrl' => url('/'),
         'slides' => Presentation::find($id)->slides->toArray(),
-        'images' => Presentation::find($id)->images->toArray(),
+        'images' => getConvertedImagesSrc(Presentation::find($id)->images->toArray()),
     ]);
 })
-->middleware('auth')->name('show_slides');
+->whereNumber('id')->middleware('auth')->name('show_slides');
 
 Route::post('/presentation/{id}/slides/create', [Slides::class, 'create'])
-->middleware('auth');
+->whereNumber('id')->middleware('auth');
 
 Route::post('/presentation/{presentationId}/image/create', [Images::class, 'create'])
-->middleware('auth');
+->whereNumber('presentationId')->middleware('auth');
+
+Route::post('/presentation/{presentationId}/image/{imageId}/delete', [Images::class, 'delete'])
+->whereNumber('presentationId')->whereNumber('imageId')->middleware('auth');
+
+Route::post('/presentation/{presentationId}/image/{imageId}/rename', [Images::class, 'rename'])
+->whereNumber('presentationId')->whereNumber('imageId')->middleware('auth');
+
+// Route::post('/presentation/{presentationId}/image/get', [Images::class, 'getList'])
+// ->middleware('auth');
+

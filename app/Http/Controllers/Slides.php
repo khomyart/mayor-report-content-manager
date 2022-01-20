@@ -29,6 +29,6 @@ class Slides extends Controller
 
         $newSlides = Presentation::find($presentationId)->slides;
         return $newSlides;
-        // return $newSlides;
+        // return $request->post('slides');
     }
 }
