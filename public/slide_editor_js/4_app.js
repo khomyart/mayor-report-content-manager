@@ -194,22 +194,21 @@ workZoneHolder.onmousedown = (e) => {
 
 let variableWidthHTML;
 
-const   btn1 = document.getElementById('debug_button_1'),
-        btn2 = document.getElementById('debug_button_2');
+// const   btn1 = document.getElementById('debug_button_1'),
+//         btn2 = document.getElementById('debug_button_2');
 
-btn1.onclick = () => {
-    variableWidthHTML = workZone.innerHTML;
-    workZone.innerHTML = '';
-    console.log(variableWidthHTML);
-}
+// btn1.onclick = () => {
+//     variableWidthHTML = workZone.innerHTML;
+//     workZone.innerHTML = '';
+//     console.log(variableWidthHTML);
+// }
 
-btn2.onclick = () => {
-    workZone.innerHTML = variableWidthHTML;
-    document.querySelectorAll('.field-item').forEach((item)=>{
-      addDragAndDropToItem(item);
-    })
-
-}
+// btn2.onclick = () => {
+//     workZone.innerHTML = variableWidthHTML;
+//     document.querySelectorAll('.field-item').forEach((item)=>{
+//       addDragAndDropToItem(item);
+//     })
+// }
 
 /* workZone inner html observation */
 const observer = new MutationObserver(function() {

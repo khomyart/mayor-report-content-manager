@@ -549,25 +549,26 @@ const imagesConfig = {
         }
     },
     remove: function() {
-        let isSuccess = false;
+        let isSuccess = true;
         let imageId = this.imageList[this.selectedImageIndex].id;
-        let imageElement = document.querySelector(`img.field-item[src="${this.imageList[this.selectedImageIndex].src}"]`)
-        
-        console.log(imageElement)
-
+        let imagePath = this.imageList[this.selectedImageIndex].src;
+        // let imageElement = document.querySelectorAll(`img.field-item[src="${this.imageList[this.selectedImageIndex].src}"]`)
+                
         if (isSuccess) {
             axios.post(`${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/${imageId}/delete`)
             .then((response) => {
                 this.imageList = response.data;
                 this.getList(true);
-                this.rebuildInputImageList();
-
-                if(imageElement.classList.contains('selected-item')) {
+                               
+                if (selectedItemForModification != null) {
                     clearItemSelection();
                 }
 
-                imageElement.remove();
-                slidesConfig.updateCurrent(slidesConfig.selectedSlideNumber);
+                slidesConfig.slideList.forEach((slide, index) => {
+                    slidesConfig.slideList[index].content = slide.content.replaceAll(imagePath, CONFIG.UI.itemTemplates.imageSrcTemplate);
+                });
+                
+                slidesConfig.select(slidesConfig.selectedSlideNumber, true);
                 slidesConfig.save();
             })
             .catch((errors) => {
@@ -594,7 +595,9 @@ const imagesConfig = {
                 this.imageList = response.data;
                 this.getList(true);
 
-                this.rebuildInputImageList();
+                if (selectedItemForModification != null) {
+                    this.rebuildInputImageList();
+                }
             })
             .catch((errors) => {
                 console.log(errors)
@@ -615,12 +618,16 @@ const imagesConfig = {
             return optionTemplate;
         }
 
-        // let imageElement = document.querySelector(`img.field-item.selected-item[src="${this.imageList[this.selectedImageIndex].src}"]`)
-        let itemImageSrc = this.imageList[this.selectedImageIndex].src;
-        let imageSelectInput = document.querySelector('#panel_image_name_select');
-        imageSelectInput.innerHTML = '';
 
-        this.getList().forEach(imageItem => {
+        let itemImageSrc = selectedItemForModification.src;
+        let imageSelectInput = document.querySelector('#panel_image_name_select');
+        
+        imageSelectInput.innerHTML = '';
+        /* fill select input with values */
+        imageSelectInput.innerHTML = 
+        optionTemplate('Оберіть зображення', CONFIG.UI.itemTemplates.imageSrcTemplate, CONFIG.UI.itemTemplates.imageSrcTemplate == itemImageSrc, true);
+
+        this.getList().forEach((imageItem) => {
             imageSelectInput.innerHTML += 
             optionTemplate(imageItem.name, imageItem.src, itemImageSrc.match(imageItem.src) != null)
         })   

@@ -37,14 +37,6 @@
                 <div class="drag-and-drop-item" i-name="img" i-addinfo="" i-is-selectable="false" i-is-movable="true" i-type="element">
                     ЗОБР.
                 </div>
-                <div style="display: flex; flex-direction:row;">
-                    <button id="debug_button_1" style="padding: 3px; margin-right: 10px;">
-                        debug button 1
-                    </button>
-                    <button id="debug_button_2" style="padding: 3px;">
-                        debug button 2
-                    </button>
-                </div>
             </div>
         </div>
         <div class="side-bars-and-main-field-holder">
