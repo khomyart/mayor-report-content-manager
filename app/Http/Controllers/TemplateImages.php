@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Presentation;
-use App\Models\Image;
+use App\Models\Report;
+use App\Models\TemplateImage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 use App\Traits\Store;
 
-class Images extends Controller
+class TemplateImages extends Controller
 {
     use Store;
 
@@ -27,36 +27,38 @@ class Images extends Controller
         return $imageList;
     }
 
-    public function create(Request $request, $presentationId) {
+    public function create(Request $request, $reportId) {
         $imageName = $request->post('name') == null ? 'Нове зображення' : $request->post('name');
-        Image::create(
+        TemplateImage::create(
             [
-                'presentation_id' => $presentationId,
+                'report_id' => $reportId,
                 'name' => $imageName,
                 'src' => $request->hasFile('image') ?
                             $this->saveFile($request->file('image')) : null,
             ]
         );
 
-        $imageList = $this->getConvertedImageList(Presentation::find($presentationId)->images->toArray());
-        return $imageList;
+        return $this->get($reportId);
     }
 
-    public function rename(Request $request, $presentationId, $imageId) {
-        $image = Image::find($imageId);
+    public function rename(Request $request, $reportId, $imageId) {
+        $image = TemplateImage::find($imageId);
         $image->name = $request->post('name');
         $image->save();
 
-        $imageList = self::getConvertedImageList(Presentation::find($presentationId)->images->toArray());
-        return $imageList;
+        return $this->get($reportId);
     }
 
-    public function delete($presentationId, $imageId) {
-        $image = Image::find($imageId);
+    public function delete($reportId, $imageId) {
+        $image = TemplateImage::find($imageId);
         $this->deleteFile($image->src);
         $image->delete();
 
-        $imageList = $this->getConvertedImageList(Presentation::find($presentationId)->images->toArray());
+        return $this->get($reportId);
+    }
+
+    public function get($reportId) {
+        $imageList = self::getConvertedImageList(Report::find($reportId)->templateImages->toArray());
         return $imageList;
     }
 }

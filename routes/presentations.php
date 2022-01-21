@@ -25,29 +25,11 @@ Route::get('/presentation/move/{id}/{direction}', [Presentations::class, 'move']
 ->whereNumber('id')->middleware('auth')->name('move_presentation');
 
 // SLIDES
-Route::get('/presentation/{id}/slides', function($id) {
-    function getConvertedImagesSrc($imageList) {
-        $index = 0;
-        foreach ($imageList as $key => $image) {
-            $imageList[$index]['src'] = Storage::url($image["src"]);
-            $index++;
-        }
-
-        return $imageList;
-    }
-
-    return view('app.slides', 
-    [
-        'presentationId' => $id,
-        'serverUrl' => url('/'),
-        'slides' => Presentation::find($id)->slides->toArray(),
-        'images' => getConvertedImagesSrc(Presentation::find($id)->images->toArray()),
-    ]);
-})
+Route::get('/presentation/{id}/slides', [Slides::class, 'show'])
 ->whereNumber('id')->middleware('auth')->name('show_slides');
 
-Route::post('/presentation/{id}/slides/create', [Slides::class, 'create'])
-->whereNumber('id')->middleware('auth');
+Route::post('/presentation/slide/create', [Slides::class, 'create'])
+->middleware('auth');
 
 Route::post('/presentation/{presentationId}/image/create', [Images::class, 'create'])
 ->whereNumber('presentationId')->middleware('auth');
@@ -60,4 +42,3 @@ Route::post('/presentation/{presentationId}/image/{imageId}/rename', [Images::cl
 
 // Route::post('/presentation/{presentationId}/image/get', [Images::class, 'getList'])
 // ->middleware('auth');
-

@@ -14,7 +14,7 @@ class Reports extends Controller
 
     public function get() {
         return view('app.reports', [
-            'reports' => Report::all(),
+            'reports' => Report::orderByDesc('published_at')->get(),
         ]);
     }
 

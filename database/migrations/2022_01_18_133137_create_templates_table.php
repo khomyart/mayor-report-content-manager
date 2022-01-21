@@ -17,9 +17,8 @@ class CreateTemplatesTable extends Migration
             $table->id();
             $table->foreignId('report_id')->references('id')->on('reports')
                 ->onUpdate('cascade')->onDelete('cascade');
-            $table->unsignedInteger('number_in_list');
             $table->string('name', 255);
-            $table->string('content')->nullable();
+            $table->mediumText('content')->nullable();
             $table->timestamps();
         });
     }

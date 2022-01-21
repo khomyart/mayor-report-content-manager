@@ -27,6 +27,9 @@
                         {{$report["year"]}}, опублікований: {{ $report["published_at"]}}
                     </div>
                     <div>
+                        <a class="btn btn-primary" href="{{ route('show_templates', $report["id"]) }}">
+                            Шаблон презентації
+                        </a>
                         <a class="btn btn-primary" href="{{'/reports/update/'.$report['id']}}"> Редагувати </a>
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="{{'#reportRemovingModal'.$report["id"]}}">
                             Видалити

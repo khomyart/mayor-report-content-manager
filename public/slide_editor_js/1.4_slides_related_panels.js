@@ -93,35 +93,35 @@ const slidesConfig = {
         }) 
     },
     calculatePreviewItemParam: function (item) {
-        let widthUnit = this.selectedSlideInnerHtmlInstance.offsetWidth / 100;
+        let widthUnit = item.parentNode.offsetWidth / 100;
         let widthMultiplier = item.getAttribute('widthMultiplier');
         let width = `${(widthUnit * widthMultiplier).toFixed(5)}`;
     
         let widthInverted = `${((item.offsetWidth / workZone.offsetWidth) * 100).toFixed(3)}`;
         
-        let heightUnit = this.selectedSlideInnerHtmlInstance.offsetHeight / 100;
+        let heightUnit = item.parentNode.offsetHeight / 100;
         let heightMultiplier = item.getAttribute('heightMultiplier');
         let height = `${(heightUnit * heightMultiplier).toFixed(5)}`;
     
         let heightInverted = `${((item.offsetHeight / workZone.offsetHeight) * 100).toFixed(3)}`;
     
-        let borderWidthUnit = this.selectedSlideInnerHtmlInstance.offsetWidth / 100;
+        let borderWidthUnit = item.parentNode.offsetWidth / 100;
         let borderWidthMultiplier = item.getAttribute('borderWidthMultiplier');
         let borderWidth = `${(borderWidthUnit * borderWidthMultiplier).toFixed(5)}`;
     
-        let fontSizeUnit = this.selectedSlideInnerHtmlInstance.offsetWidth / 100;
+        let fontSizeUnit = item.parentNode.offsetWidth / 100;
         let fontSizeMultiplier = item.getAttribute('fontSizeMultiplier');
         let fontSize = `${(fontSizeUnit * fontSizeMultiplier).toFixed(4)}`;
     
-        let paddingUnit = this.selectedSlideInnerHtmlInstance.offsetWidth / 100;
+        let paddingUnit = item.parentNode.offsetWidth / 100;
         let paddingMultiplier = item.getAttribute('paddingMultiplier');
         let padding = `${(paddingUnit * paddingMultiplier).toFixed(5)}`;
     
-        let borderRadiusUnit = this.selectedSlideInnerHtmlInstance.offsetWidth / 100;
+        let borderRadiusUnit = item.parentNode.offsetWidth / 100;
         let borderRadiusMultiplier = item.getAttribute('borderRadiusMultiplier');
         let borderRadius = `${(borderRadiusUnit * borderRadiusMultiplier).toFixed(5)}`;
     
-        let marginBottomUnit = this.selectedSlideInnerHtmlInstance.offsetHeight/100;
+        let marginBottomUnit = item.parentNode.offsetHeight/100;
         let marginBottomMultiplier = item.getAttribute('marginBottomMultiplier');
         let marginBottom = `${(marginBottomUnit * marginBottomMultiplier).toFixed(4)}`;
     
@@ -139,7 +139,7 @@ const slidesConfig = {
     },
     //update selected slide in slide panel
     updateCurrent: function(slideNumber) {
-        if (this.slideList[slideNumber].content != workZone.innerHTML) {
+        if (this.slideList.length != 0 && this.slideList[slideNumber].content != workZone.innerHTML) {
             this.slideList[slideNumber].content = workZone.innerHTML;
         }
     },
@@ -206,17 +206,17 @@ const slidesConfig = {
         }                
     },
     rebuildSlidesList: function(slideList) {
-        if (slideList.length == 0) {
-            return null;
-        }
-
         this.slideContainer.innerHTML = '';
 
         slideList.forEach((slide, index) => {
             this.slideContainer.innerHTML += 
                 this.slideTemplate(this.selectedSlideNumber == index, 
                     this.mainSlide == index, index, slide.name);                    
-        });     
+        });  
+        
+        if (slideList.length == 0) {
+            return null;
+        }
 
         this.selectedSlideInnerHtmlInstance = document.querySelector(`div[slide-number="${this.selectedSlideNumber}"].slide-content`)
 
@@ -325,39 +325,28 @@ const slidesConfig = {
     },
     //send slides to backend
     save() {
-        let options = {
-            // headers: {'Content-Type': 'multipart/form-data'}
+        function getUrl (mode) {
+            switch (mode) {
+                case 'template':
+                    return `${CONFIG.serverUrl}/report/template/create`
+                case 'presentation':
+                    return `${CONFIG.serverUrl}/presentation/slide/create`
+            }
         }
+
         let dataObject = {
+            reportId: CONFIG.reportId,
             presentationId: CONFIG.presentationId,
             slides: JSON.stringify(this.slideList)
         }
-
-        axios.post(`${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/slides/create`, dataObject, options)
+        
+        axios.post(getUrl(CONFIG.mode), dataObject)
         .then((response) => {
-            // this.slideList = response.data;
-            // console.log(response)
-            // this.getList(true);
-            alert('Збережено')
         })
         .catch((errors) => {
             console.log(errors)
             alert('Сталася помилка')
         })
-
-        // $.post( `${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/slides/create`, 
-        //     {
-        //         presentationId: CONFIG.presentationId,
-        //         slides: JSON.stringify(this.slideList)
-        //     })
-        //     .done((data) => {
-        //         this.slideList = data;
-        //         console.log(data)
-        //         this.getList(true);
-        //     })
-        //     .fail(() => {
-        //         alert( "error" );
-        //     })
 
         console.log('sent')
     }
@@ -371,16 +360,7 @@ const templatesConfig = {
         }
         return this.templateList;
     },
-    templateList: [
-        {
-            name: 'Привіт, друже',
-            content: '<div class="block-elem-template field-item" i-name="block" widthmultiplier="100" heightmultiplier="100" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="-50%,-50%" locktype="movement" newly-created="false" cy="50%%" cx="50%%" style="width: 896px; height: 640px; border-width: 0px; border-radius: 0px; transform: translate(-50%, -50%); font-size: 17.92px; padding: 2px; z-index: 101; left: 50%; top: 50%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(0deg, rgba(239, 37, 37, 0.55) 10%, rgb(38, 96, 232) 92%);" i-is-selectable="true"></div><a class="text-elem-template field-item" i-name="href" widthmultiplier="auto" heightmultiplier="auto" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="2.6" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" cy="77.8125%%" cx="8.9286%%" style="outline: none; text-decoration: none; cursor: pointer; color: black; width: auto; height: auto; border-width: 0px; border-radius: 0px; transform: translate(0%, 0%); font-size: 23.296px; padding: 2px; z-index: 102; left: 8.9286%; top: 77.8125%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%);" i-is-selectable="true" href="https://lutskrada.gov.ua"><p marginbottommultiplier="0.2" style="margin-bottom: 1.28px;"><span style="color:hsl(0,0%,100%);"><strong>lutskrada.gov.ua</strong></span></p></a><div class="text-elem-template field-item" i-name="text" widthmultiplier="auto" heightmultiplier="auto" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="5.8" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" cy="6.5625%%" cx="6.69643%%" style="width: auto; height: auto; border-width: 0px; border-radius: 0px; transform: translate(0%, 0%); font-size: 51.968px; padding: 2px; z-index: 103; left: 6.69643%; top: 6.5625%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%);" i-is-selectable="true"><p marginbottommultiplier="0.2" style="margin-bottom: 1.28px;"><span style="color:hsl(0, 0%, 100%);">Привіт, друже</span></p><p marginbottommultiplier="0.2" style="margin-bottom: 1.28px;"><span style="color:hsl(0, 0%, 100%);">з вчора…</span></p><p marginbottommultiplier="0.2" style="margin-bottom: 1.28px;"><span style="color:hsl(0, 0%, 100%);">давно не бачились</span></p></div><div class="block-elem-template field-item" i-name="block" widthmultiplier="52" heightmultiplier="1" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" cy="44.375%%" cx="6.91964%%" style="width: 465.92px; height: 6.4px; border-width: 0px; border-radius: 0px; transform: translate(0%, 0%); font-size: 17.92px; padding: 2px; z-index: 104; left: 6.91964%; top: 44.375%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(90deg, rgb(249, 253, 13) 10%, rgb(44, 110, 242) 90%); background-color: rgba(228, 211, 33, 0);" i-is-selectable="true"></div><div class="block-elem-template field-item" i-name="block" widthmultiplier="17" heightmultiplier="100" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="-100%,-100%" locktype="movement" newly-created="false" cy="100%%" cx="100%%" style="width: 152.32px; height: 640px; border-width: 0px; border-radius: 0px; transform: translate(-100%, -100%); font-size: 17.92px; padding: 2px; z-index: 105; left: 100%; top: 100%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(0deg, rgba(254, 22, 22, 0.52) 10%, rgba(255, 255, 255, 0) 90%); background-color: rgba(189, 106, 97, 0);" i-is-selectable="true"></div>',
-        },
-        {
-            name: 'тест з індексу',
-            content: '<div class="block-elem-template field-item selected-item" i-name="block" widthmultiplier="10" heightmultiplier="14" borderwidthmultiplier="0" borderradiusmultiplier="0" fontsizemultiplier="2" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: 90px; height: 90px; border-width: 0px; border-radius: 0px; transform: translate(0%, 0%); font-size: 17.92px; padding: 2px; z-index: 101; left: 3.79464%; top: 3.75%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%);" cy="3.7471%" cx="3.8526%" i-is-selectable="true"></div><div class="text-elem-template field-item" i-name="text" widthmultiplier="54.576" heightmultiplier="17.813" borderwidthmultiplier="0.15" borderradiusmultiplier="0" fontsizemultiplier="7.9" paddingmultiplier="0.2" marginbottommultiplier="0.2" canchor="0%,0%" locktype="none" newly-created="false" style="width: auto; height: auto; border-width: 1.344px; border-radius: 0px; transform: translate(0%, 0%); font-size: 70.784px; padding: 2px; z-index: 40; left: 5.24554%; top: 17.6562%; display: block; transition: all 0s ease-in-out 0s; background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%);" cy="17.6563%" cx="5.2455%" i-is-selectable="true"><p marginbottommultiplier="0.2" style="margin-bottom: 1.28px;">Привіт, друже</p></div>',
-        },
-    ],
+    templateList: [],
     buttons: {
         applyTemplateToSlide: document.querySelector('#apply_template_to_slide'),
         // ...
@@ -440,15 +420,35 @@ const templatesConfig = {
         console.log('rebuilded')
     },
     select: function(templateNumber) {  
+        //text area template generates according to presence of slides inside 
+        //slideList, if there is no slides, template will generate text which 
+        //offer user to create new slide with this template
+        function textAreaTemplate(name, selectedSlideName) {
+            if (selectedSlideName == null) {
+                return `
+                    <strong>Буде створено новий слайд на основі вибраного шаблону!</strong>
+                    <br>
+                    Ви точно бажаєте застосувати шаблон "${name}"?
+                `
+            } else {
+                return `
+                    <strong>Вміст слайду буде замінено вмістом шаблону!</strong>
+                    <br>
+                    Ви точно бажаєте застосувати шаблон "${name}" 
+                    до слайду "${selectedSlideName}"? 
+                `
+            }
+        }
+
         this.selectedTemplateNumber = templateNumber;
         
         let modal = new bootstrap.Modal(document.getElementById('applySlideTemplateModal')),
-        templateNameSpan = document.querySelector('#blueprint_name_template_modal'),
-        slideNameSpan = document.querySelector('#slide_name_template_modal');
+        modalTextArea = document.querySelector('#apply_slide_template_text_area');
         modal.show();
 
-        templateNameSpan.innerHTML = this.templateList[templateNumber].name;
-        slideNameSpan.innerHTML = slidesConfig.slideList[slidesConfig.selectedSlideNumber].name;
+        modalTextArea.innerHTML = textAreaTemplate(
+            this.templateList[templateNumber].name,
+            slidesConfig.slideList != 0 ? slidesConfig.slideList[slidesConfig.selectedSlideNumber].name : null);
     },
     templateBlueprint: function(templateNumber, templateName) {
         let templateBlueprint = `
@@ -525,6 +525,15 @@ const imagesConfig = {
         let isSuccess = true;
         
         if (isSuccess) {    
+            function getUrl (mode) {
+                switch (mode) {
+                    case 'template':
+                        return `${CONFIG.serverUrl}/report/${CONFIG.reportId}/image/create`
+                    case 'presentation':
+                        return `${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/create`
+                }
+            }
+
             let options = {
                 headers: {'Content-Type': 'multipart/form-data'}
             }
@@ -533,7 +542,7 @@ const imagesConfig = {
             formData.append('name', imageNameInput.value),
             formData.append('image', imageFileInput.length == 0 ? null : imageFileInput.files[0])
 
-            axios.post(`${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/create`, formData, options)
+            axios.post(getUrl(CONFIG.mode), formData, options)
             .then((response) => {
                 this.imageList = response.data;
                 this.getList(true);
@@ -555,7 +564,16 @@ const imagesConfig = {
         // let imageElement = document.querySelectorAll(`img.field-item[src="${this.imageList[this.selectedImageIndex].src}"]`)
                 
         if (isSuccess) {
-            axios.post(`${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/${imageId}/delete`)
+            function getUrl (mode) {
+                switch (mode) {
+                    case 'template':
+                        return `${CONFIG.serverUrl}/report/${CONFIG.reportId}/image/${imageId}/delete`
+                    case 'presentation':
+                        return `${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/${imageId}/delete`
+                }
+            }
+
+            axios.post(getUrl(CONFIG.mode))
             .then((response) => {
                 this.imageList = response.data;
                 this.getList(true);
@@ -589,7 +607,16 @@ const imagesConfig = {
         let newImageName = renameImageNameInput.value;
 
         if (isSuccess) {
-            axios.post(`${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/${imageId}/rename`, 
+            function getUrl(mode) {
+                switch (mode) {
+                    case 'template':
+                        return `${CONFIG.serverUrl}/report/${CONFIG.reportId}/image/${imageId}/rename`
+                    case 'presentation':
+                        return `${CONFIG.serverUrl}/presentation/${CONFIG.presentationId}/image/${imageId}/rename`
+                }
+            }
+
+            axios.post(getUrl(CONFIG.mode), 
             {name: newImageName})
             .then((response) => {
                 this.imageList = response.data;
@@ -617,7 +644,6 @@ const imagesConfig = {
             `
             return optionTemplate;
         }
-
 
         let itemImageSrc = selectedItemForModification.src;
         let imageSelectInput = document.querySelector('#panel_image_name_select');
@@ -712,6 +738,18 @@ srpConfig.panels.slideList.buttons.addSlide.onclick = () => {
 srpConfig.panels.slideList.buttons.saveSlidesList.onclick = () => {
     slidesConfig.save();
 }
+
+srpConfig.panels.templatesList.buttons.updateTemplateList.onclick = () => {
+    axios.get(`${CONFIG.serverUrl}/report/${CONFIG.reportId}/templates/get`)
+    .then((response) => {
+        templatesConfig.templateList = response.data;
+        templatesConfig.getList(true);
+    })
+    .catch((errors) => {
+        console.log(errors)
+        alert('Сталася помилка')
+    })
+}
 /* SLIDE BUTTONS */
 slidesConfig.buttons.removeSlide.onclick = () => {
     var modalElement = document.getElementById('removeSlideModal')
@@ -722,7 +760,14 @@ slidesConfig.buttons.removeSlide.onclick = () => {
         slidesConfig.selectedSlideNumber == 0 ? slidesConfig.selectedSlideNumber = 0 : slidesConfig.selectedSlideNumber -= 1;
         console.log(slidesConfig.selectedSlideNumber)
         console.log(slidesConfig.slideList)
-        slidesConfig.select(slidesConfig.selectedSlideNumber, true);
+
+        if (slidesConfig.slideList.length != 0) {
+            slidesConfig.select(slidesConfig.selectedSlideNumber, true);
+        } else {
+            slidesConfig.rebuildSlidesList(slidesConfig.slideList);
+            workZone.innerHTML = '';
+        }
+        
     }
 }
 slidesConfig.buttons.renameSlide.onclick = () => {
@@ -742,6 +787,12 @@ templatesConfig.buttons.applyTemplateToSlide.onclick = () => {
     var modalElement = document.getElementById('applySlideTemplateModal')
     var modal = bootstrap.Modal.getInstance(modalElement) // Returns a Bootstrap modal instance
     modal.hide();
+
+    if (slidesConfig.slideList.length == 0) {
+        slidesConfig.add(CONFIG.presentationName);
+        slidesConfig.getList(true);
+        slidesConfig.selectedSlideNumber = 0;
+    }
 
     //rebuilding work zone inner html with all items
     if (workZone.innerHTML != templatesConfig.templateList[templatesConfig.selectedTemplateNumber].content) {
@@ -769,10 +820,6 @@ templatesConfig.buttons.applyTemplateToSlide.onclick = () => {
         workZoneHolder.offsetHeight / 2 - everythingHolder.offsetHeight / 2;
     everythingHolder.scrollLeft =
         workZoneHolder.offsetWidth / 2 - everythingHolder.offsetWidth / 2;
-}
-
-srpConfig.panels.templatesList.buttons.updateTemplateList.onclick = () => {
-    templatesConfig.getList(true)
 }
 
 /* IMAGE BUTTONS */

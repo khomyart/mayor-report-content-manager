@@ -9,7 +9,7 @@ use App\Models\ReportBook;
 use App\Models\Article;
 use App\Models\Presentation;
 use App\Models\Template;
-use App\Models\TemplateImages;
+use App\Models\TemplateImage;
 
 class Report extends Model
 {
@@ -34,6 +34,6 @@ class Report extends Model
     }
 
     public function templateImages() {
-        return $this->hasMany(TemplateImages::class);
+        return $this->hasMany(TemplateImage::class);
     }
 }

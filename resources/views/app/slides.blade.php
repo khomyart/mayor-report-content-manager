@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{asset('slide_editor_css/1_style.css')}}">
     <link rel="stylesheet" href="{{asset('slide_editor_css/2_context_panel.css')}}">
     <link rel="stylesheet" href="{{asset('slide_editor_css/3_slides_related_panels.css')}}">
+    <link rel="stylesheet" href="{{asset('slide_editor_css/4_navigation_panel.css')}}">
 </head>
 <body style="position: relative; display: none;">
     <div class="c-container">
@@ -36,6 +37,11 @@
                 </div>
                 <div class="drag-and-drop-item" i-name="img" i-addinfo="" i-is-selectable="false" i-is-movable="true" i-type="element">
                     ЗОБР.
+                </div>
+            </div>
+            <div class="navigation-panel-buttons-holder">
+                <div id="goToPresentations" class="navigation-panel-button">
+                    Презентації
                 </div>
             </div>
         </div>
@@ -633,11 +639,8 @@
             <h5 class="modal-title" id="applySlideTemplateModalLabel">Застосувати шаблон</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <strong>Вміст слайду буде замінено вмістом шаблону!</strong>
-                <br>
-                Ви точно бажаєте застосувати шаблон "<span id="blueprint_name_template_modal"></span>" 
-                до слайду "<span id="slide_name_template_modal"></span>"? 
+            <div id="apply_slide_template_text_area" class="modal-body">
+                
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
@@ -739,23 +742,29 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
     <script>
-        // $.ajaxSetup({
-        //     headers: {
-        //         'X-CSRF-TOKEN': CONFIG.CSRF,
-        //     }
-        // });
-
         CONFIG.serverUrl = {!! json_encode($serverUrl) !!};
+        CONFIG.presentationUrl = {!! json_encode($url) !!};
+        CONFIG.presentationName = {!! json_encode($presentationName) !!}
         CONFIG.presentationId = {!! json_encode($presentationId) !!};
+        CONFIG.reportId = {!! json_encode($reportId) !!};
         CONFIG.CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         CONFIG.UI.itemTemplates.imageSrcTemplate = `${CONFIG.serverUrl}/storage/image_placeholder.png`,
         
+        CONFIG.mode = {!! json_encode($mode) !!};
+
         slidesConfig.slideList = {!! json_encode($slides) !!}; 
         imagesConfig.imageList = {!! json_encode($images) !!}; 
-        // slidesConfig.slideList = {!! json_encode($slides) !!}; 
-        
+        templatesConfig.templateList = {!! json_encode($templates) !!}
+
         window.addEventListener('load', function() {
             slidesConfig.getList(true);
+            
+            if (CONFIG.mode == 'template') {
+                srpConfig.buttons.templatesList.remove()
+                goToPresentationsButton.innerHTML = 'Звіти'
+            } else {
+                goToPresentationsButton.innerHTML = 'Презентації'
+            }
         })
     </script>
 </body>

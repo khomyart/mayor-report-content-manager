@@ -1,9 +1,9 @@
 @php
 $menu = [
-    [
-        "display_name" => 'Головна',
-        "redirects_to" => 'dashboard',
-    ],
+    // [
+    //     "display_name" => 'Головна',
+    //     "redirects_to" => 'dashboard',
+    // ],
     [
         "display_name" => 'Звіти',
         "redirects_to" => 'reports',
@@ -15,7 +15,7 @@ $menu = [
     [
         "display_name" => 'Презентації',
         "redirects_to" => 'presentations',
-    ]      
+    ],     
 ];
 @endphp
 

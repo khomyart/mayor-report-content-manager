@@ -194,21 +194,12 @@ workZoneHolder.onmousedown = (e) => {
 
 let variableWidthHTML;
 
-// const   btn1 = document.getElementById('debug_button_1'),
-//         btn2 = document.getElementById('debug_button_2');
+const goToPresentationsButton = document.getElementById('goToPresentations');
 
-// btn1.onclick = () => {
-//     variableWidthHTML = workZone.innerHTML;
-//     workZone.innerHTML = '';
-//     console.log(variableWidthHTML);
-// }
-
-// btn2.onclick = () => {
-//     workZone.innerHTML = variableWidthHTML;
-//     document.querySelectorAll('.field-item').forEach((item)=>{
-//       addDragAndDropToItem(item);
-//     })
-// }
+goToPresentationsButton.onclick = function(event) {
+  slidesConfig.save();
+  window.location.href = CONFIG.presentationUrl;
+}
 
 /* workZone inner html observation */
 const observer = new MutationObserver(function() {

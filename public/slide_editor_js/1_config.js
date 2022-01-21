@@ -1,7 +1,11 @@
 let CONFIG = {
   serverUrl: null,
+  presentationUrl: null,
   presentationId: null,
+  reportId: null,
   CSRF: null,
+  mode: null,
+  presentationName: null,
   coreElementsSelectors: {
     container: ".c-container",
     sideBarsAndMainFieldHolder: ".side-bars-and-main-field-holder",
