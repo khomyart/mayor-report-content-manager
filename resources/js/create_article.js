@@ -961,6 +961,7 @@ function submitArticleData() {
     axios.post('/articles/create', formData, options)
     .then(function (response) {
         console.log(response)
+        window.location.href = url;
     })
     .catch(function (errors) {
         console.log(errors)

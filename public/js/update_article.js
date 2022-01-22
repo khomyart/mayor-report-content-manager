@@ -3009,8 +3009,9 @@ function submitArticleData() {
     }
   };
   axios__WEBPACK_IMPORTED_MODULE_0___default().post("/article/update/".concat(incomingArticle.id), formData, options).then(function (response) {
-    console.log(response);
-    document.location.reload();
+    console.log(response); // document.location.reload();
+
+    window.location.href = url;
   })["catch"](function (errors) {
     console.log(errors);
   });

@@ -3008,6 +3008,7 @@ function submitArticleData() {
   };
   axios__WEBPACK_IMPORTED_MODULE_0___default().post('/articles/create', formData, options).then(function (response) {
     console.log(response);
+    window.location.href = url;
   })["catch"](function (errors) {
     console.log(errors);
   });

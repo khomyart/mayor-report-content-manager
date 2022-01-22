@@ -12,7 +12,8 @@ Route::get('/articles', [Articles::class, 'show'])
 ->middleware('auth')->name('articles');
 
 Route::get('/articles/create/{current_report_id?}', function ($current_report_id = null) {
-    return view("app.articles_create", ['reports' => Report::all(), 'current_report_id' => $current_report_id]);
+    return view("app.articles_create", 
+    ['reports' => Report::all(), 'current_report_id' => $current_report_id, 'url'=>url('/').'/articles']);
 })->middleware('auth')->name('create_article_form');
 
 Route::post('/articles/create', [Articles::class, 'create'])
@@ -29,7 +30,7 @@ Route::get('/article/update/{id}', function ($id) {
         $article["charts"][$chartKey]["datasets"] = ChartDataset::where('chart_id', $chart["id"])->get()->toArray();
     }
 
-    return view('app.articles_update', ['article' => $article, 'reports' => Report::all()]);
+    return view('app.articles_update', ['article' => $article, 'reports' => Report::all(), 'url'=>url('/').'/articles']);
 })->whereNumber('id')->middleware('auth')->name('update_article');
 
 Route::post('/article/update/{id}', [Articles::class, 'update']);

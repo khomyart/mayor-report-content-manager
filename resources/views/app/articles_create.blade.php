@@ -249,6 +249,7 @@ ClassicEditor
         console.error( error );
     });
 
+    let url = {!! json_encode($url) !!}
 </script>
 @endsection
 

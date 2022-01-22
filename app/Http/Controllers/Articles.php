@@ -35,7 +35,7 @@ class Articles extends Controller
 
         if(Report::find($request->post('report_id')) && $validation_is_passed) {
             $lastNumberInList = DB::table('articles')->orderByDesc('number_in_list')->first();
-            $lastNumberInList = $lastNumberInList->number_in_list;
+            $lastNumberInList = $lastNumberInList == null ? 0 : $lastNumberInList->number_in_list;
             $createdArticle = Article::create(
                 [
                     'report_id' => $request->post('report_id'),

@@ -15,7 +15,7 @@
 <div class="articles container-fluid p-0 d-flex flex-column col-12" style="height: 100%">
     <nav class="button-holder col-12 d-flex flex-row p-3">
         <button class="btn btn-primary p-1 px-2" data-bs-toggle="modal" data-bs-target="#presentationCreateModal">
-            Створити презентацію
+            Створити розділ презентації
         </button>
 
         <div class="modal fade" id="presentationCreateModal" tabindex="-1" aria-labelledby="presentationCreateModalLabel" aria-hidden="true">
@@ -61,7 +61,7 @@
             <div class="collapse show" id="presentations{{ $report["id"] }}">
                 <div>
                     <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="{{'#presentationCreatingModal'.$report['id']}}">
-                        Створити презентацію для {{$report['year']}} року
+                        Створити розділ презентації для {{$report['year']}} року
                     </button>
                     
                     <div class="modal fade" id="{{'presentationCreatingModal'.$report['id']}}" tabindex="-1" aria-labelledby="{{'presentationCreatingModalLabel'.$report['id']}}" aria-hidden="true">

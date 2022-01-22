@@ -962,7 +962,8 @@ function submitArticleData() {
     axios.post(`/article/update/${incomingArticle.id}`, formData, options)
     .then(function (response) {
         console.log(response)
-        document.location.reload();
+        // document.location.reload();
+        window.location.href = url;
     })
     .catch(function (errors) {
         console.log(errors)

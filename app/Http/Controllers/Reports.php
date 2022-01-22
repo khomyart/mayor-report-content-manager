@@ -69,7 +69,7 @@ class Reports extends Controller
         $report->save();
         $report->reportBook->save();
 
-        return back();
+        return redirect()->route('reports')->with('message', 'Звіт успішно оновлено');
     }
 
     public function delete(Request $request, $id) {
