@@ -50,6 +50,7 @@ function configureContextPanel(mode) {
     let availableFields = {
         position: {
             init: function() {
+                console.log("inited")
                 let minValue = 0;
                 let maxValue = 100;
                 let fieldHolder = document.querySelector('div[ci-name="position"]')
@@ -59,10 +60,16 @@ function configureContextPanel(mode) {
                 let x = document.querySelector('#panel_position_x');
                 let y = document.querySelector('#panel_position_y');
 
-                if (selectedItemForModification.style.left.match(/px/) != null &&
+                if (selectedItemForModification.style.left.match(/px/) != null ||
                     selectedItemForModification.style.top.match(/px/) != null) {
                     x.value = (selectedItemForModification.offsetLeft / workZone.offsetWidth * 100).toFixed(4);
                     y.value = (selectedItemForModification.offsetTop / workZone.offsetHeight * 100).toFixed(4);
+
+                    selectedItemForModification.setAttribute('cX', x.value + '%')
+                    selectedItemForModification.setAttribute('cY', y.value + '%')
+                    selectedItemForModification.style.left = selectedItemForModification.getAttribute('cX')
+                    selectedItemForModification.style.top = selectedItemForModification.getAttribute('cY')
+
                 } else {
                     x.value = selectedItemForModification.style.left.replace(/%/gi,'');
                     y.value = selectedItemForModification.style.top.replace(/%/gi,'');
@@ -154,6 +161,9 @@ function configureContextPanel(mode) {
                         selectedItemForModification.style.transform = `${calculateItemParams(selectedItemForModification).transform}`;
                         selectedItemForModification.style.left = selectedItemForModification.offsetLeft + calculateItemParams(selectedItemForModification).anchorShiftX + 'px';
                         selectedItemForModification.style.top = selectedItemForModification.offsetTop + calculateItemParams(selectedItemForModification).anchorShiftY + 'px';
+
+                        // selectedItemForModification.style.left = calculateItemParams(selectedItemForModification).cX + '%';
+                        // selectedItemForModification.style.top = calculateItemParams(selectedItemForModification).cY + '%';
                     
                         // calculatePositionForItems(selectedItemForModification)
                         assignActivatedAnchorButtonClass(anchorButtons);

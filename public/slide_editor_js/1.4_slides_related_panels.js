@@ -74,6 +74,29 @@ const slidesConfig = {
     selectedSlideInnerHtmlInstance: null,
     mainSlide: 0,
     updateSlideContentElementChildsValues(slideContentElement) {
+        function recursiveChildrenFontSizing(fontSize, childrenNode) {
+            if (childrenNode.length > 0) {
+                console.log('iteration')
+                console.log(childrenNode)
+                childrenNode[0].style.fontSize = `${fontSize}px`;
+                recursiveChildrenFontSizing(fontSize, childrenNode[0].children);
+            } 
+
+            return
+        }
+
+        // let elementsWithResizableFont = document.querySelectorAll('[fontSizeMultiplier]')
+        // elementsWithResizableFont.forEach(e => {
+        //     let fontSizeUnit = slides[0].offsetWidth / 100;
+        //     let fontSizeMultiplier = e.getAttribute('fontSizeMultiplier');
+        //     e.style.fontSize = `${fontSizeUnit * fontSizeMultiplier}px`;
+
+        //     e.childNodes.forEach((childNode)=>{
+        //         childNode.style.fontSize = `${fontSizeUnit * fontSizeMultiplier}px`;
+        //         recursiveChildrenFontSizing(fontSizeUnit * fontSizeMultiplier, childNode.children)
+        //     }) 
+        // })
+
         slideContentElement.childNodes.forEach(childNode => {
             childNode.style.width =`${ this.calculatePreviewItemParam(childNode).width}px`;
             childNode.style.height =`${ this.calculatePreviewItemParam(childNode).height}px`;

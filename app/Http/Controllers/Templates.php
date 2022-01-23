@@ -23,7 +23,7 @@ class Templates extends Controller
             'presentationName' => null,
             'slides' => $report->templates->toArray(),
             'images' => Images::getConvertedImageList($report->templateImages->toArray()),
-            'templates' => null,
+            'templates' => $report->templates->toArray(),
             'url' => url('/').'/reports',
             'mode' => 'template'
         ]);

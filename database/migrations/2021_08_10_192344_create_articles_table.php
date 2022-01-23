@@ -19,7 +19,7 @@ class CreateArticlesTable extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->unsignedInteger('number_in_list');
             $table->string('name', 255);
-            $table->string('content');
+            $table->mediumText('content');
             $table->string('path_to_additional_content', 255)->nullable()->default(null);
             $table->timestamps();
         });

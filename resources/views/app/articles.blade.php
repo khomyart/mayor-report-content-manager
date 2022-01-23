@@ -39,10 +39,10 @@
                 <div>
                     @foreach ($report["articles"] as $article)
                     <div class="mb-4 p-3 article-element d-flex flex-row justify-content-between">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center col-8">
                             {{ $article["name"] }}
                         </div>
-                        <div>
+                        <div class="col-4 d-flex align-items-center justify-content-end article-button-container">
                             @if (!$loop->first)
                                 <a class="btn btn-primary text-align-center" href="{{ route('move_article', ['id' => $article["id"], 'direction' => 'down']) }}">+</a>
                             @endif

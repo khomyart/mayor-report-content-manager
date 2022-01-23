@@ -34,7 +34,7 @@
             </div>
             <div class="row mb-3">
                 <div class="col-6">
-                    <label for="report_image" class="form-label">Зображення звіту</label>
+                    <label for="report_image" class="form-label">Зображення звіту (10:6 - 500x300)</label>
                     <input class="form-control" type="file" id="report_image" name="report_image">
                 </div>
                 <div class="col-6">
@@ -46,10 +46,18 @@
             @if (isset($data))
                 <div class="row mb-3">
                     <div class="col-6">
-                        <img src="{{ Storage::url($data["img_src"]); }}" alt="" style="width: 100%;">
+                        @if (isset($data["img_src"]))
+                            <img src="{{ Storage::url($data["img_src"]); }}" alt="" style="width: 100%;">
+                        @endif
                     </div>
                     <div class="col-6">
-                        
+                            <div class="row" id="existing_additional_file_holder">
+                                <div class="col-6 pt-3">
+                                    ✔️
+                                    <a id="existing_additional_file" name="existing_additional_file" href="{{ Storage::url($data["path_to_report_book"]); }}">
+                                        Звіт книжка</a>
+                                </div>
+                            </div>
                     </div>
                 </div>
             @endif
