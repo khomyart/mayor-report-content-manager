@@ -100,10 +100,10 @@
                 <div>
                     @foreach ($report["presentations"] as $presentation)
                     <div class="mb-4 p-3 article-element d-flex flex-row justify-content-between">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center col-7">
                             {{ $presentation["name"] }}
                         </div>
-                        <div>
+                        <div class="col-5 d-flex align-items-center justify-content-end article-button-container">
                             @if (!$loop->first)
                                 <a class="btn btn-primary text-align-center" href="{{ route('move_presentation', ['id' => $presentation["id"], 'direction' => 'down']) }}">+</a>
                             @endif
@@ -119,59 +119,58 @@
                             </button>
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="{{'#presentationRemovingModal'.$presentation['id']}}">
                                 Видалити
-                            </button>
+                            </button>                  
+                        </div>
+                    </div>
+                    
+                    <div class="modal fade" id="{{'presentationRemovingModal'.$presentation['id']}}" tabindex="-1" aria-labelledby="{{'presentationRemovingModalLabel'.$presentation['id']}}" aria-hidden="true">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="{{'presentationRemovingModalLabel'.$presentation['id']}}">Видалення презентації</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Ви дійсно бажаєте видалити презентацію: "{{ $presentation['name'] }}"?
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відмінити</button>
+                            <a class="btn btn-danger" href="{{route('remove_presentation', $presentation['id'])}}"> Видалити </a>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="{{'presentationUpdateingModal'.$presentation['id']}}" tabindex="-1" aria-labelledby="{{'presentationUpdateingModalLabel'.$presentation['id']}}" aria-hidden="true">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="{{'presentationUpdateingModalLabel'.$presentation['id']}}">Редагування заголовку презентації</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                
+                                <form id="{{'updatePresentation'.$presentation['id']}}" action="{{ route('update_presentation') }}" method="post">
+                                    @csrf
+                                    <select class="form-select mb-3" name="report_id">
+                                        <option disabled value="">Оберіть рік звіту</option>
+                                        @foreach ($reports as $formReport)
+                                            <option {{$formReport['id'] == $report['id'] ? 'selected' : ''}} value="{{$formReport['id']}}">{{$formReport['year']}}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="mb-3">
+                                        <input type="text" hidden name="presentation_id" value="{{$presentation['id']}}">
+                                        <label for="{{'updatePresentationName'.$presentation['id']}}" class="form-label">Назва розділу презентації</label>
+                                        <input type="input" name="presentation_name" class="form-control" id="{{'updatePresentationName'.$presentation['id']}}"
+                                            value="{{$presentation['name']}}">
+                                    </div>
+                                </form>
 
-                            <div class="modal fade" id="{{'presentationUpdateingModal'.$presentation['id']}}" tabindex="-1" aria-labelledby="{{'presentationUpdateingModalLabel'.$presentation['id']}}" aria-hidden="true">
-                                <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                    <h5 class="modal-title" id="{{'presentationUpdateingModalLabel'.$presentation['id']}}">Редагування заголовку презентації</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        
-                                        <form id="{{'updatePresentation'.$presentation['id']}}" action="{{ route('update_presentation') }}" method="post">
-                                            @csrf
-                                            <select class="form-select mb-3" name="report_id">
-                                                <option disabled value="">Оберіть рік звіту</option>
-                                                @foreach ($reports as $formReport)
-                                                    <option {{$formReport['id'] == $report['id'] ? 'selected' : ''}} value="{{$formReport['id']}}">{{$formReport['year']}}</option>
-                                                @endforeach
-                                            </select>
-                                            <div class="mb-3">
-                                                <input type="text" hidden name="presentation_id" value="{{$presentation['id']}}">
-                                                <label for="{{'updatePresentationName'.$presentation['id']}}" class="form-label">Назва розділу презентації</label>
-                                                <input type="input" name="presentation_name" class="form-control" id="{{'updatePresentationName'.$presentation['id']}}"
-                                                    value="{{$presentation['name']}}">
-                                            </div>
-                                        </form>
-        
-                                    </div>
-                                    <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відмінити</button>
-                                    <button class="btn btn-success" form="{{'updatePresentation'.$presentation['id']}}" type="submit"> Оновити </button>
-                                    </div>
-                                </div>
-                                </div>
                             </div>
-                                                        
-                            <div class="modal fade" id="{{'presentationRemovingModal'.$presentation['id']}}" tabindex="-1" aria-labelledby="{{'presentationRemovingModalLabel'.$presentation['id']}}" aria-hidden="true">
-                                <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                    <h5 class="modal-title" id="{{'presentationRemovingModalLabel'.$presentation['id']}}">Видалення презентації</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Ви дійсно бажаєте видалити презентацію: "{{ $presentation['name'] }}"?
-                                    </div>
-                                    <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відмінити</button>
-                                    <a class="btn btn-danger" href="{{route('remove_presentation', $presentation['id'])}}"> Видалити </a>
-                                    </div>
-                                </div>
-                                </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відмінити</button>
+                            <button class="btn btn-success" form="{{'updatePresentation'.$presentation['id']}}" type="submit"> Оновити </button>
                             </div>
+                        </div>
                         </div>
                     </div>
                     @endforeach
