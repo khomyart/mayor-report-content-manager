@@ -2594,6 +2594,10 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
           offset: chartInstance.type !== 'horizontalBar',
           ticks: {
             callback: function callback(value, index, values) {
+              if (chartInstance.type != 'horizontalBar') {
+                return value;
+              }
+
               if (showVerbalRounding == 'true' || showVerbalRounding == true) {
                 if (value >= 1000 && value < 1000000) {
                   return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
@@ -2624,6 +2628,10 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
           },
           ticks: {
             callback: function callback(value, index, values) {
+              if (chartInstance.type == 'horizontalBar') {
+                return value;
+              }
+
               if (showVerbalRounding == 'true' || showVerbalRounding == true) {
                 if (value >= 1000 && value < 1000000) {
                   return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
@@ -2973,7 +2981,7 @@ function submitChartData(mode, chartID) {
           ] 
       }
   ]
-     /* */
+   /* */
 
 
   articleChartsInstances = buildCharts(chartHTMLTemplate, chartSelectors, charts);
@@ -3024,8 +3032,6 @@ document.querySelector('#submit_chart_data').onclick = function () {
 document.querySelector('#submit_edited_chart_data').onclick = function () {
   submitChartData('edit', document.querySelector('#edit_chart_id').value);
 };
-
-document.querySelector('#debug').onclick = function () {};
 /* Submiting article */
 
 

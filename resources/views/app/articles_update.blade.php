@@ -178,7 +178,6 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="debug" class="btn btn-primary">Debug</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відміна</button>
                         <button type="button" id="submit_chart_data" class="btn btn-primary">Зберегти</button>
                     </div>
@@ -258,7 +257,6 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="edit_debug" class="btn btn-primary">Debug</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відміна</button>
                         <button type="button" id="submit_edited_chart_data" class="btn btn-primary">Зберегти</button>
                     </div>

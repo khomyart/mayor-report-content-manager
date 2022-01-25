@@ -539,8 +539,12 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                     offset: chartInstance.type !== 'horizontalBar',
                     ticks: {
                         callback: function(value, index, values) {
+                            if (chartInstance.type != 'horizontalBar') {
+                                return value;
+                            }
+
                             if (showVerbalRounding == 'true' ||
-                                showVerbalRounding == true) {
+                                showVerbalRounding == true){
                                 if (value >= 1000 && value < 1000000) {
                                     return `${(value/1000).toFixed(1)} тис.${dataLabelSuffix}`;
                                 } else if (value >= 1000000 && value < 1000000000) {
@@ -570,6 +574,10 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                     },
                     ticks: {
                         callback: function(value, index, values) {
+                            if (chartInstance.type == 'horizontalBar') {
+                                return value;
+                            }
+
                             if (showVerbalRounding == 'true' ||
                                 showVerbalRounding == true) {
                                 if (value >= 1000 && value < 1000000) {
@@ -925,7 +933,6 @@ function submitChartData(mode, chartID) {
             ] 
         }
     ]
-
      /* */
     articleChartsInstances = buildCharts(chartHTMLTemplate, chartSelectors, charts);    
 }
@@ -976,10 +983,6 @@ document.querySelector('#submit_chart_data').onclick = () => {
 
 document.querySelector('#submit_edited_chart_data').onclick = () => {
     submitChartData('edit', document.querySelector('#edit_chart_id').value);
-}
-
-document.querySelector('#debug').onclick = () => {
-
 }
 
 /* Submiting article */
@@ -1038,7 +1041,3 @@ try {
         isFileDeleted = true;
     }
 } catch (e) {}
-
-
-
-
