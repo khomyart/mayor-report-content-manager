@@ -85,18 +85,6 @@ const slidesConfig = {
             return
         }
 
-        // let elementsWithResizableFont = document.querySelectorAll('[fontSizeMultiplier]')
-        // elementsWithResizableFont.forEach(e => {
-        //     let fontSizeUnit = slides[0].offsetWidth / 100;
-        //     let fontSizeMultiplier = e.getAttribute('fontSizeMultiplier');
-        //     e.style.fontSize = `${fontSizeUnit * fontSizeMultiplier}px`;
-
-        //     e.childNodes.forEach((childNode)=>{
-        //         childNode.style.fontSize = `${fontSizeUnit * fontSizeMultiplier}px`;
-        //         recursiveChildrenFontSizing(fontSizeUnit * fontSizeMultiplier, childNode.children)
-        //     }) 
-        // })
-
         slideContentElement.childNodes.forEach(childNode => {
             childNode.style.width =`${ this.calculatePreviewItemParam(childNode).width}px`;
             childNode.style.height =`${ this.calculatePreviewItemParam(childNode).height}px`;
@@ -116,35 +104,40 @@ const slidesConfig = {
         }) 
     },
     calculatePreviewItemParam: function (item) {
-        let widthUnit = item.parentNode.offsetWidth / 100;
+        let miniatureSlideContentElement = {
+            offsetWidth: document.querySelector('.slide-content').offsetWidth,
+            offsetHeight: document.querySelector('.slide-content').offsetHeight * 0.98,
+        }
+
+        let widthUnit = miniatureSlideContentElement.offsetWidth / 100;
         let widthMultiplier = item.getAttribute('widthMultiplier');
         let width = `${(widthUnit * widthMultiplier).toFixed(5)}`;
     
         let widthInverted = `${((item.offsetWidth / workZone.offsetWidth) * 100).toFixed(3)}`;
         
-        let heightUnit = item.parentNode.offsetHeight / 100;
+        let heightUnit = miniatureSlideContentElement.offsetHeight / 100;
         let heightMultiplier = item.getAttribute('heightMultiplier');
         let height = `${(heightUnit * heightMultiplier).toFixed(5)}`;
     
         let heightInverted = `${((item.offsetHeight / workZone.offsetHeight) * 100).toFixed(3)}`;
     
-        let borderWidthUnit = item.parentNode.offsetWidth / 100;
+        let borderWidthUnit = miniatureSlideContentElement.offsetWidth / 100;
         let borderWidthMultiplier = item.getAttribute('borderWidthMultiplier');
         let borderWidth = `${(borderWidthUnit * borderWidthMultiplier).toFixed(5)}`;
     
-        let fontSizeUnit = item.parentNode.offsetWidth / 100;
+        let fontSizeUnit = miniatureSlideContentElement.offsetWidth / 100;
         let fontSizeMultiplier = item.getAttribute('fontSizeMultiplier');
         let fontSize = `${(fontSizeUnit * fontSizeMultiplier).toFixed(4)}`;
     
-        let paddingUnit = item.parentNode.offsetWidth / 100;
+        let paddingUnit = miniatureSlideContentElement.offsetWidth / 100;
         let paddingMultiplier = item.getAttribute('paddingMultiplier');
         let padding = `${(paddingUnit * paddingMultiplier).toFixed(5)}`;
     
-        let borderRadiusUnit = item.parentNode.offsetWidth / 100;
+        let borderRadiusUnit = miniatureSlideContentElement.offsetWidth / 100;
         let borderRadiusMultiplier = item.getAttribute('borderRadiusMultiplier');
         let borderRadius = `${(borderRadiusUnit * borderRadiusMultiplier).toFixed(5)}`;
     
-        let marginBottomUnit = item.parentNode.offsetHeight/100;
+        let marginBottomUnit = miniatureSlideContentElement.offsetHeight/100;
         let marginBottomMultiplier = item.getAttribute('marginBottomMultiplier');
         let marginBottom = `${(marginBottomUnit * marginBottomMultiplier).toFixed(4)}`;
     
