@@ -60,7 +60,6 @@ let CONFIG = {
           itemTemplate.setAttribute('borderWidthMultiplier', '0');
           itemTemplate.setAttribute('borderRadiusMultiplier', '0');
           itemTemplate.setAttribute('fontSizeMultiplier', '2');
-          itemTemplate.setAttribute('paddingMultiplier', '0.2');
           itemTemplate.setAttribute('marginBottomMultiplier', '0.2');
           itemTemplate.setAttribute('cAnchor', '0%,0%');
           itemTemplate.setAttribute('lockType', 'none');

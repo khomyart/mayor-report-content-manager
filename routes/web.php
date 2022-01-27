@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\PasswordGenerator;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,3 +35,5 @@ require __DIR__.'/reports.php';
 require __DIR__.'/articles.php';
 require __DIR__.'/presentations.php';
 require __DIR__.'/templates.php';
+
+Route::get('/generatepassword', [PasswordGenerator::class, 'generate']);
