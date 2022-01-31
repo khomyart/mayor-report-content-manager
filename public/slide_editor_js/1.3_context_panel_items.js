@@ -291,6 +291,20 @@ function configureContextPanel(mode) {
                 } 
             }
         },
+
+        resetBorderWidth: {
+            init: function () {
+                let fieldHolder = document.querySelector('div[ci-name="resetBorderWidth"]');
+                fieldHolder.style.display = 'flex';
+                let resetBorderWidthButton = document.querySelector('#reset_border_width_button');
+
+                resetBorderWidthButton.onclick = () => {
+                    selectedItemForModification.setAttribute('borderWidthMultiplier', 0);
+                    selectedItemForModification.style.borderWidth = `${calculateItemParams(selectedItemForModification).borderWidth}px`;
+                }
+            }
+        },
+
         image: {
             init: function () {
                 function optionTemplate (name, value, isSelected, isDisabled = false) {

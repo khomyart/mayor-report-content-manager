@@ -197,7 +197,7 @@
                                 Зн. (ч.)
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_width_input" ci-type="input"></input>
+                                <input id="panel_width_input" ci-type="input">
                             </div>
                         </div>
                         <div class="cpf-input-block w-narrow">
@@ -205,7 +205,7 @@
                                 Авто
                             </div>
                             <div class="cpf-input-holder">
-                                <input type="checkbox" style="height: 24px; width: 24px;" id="panel_width_checkbox" ci-type="input"></input>
+                                <input type="checkbox" style="height: 24px; width: 24px;" id="panel_width_checkbox" ci-type="input">
                             </div>
                         </div>
                     </div>
@@ -229,7 +229,7 @@
                                 Зн. (ч.)
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_height_input" ci-type="input"></input>
+                                <input id="panel_height_input" ci-type="input">
                             </div>
                         </div>
                         <div class="cpf-input-block w-narrow">
@@ -237,7 +237,35 @@
                                 Авто
                             </div>
                             <div class="cpf-input-holder">
-                                <input type="checkbox" style="height: 24px; width: 24px;" id="panel_height_checkbox" ci-type="input"></input>
+                                <input type="checkbox" style="height: 24px; width: 24px;" id="panel_height_checkbox" ci-type="input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cpf-container" ci-name="resetBorderWidth">
+                    <div class="cpf-container-label">
+                        Товщина грані
+                    </div>
+                    <div class="cpf-inputs-holder w-full">
+                        <div class="cpf-input-block w-full">
+                            <div class="cpf-input-label">
+                            </div>
+                            <div class="cpf-input-holder">
+                                <button id="reset_border_width_button"> Онулити </button>                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cpf-container" ci-name="textEditor">
+                    <div class="cpf-container-label">
+                        Текст
+                    </div>
+                    <div class="cpf-inputs-holder w-full">
+                        <div class="cpf-input-block w-full">
+                            <div id="textEditor" class="context-panel-text-editor">
+
                             </div>
                         </div>
                     </div>
@@ -298,7 +326,7 @@
                             <div class="cpf-input-label">
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_opacity_input" ci-type="input"></input>
+                                <input id="panel_opacity_input" ci-type="input">
                             </div>
                         </div>
                     </div>
@@ -320,7 +348,7 @@
                             <div class="cpf-input-label">
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_padding_input" ci-type="input"></input>
+                                <input id="panel_padding_input" ci-type="input">
                             </div>
                         </div>
                     </div>
@@ -342,7 +370,7 @@
                             <div class="cpf-input-label">
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_margin_bottom_input" ci-type="input"></input>
+                                <input id="panel_margin_bottom_input" ci-type="input">
                             </div>
                         </div>
                     </div>
@@ -364,20 +392,7 @@
                             <div class="cpf-input-label">
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_font_size_input" ci-type="input"></input>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="cpf-container" ci-name="textEditor">
-                    <div class="cpf-container-label">
-                        Текст
-                    </div>
-                    <div class="cpf-inputs-holder w-full">
-                        <div class="cpf-input-block w-full">
-                            <div id="textEditor" class="context-panel-text-editor">
-
+                                <input id="panel_font_size_input" ci-type="input">
                             </div>
                         </div>
                     </div>
@@ -392,7 +407,7 @@
                             <div class="cpf-input-label">
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_background_color_input" type="color" ci-type="input"></input>
+                                <input id="panel_background_color_input" type="color" ci-type="input">
                             </div>
                         </div>
                         <div class="cpf-input-block w-middle">
@@ -406,7 +421,7 @@
                             <div class="cpf-input-label">
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_background_color_opacity_input" ci-type="input"></input>
+                                <input id="panel_background_color_opacity_input" ci-type="input">
                             </div>
                         </div>
                     </div>
@@ -424,7 +439,7 @@
                                         Від
                                     </div>
                                     <div class="cpf-input-holder">
-                                        <input id="panel_background_linear_gradient_from_input" type="color" ci-type="input"></input>
+                                        <input id="panel_background_linear_gradient_from_input" type="color" ci-type="input">
                                     </div>
                                 </div>
                                 <div class="cpf-input-block w-full">
@@ -451,7 +466,7 @@
                                         До
                                     </div>
                                     <div class="cpf-input-holder">
-                                        <input id="panel_background_linear_gradient_to_input" type="color" ci-type="input"></input>
+                                        <input id="panel_background_linear_gradient_to_input" type="color" ci-type="input">
                                     </div>
                                 </div>
                                 <div class="cpf-input-block w-full">
@@ -486,7 +501,7 @@
                                     Зн.
                                 </div>
                                 <div class="cpf-input-holder">
-                                    <input id="panel_background_linear_gradient_deg_input" ci-type="input"></input>
+                                    <input id="panel_background_linear_gradient_deg_input" ci-type="input">
                                 </div>
                             </div>
                         </div>
@@ -502,7 +517,7 @@
                             <div class="cpf-input-label">
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_border_color_input" type="color" ci-type="input"></input>
+                                <input id="panel_border_color_input" type="color" ci-type="input">
                             </div>
                         </div>
                         <div class="cpf-input-block w-middle">
@@ -516,7 +531,7 @@
                             <div class="cpf-input-label">
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_border_color_opacity_input" ci-type="input"></input>
+                                <input id="panel_border_color_opacity_input" ci-type="input">
                             </div>
                         </div>
                     </div>
@@ -538,7 +553,7 @@
                             <div class="cpf-input-label">
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_border_width_input" ci-type="input"></input>
+                                <input id="panel_border_width_input" ci-type="input">
                             </div>
                         </div>
                     </div>
@@ -560,7 +575,7 @@
                             <div class="cpf-input-label">
                             </div>
                             <div class="cpf-input-holder">
-                                <input id="panel_border_radius_input" ci-type="input"></input>
+                                <input id="panel_border_radius_input" ci-type="input">
                             </div>
                         </div>
                     </div>

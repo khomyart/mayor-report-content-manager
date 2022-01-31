@@ -105,9 +105,23 @@ const slidesConfig = {
     },
     calculatePreviewItemParam: function (item) {
         let miniatureSlideContentElement = {
-            offsetWidth: document.querySelector('.slide-content').offsetWidth,
-            offsetHeight: document.querySelector('.slide-content').offsetHeight * 0.98,
+            offsetWidth: null,
+            offsetHeight: null
         }
+        
+        if (document.querySelector('.slide-content') != null) {
+            miniatureSlideContentElement = {
+                offsetWidth: document.querySelector('.slide-content').offsetWidth,
+                offsetHeight: document.querySelector('.slide-content').offsetHeight * 0.98,
+            }
+        } else {
+            miniatureSlideContentElement = {
+                offsetWidth: document.querySelector('.template-content').offsetWidth,
+                offsetHeight: document.querySelector('.template-content').offsetHeight * 0.98,
+            }
+        }
+
+        
 
         let widthUnit = miniatureSlideContentElement.offsetWidth / 100;
         let widthMultiplier = item.getAttribute('widthMultiplier');

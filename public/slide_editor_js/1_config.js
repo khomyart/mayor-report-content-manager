@@ -97,7 +97,7 @@ let CONFIG = {
           return itemTemplate;
         },
         contextPanelParams: [
-          'fontSize', 'anchor', 'position', 'width', 'height', 'textEditor','opacity', 
+          'fontSize', 'resetBorderWidth', 'anchor', 'position', 'width', 'height', 'textEditor','opacity', 
           'marginBottom', 'padding', 'zIndex', 'backgroundColor', 'borderColor', 'borderWidth', 
           'borderRadius', 'backgroundLinearGradient',
         ], 
