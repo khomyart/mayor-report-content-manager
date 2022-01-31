@@ -157,7 +157,7 @@ workZoneHolder.onmousedown = (e) => {
     e.preventDefault();
   }
 
-  workZoneHolder.onmousemove = (e) => {
+  workZoneHolder.addEventListener('mousemove', e => {
     if (e.buttons == 4) {
       everythingHolder.scrollLeft =
         pressedMiddleMouseButtonScrollCoordinates.x -
@@ -167,11 +167,11 @@ workZoneHolder.onmousedown = (e) => {
         (e.clientY - pressedMiddleMouseButtonCoordinates.y);
       everythingHolder.style.cursor = "grab";
     }
-  };
+  });
 
-  workZoneHolder.onmouseup = (e) => {
+  workZoneHolder.addEventListener('mouseup', e => {
     everythingHolder.style.cursor = "default";
-  };
+  });
 };
 
 // let incomingJson = {

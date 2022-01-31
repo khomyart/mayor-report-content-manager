@@ -589,7 +589,7 @@ function configureContextPanel(mode) {
 
                     match = backgroundImage.matchAll(/[0-9.]+deg/gi);
                     match = Array.from(match, x => x[0]);
-                    deg = match[0].slice(0,-3);
+                    deg = match.length == 0 ? 180 : match[0].slice(0,-3);
 
                     return {
                         persentagesValue,

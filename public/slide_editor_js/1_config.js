@@ -63,6 +63,7 @@ let CONFIG = {
           itemTemplate.setAttribute('marginBottomMultiplier', '0.2');
           itemTemplate.setAttribute('cAnchor', '0%,0%');
           itemTemplate.setAttribute('lockType', 'none');
+          itemTemplate.setAttribute('is-editable', 'true');
           itemTemplate.setAttribute('newly-created', 'true');
 
           return itemTemplate;
@@ -88,6 +89,7 @@ let CONFIG = {
           itemTemplate.setAttribute('marginBottomMultiplier', '0.2');
           itemTemplate.setAttribute('cAnchor', '0%,0%');
           itemTemplate.setAttribute('lockType', 'none');
+          itemTemplate.setAttribute('is-editable', 'true');
           itemTemplate.setAttribute('newly-created', 'true');
           itemTemplate.innerHTML = '<p>Текст 123</p>';
 
@@ -117,6 +119,7 @@ let CONFIG = {
           itemTemplate.setAttribute('marginBottomMultiplier', '0.2');
           itemTemplate.setAttribute('cAnchor', '0%,0%');
           itemTemplate.setAttribute('lockType', 'none');
+          itemTemplate.setAttribute('is-editable', 'true');
           itemTemplate.setAttribute('newly-created', 'true');
           itemTemplate.innerHTML = '<p>Текст посилання 123</p>';
 
@@ -148,6 +151,7 @@ let CONFIG = {
           itemTemplate.setAttribute('borderRadiusMultiplier', '0');
           itemTemplate.setAttribute('cAnchor', '0%,0%');
           itemTemplate.setAttribute('lockType', 'none');
+          itemTemplate.setAttribute('is-editable', 'true');
           itemTemplate.setAttribute('newly-created', 'true');
 
           itemTemplate.src = CONFIG.UI.itemTemplates.imageSrcTemplate;

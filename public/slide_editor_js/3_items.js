@@ -307,8 +307,8 @@ function itemDragActions(item, event) {
         }
     }
 
-    document.body.onmouseup = () => {
-        itemDropActions(item);
+    document.body.onmouseup = (event) => {
+        itemDropActions(item, event);
     }
 }
 
@@ -316,7 +316,7 @@ function itemDragActions(item, event) {
  * Decides how item should behave when mouse moving is done and lmb has been released
  * @param {*} item 
  */
-function itemDropActions(item) {
+function itemDropActions(item, event) {
     item.setAttribute('newly-created', false)
     item.style.transition = `all ease-in-out 0s`;
     item.setAttribute('i-is-selectable', 'true');
@@ -338,7 +338,7 @@ function itemDropActions(item) {
         calculatePositionForItems(item)
     }
 
-    if(selectedItemForModification) {
+    if(selectedItemForModification && event.buttons == 1) {
         clearItemSelection();
         selectItem(item);
     }
@@ -353,6 +353,8 @@ function itemDropActions(item) {
  * @param {object} item item which has been clicked
  */
 function selectItem(item) {
+    if (item.getAttribute('is-editable') == 'false') return;
+
     document.querySelectorAll('.selected-item').forEach(item => {
         item.classList.remove('selected-item')
     })
@@ -402,6 +404,27 @@ function showContextMenuOfItem(item, event) {
             },
             //TODO: create extendable stuff
             extendable: {}
+        },
+        {
+            name: () => {
+                return item.getAttribute('is-editable') == 'true' ? 'Блокувати редагування' : 'Розблокувати редагування'
+            },
+            method: () => {
+                if (!item.hasAttribute('is-editable')) {
+                    item.setAttribute('is-editable', 'false')
+                }
+
+                switch (item.getAttribute('is-editable')) {
+                    case 'false':
+                        item.setAttribute('is-editable', 'true');
+                    break;
+                    case 'true':
+                        item.setAttribute('is-editable', 'false');
+                        if (selectedItemForModification != null) configureContextPanel('destroy');
+                    break;
+                }
+                removeContextMenu()
+            },
         },
         {
             name: () => `hr`
