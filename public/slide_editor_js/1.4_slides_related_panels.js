@@ -372,6 +372,7 @@ const slidesConfig = {
         
         axios.post(getUrl(CONFIG.mode), dataObject)
         .then((response) => {
+            alert('Збережено')
         })
         .catch((errors) => {
             console.log(errors)
