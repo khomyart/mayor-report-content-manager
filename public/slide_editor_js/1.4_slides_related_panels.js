@@ -295,9 +295,15 @@ const slidesConfig = {
         if (workZone.innerHTML != this.slideList[this.selectedSlideNumber].content) {
             workZone.innerHTML = this.slideList[this.selectedSlideNumber].content;
             let fieldItems = document.querySelectorAll('.field-item');
+            //do this to field items when they are spawned
             fieldItems.forEach((item)=>{
                 addDragAndDropToItem(item);
                 item.ondragstart = () => false;
+
+                item.addEventListener('click', (event) => {
+                    event.preventDefault();
+                })
+
                 item.childNodes.forEach(element => {
                     element.ondragstart = () => false;
                     element.onclick = () => false;

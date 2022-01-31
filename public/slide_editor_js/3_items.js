@@ -64,6 +64,9 @@ function createNewItem(event, rootItem) {
     }
 
     newElementOfSchema.ondragstart = () => false;
+    newElementOfSchema.addEventListener('click', (event) => {
+        event.preventDefault();
+    })
     newElementOfSchema.childNodes.forEach(element => {
         element.ondragstart = () => false;
         element.onclick = () => false;
