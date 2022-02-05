@@ -18,7 +18,7 @@ class CreateChartDatasetsTable extends Migration
             $table->foreignId('chart_id')->references('id')->on('charts')
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->string('label', 255);
-            $table->bigInteger('value');
+            $table->float('value', 0, 0);
             $table->timestamps();
         });
     }

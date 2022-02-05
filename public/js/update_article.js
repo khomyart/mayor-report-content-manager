@@ -2153,7 +2153,7 @@ var rules = {
     return string.length > 0 ? true : false;
   },
   'numbers': function numbers(string) {
-    var re = /^[0-9]+$/gmi;
+    var re = /^[0-9]*\.{0,1}[0-9]+$/gmi;
     return string.match(re) != null ? true : false;
   },
   'letters': function letters(string) {
@@ -2230,14 +2230,16 @@ var elementsForChartEditValidation = [{
 }];
 
 function chartHTMLTemplate(chartArrayId) {
-  return "\n    <div class=\"col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder\"> \n        <div class=\"chart-menu-buttons-holder d-flex flex-column shadow p-2 rounded\">\n            <button class=\"btn btn-primary edit-chart-button mb-2\" chart_array_id=\"".concat(chartArrayId, "\">\u0420\u0435\u0434\u0430\u0433\u0443\u0432\u0430\u0442\u0438</button>\n            <button class=\"btn btn-danger remove-chart-button\" chart_array_id=\"").concat(chartArrayId, "\">\u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438</button>\n        </div>\n        <canvas class=\"__article_id___chart\"></canvas> \n    </div>\n    <hr class=\"mb-3\"/>\n    ");
+  return "\n    <div class=\"col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder\"> \n        <div class=\"chart-menu-buttons-holder d-flex flex-column shadow p-2 rounded\">\n            <button class=\"btn btn-primary edit-chart-button mb-2\" chart_array_id=\"".concat(chartArrayId, "\">\u0420\u0435\u0434\u0430\u0433\u0443\u0432\u0430\u0442\u0438</button>\n            <button class=\"btn btn-danger remove-chart-button mb-2\" chart_array_id=\"").concat(chartArrayId, "\">\u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438</button>\n            <div class=\"col-12 d-flex justify-content-around\">\n                <button class=\"col-5 btn btn-primary up-chart-button\" chart_array_id=\"").concat(chartArrayId, "\">+</button>\n                <button class=\"col-5 btn btn-danger down-chart-button\" chart_array_id=\"").concat(chartArrayId, "\">-</button>\n            </div>\n        </div>\n        <canvas class=\"__article_id___chart\"></canvas> \n    </div>\n    <hr class=\"mb-3\"/>\n    ");
 }
 
 var chartSelectors = {
   chartContainer: '.charts-container',
   chart: '.__article_id___chart',
   editChartButton: '.edit-chart-button',
-  removeChartButton: '.remove-chart-button'
+  removeChartButton: '.remove-chart-button',
+  upChartButton: '.up-chart-button',
+  downChartButton: '.down-chart-button'
 };
 var charts = [];
 var articleChartsInstances = [];
@@ -2310,6 +2312,47 @@ function stringCut(symbolsPerLine, string) {
   }
 }
 
+function moveChart(direction, chartArrayIndex) {
+  chartArrayIndex = parseInt(chartArrayIndex);
+
+  switch (direction) {
+    case 'up':
+      console.log('up');
+      console.log(charts);
+      console.log(chartArrayIndex);
+
+      if (chartArrayIndex > 0) {
+        var previousChart = charts[chartArrayIndex - 1];
+        var currentChart = charts[chartArrayIndex]; //reasign charts
+
+        articleChartsInstances[chartArrayIndex - 1] = currentChart;
+        articleChartsInstances[chartArrayIndex] = previousChart;
+        charts[chartArrayIndex - 1] = currentChart;
+        charts[chartArrayIndex] = previousChart;
+        console.log(charts);
+      }
+
+      break;
+
+    case 'down':
+      console.log('down');
+      console.log(charts);
+      console.log(chartArrayIndex);
+
+      if (chartArrayIndex < charts.length - 1) {
+        var nextChart = charts[chartArrayIndex + 1];
+        var _currentChart = charts[chartArrayIndex]; //reasign charts
+
+        articleChartsInstances[chartArrayIndex + 1] = _currentChart;
+        articleChartsInstances[chartArrayIndex] = nextChart;
+        charts[chartArrayIndex + 1] = _currentChart;
+        charts[chartArrayIndex] = nextChart;
+      }
+
+      break;
+  }
+}
+
 function removeElementFromChartArray(chartArrayIndex) {
   charts.splice(chartArrayIndex, 1);
   articleChartsInstances.splice(chartArrayIndex, 1);
@@ -2362,7 +2405,7 @@ function showEditChartModal(id) {
 /**
  * 
  * @param {string} chartHTMLTemplate template for chart's canvas, actually chart holder template
- * @param {object} selectors object wich contains selectors for main elements
+ * @param {object} selectors object which contains selectors for main elements
  * @param {array} chartsArray array with charts params like title, legend, values, etc
  * @returns 
  */
@@ -2497,7 +2540,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
               } else if (currentItemData >= 1000000 && currentItemData < 1000000000) {
                 return "".concat(label).concat((currentItemData / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
               } else if (currentItemData >= 1000000000) {
-                return "".concat(label).concat((currentItemData / 1000000000).toFixed(1), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+                return "".concat(label).concat((currentItemData / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
               } else {
                 return "".concat(label).concat(currentItemData).concat(dataLabelSuffix);
               }
@@ -2528,7 +2571,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
               } else if (value >= 1000000 && value < 1000000000) {
                 return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
               } else if (value >= 1000000000) {
-                return "".concat((value / 1000000000).toFixed(1), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+                return "".concat((value / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
               } else {
                 return "".concat(value).concat(dataLabelSuffix);
               }
@@ -2604,7 +2647,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                 } else if (value >= 1000000 && value < 1000000000) {
                   return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
                 } else if (value >= 1000000000) {
-                  return "".concat((value / 1000000000).toFixed(1), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+                  return "".concat((value / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
                 } else {
                   return "".concat(value).concat(dataLabelSuffix);
                 }
@@ -2638,7 +2681,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                 } else if (value >= 1000000 && value < 1000000000) {
                   return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
                 } else if (value >= 1000000000) {
-                  return "".concat((value / 1000000000).toFixed(1), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+                  return "".concat((value / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
                 } else {
                   return "".concat(value).concat(dataLabelSuffix);
                 }
@@ -2697,6 +2740,20 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
     document.querySelectorAll('.edit-chart-button').forEach(function (button) {
       button.onclick = function (event) {
         showEditChartModal(event.target.getAttribute('chart_array_id'));
+      };
+    }); //up button asignment
+
+    document.querySelectorAll('.up-chart-button').forEach(function (button) {
+      button.onclick = function (event) {
+        moveChart('up', event.target.getAttribute('chart_array_id'));
+        buildCharts(chartHTMLTemplate, selectors, charts);
+      };
+    }); //down button asignment
+
+    document.querySelectorAll('.down-chart-button').forEach(function (button) {
+      button.onclick = function (event) {
+        moveChart('down', event.target.getAttribute('chart_array_id'));
+        buildCharts(chartHTMLTemplate, selectors, charts);
       };
     });
   }

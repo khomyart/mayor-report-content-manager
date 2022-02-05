@@ -73,7 +73,7 @@ let rules = {
         return string.length > 0 ? true : false
     },
     'numbers': (string) => {
-        let re = /^[0-9]+$/gmi;
+        let re = /^[0-9]*\.{0,1}[0-9]+$/gmi;
         return string.match(re) != null ? true : false;
     },
     'letters': (string) => {
@@ -175,7 +175,11 @@ function chartHTMLTemplate (chartArrayId) {
     <div class="col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder"> 
         <div class="chart-menu-buttons-holder d-flex flex-column shadow p-2 rounded">
             <button class="btn btn-primary edit-chart-button mb-2" chart_array_id="${chartArrayId}">Редагувати</button>
-            <button class="btn btn-danger remove-chart-button" chart_array_id="${chartArrayId}">Видалити</button>
+            <button class="btn btn-danger remove-chart-button mb-2" chart_array_id="${chartArrayId}">Видалити</button>
+            <div class="col-12 d-flex justify-content-around">
+                <button class="col-5 btn btn-primary up-chart-button" chart_array_id="${chartArrayId}">+</button>
+                <button class="col-5 btn btn-danger down-chart-button" chart_array_id="${chartArrayId}">-</button>
+            </div>
         </div>
         <canvas class="__article_id___chart"></canvas> 
     </div>
@@ -187,7 +191,9 @@ let chartSelectors = {
     chartContainer: '.charts-container',
     chart: '.__article_id___chart',
     editChartButton: '.edit-chart-button',
-    removeChartButton: '.remove-chart-button'
+    removeChartButton: '.remove-chart-button',
+    upChartButton: '.up-chart-button',
+    downChartButton: '.down-chart-button',
 }
 
 let charts = [];
@@ -258,6 +264,44 @@ let articleChartsInstances = [];
     }
 }
 
+function moveChart(direction, chartArrayIndex) {
+    chartArrayIndex = parseInt(chartArrayIndex);
+
+    switch (direction) {
+        case 'up':
+            console.log('up')
+            console.log(charts)
+            console.log(chartArrayIndex)
+
+            if (chartArrayIndex > 0) {
+                let previousChart = charts[chartArrayIndex - 1];
+                let currentChart = charts[chartArrayIndex];
+                //reasign charts
+                articleChartsInstances[chartArrayIndex - 1] = currentChart;
+                articleChartsInstances[chartArrayIndex] = previousChart;
+                charts[chartArrayIndex - 1] = currentChart;
+                charts[chartArrayIndex] = previousChart;
+                console.log(charts)
+            }
+            break;
+    
+        case 'down':
+            console.log('down')
+            console.log(charts)
+            console.log(chartArrayIndex)
+
+            if (chartArrayIndex < charts.length - 1) {
+                let nextChart = charts[chartArrayIndex + 1];
+                let currentChart = charts[chartArrayIndex];
+                //reasign charts
+                articleChartsInstances[chartArrayIndex + 1] = currentChart;
+                articleChartsInstances[chartArrayIndex] = nextChart;
+                charts[chartArrayIndex + 1] = currentChart;
+                charts[chartArrayIndex] = nextChart;
+            }
+            break;
+    }
+}
 
 function removeElementFromChartArray(chartArrayIndex) {
     charts.splice(chartArrayIndex, 1);
@@ -318,7 +362,7 @@ function showEditChartModal(id) {
 /**
  * 
  * @param {string} chartHTMLTemplate template for chart's canvas, actually chart holder template
- * @param {object} selectors object wich contains selectors for main elements
+ * @param {object} selectors object which contains selectors for main elements
  * @param {array} chartsArray array with charts params like title, legend, values, etc
  * @returns 
  */
@@ -445,7 +489,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                             } else if (currentItemData >= 1000000 && currentItemData < 1000000000) {
                                 return `${label}${(currentItemData/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
                             } else if (currentItemData >= 1000000000) {
-                                return `${label}${(currentItemData/1000000000).toFixed(1)} млрд.${dataLabelSuffix}`;
+                                return `${label}${(currentItemData/1000000000).toFixed(3)} млрд.${dataLabelSuffix}`;
                             } else {
                                 return `${label}${currentItemData}${dataLabelSuffix}`;
                             }
@@ -478,7 +522,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                             } else if (value >= 1000000 && value < 1000000000) {
                                 return `${(value/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
                             } else if (value >= 1000000000) {
-                                return `${(value/1000000000).toFixed(1)} млрд.${dataLabelSuffix}`;
+                                return `${(value/1000000000).toFixed(3)} млрд.${dataLabelSuffix}`;
                             } else {
                                 return `${value}${dataLabelSuffix}`;
                             }
@@ -550,7 +594,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                                 } else if (value >= 1000000 && value < 1000000000) {
                                     return `${(value/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
                                 } else if (value >= 1000000000) {
-                                    return `${(value/1000000000).toFixed(1)} млрд.${dataLabelSuffix}`;
+                                    return `${(value/1000000000).toFixed(3)} млрд.${dataLabelSuffix}`;
                                 } else {
                                     return `${value}${dataLabelSuffix}`;
                                 }
@@ -585,7 +629,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                                 } else if (value >= 1000000 && value < 1000000000) {
                                     return `${(value/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
                                 } else if (value >= 1000000000) {
-                                    return `${(value/1000000000).toFixed(1)} млрд.${dataLabelSuffix}`;
+                                    return `${(value/1000000000).toFixed(3)} млрд.${dataLabelSuffix}`;
                                 } else {
                                     return `${value}${dataLabelSuffix}`;
                                 }
@@ -645,6 +689,22 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
         document.querySelectorAll('.edit-chart-button').forEach(button => {
             button.onclick = (event) => {
                 showEditChartModal(event.target.getAttribute('chart_array_id'))
+            }
+        })
+
+        //up button asignment
+        document.querySelectorAll('.up-chart-button').forEach(button => {
+            button.onclick = (event) => {
+                moveChart('up', (event.target.getAttribute('chart_array_id')));
+                buildCharts(chartHTMLTemplate, selectors, charts);
+            }
+        })
+
+        //down button asignment
+        document.querySelectorAll('.down-chart-button').forEach(button => {
+            button.onclick = (event) => {
+                moveChart('down', (event.target.getAttribute('chart_array_id')));
+                buildCharts(chartHTMLTemplate, selectors, charts);
             }
         })
     }
