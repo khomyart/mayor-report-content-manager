@@ -70,6 +70,8 @@ document.body.style.display = "";
 
 //!!TODO: Make this stuff responsive to screen changing, white(blank) spaces near workZone
 setTimeout(() => {
+  srpConfig.panels.slideList.show();
+  
   sideBarsAndMainFieldHolder.style.height = `${container.offsetHeight - (CONFIG.UI.defaultWorkZoneItemsOffsets.height + CONFIG.UI.itemsPanel.defaultDistanceFromWorkZoneItem)}px`;
   workZoneHolder.style.width = `${
     workZone.offsetWidth + document.body.offsetWidth * 1.5
@@ -228,7 +230,7 @@ setInterval(()=>{
 
 window.addEventListener('load', function() {
   //init slides panel
-  srpConfig.panels.slideList.show();
+  // srpConfig.panels.slideList.show();
   // slidesConfig.getList(true);
 
   // srpConfig.panels.imagesList.show();
