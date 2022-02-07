@@ -773,9 +773,7 @@
         imagesConfig.imageList = {!! json_encode($images) !!}; 
         templatesConfig.templateList = {!! json_encode($templates) !!}
 
-        window.addEventListener('load', function() {
-            slidesConfig.getList(true);
-            
+        window.addEventListener('load', function() {            
             if (CONFIG.mode == 'template') {
                 // srpConfig.buttons.templatesList.remove()
                 goToPresentationsButton.innerHTML = 'Звіти'

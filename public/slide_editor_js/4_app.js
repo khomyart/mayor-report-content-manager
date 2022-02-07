@@ -68,24 +68,6 @@ itemPanel.style.height = `${CONFIG.UI.defaultWorkZoneItemsOffsets.height + CONFI
 
 document.body.style.display = "";
 
-//!!TODO: Make this stuff responsive to screen changing, white(blank) spaces near workZone
-setTimeout(() => {
-  srpConfig.panels.slideList.show();
-  
-  sideBarsAndMainFieldHolder.style.height = `${container.offsetHeight - (CONFIG.UI.defaultWorkZoneItemsOffsets.height + CONFIG.UI.itemsPanel.defaultDistanceFromWorkZoneItem)}px`;
-  workZoneHolder.style.width = `${
-    workZone.offsetWidth + document.body.offsetWidth * 1.5
-  }px`;
-  workZoneHolder.style.height = `${
-    workZone.offsetHeight + document.body.offsetHeight * 1.5
-  }px`;
-  //initial scroll position, scroll can be setted up only if workZoneHolder with and haight are configured
-  everythingHolder.scrollTop =
-    workZoneHolder.offsetHeight / 2 - everythingHolder.offsetHeight / 2;
-  everythingHolder.scrollLeft =
-    workZoneHolder.offsetWidth / 2 - everythingHolder.offsetWidth / 2;
-}, 10);
-
 //Initialization root items, making them be dependent of config
 rootItems.forEach((element) => {
   element.className = `${element.className}`;
@@ -229,11 +211,19 @@ setInterval(()=>{
 },1000)
 
 window.addEventListener('load', function() {
-  //init slides panel
-  // srpConfig.panels.slideList.show();
-  // slidesConfig.getList(true);
-
-  // srpConfig.panels.imagesList.show();
-  // imagesConfig.rebuildList(imagesConfig.imageList);
-  // srpConfig.buttons.imagesList.classList.add(srpConfig.buttons.activeButtonClass)
+  srpConfig.panels.slideList.show();
+  slidesConfig.getList(true);
+  
+  sideBarsAndMainFieldHolder.style.height = `${container.offsetHeight - (CONFIG.UI.defaultWorkZoneItemsOffsets.height + CONFIG.UI.itemsPanel.defaultDistanceFromWorkZoneItem)}px`;
+  workZoneHolder.style.width = `${
+    workZone.offsetWidth + document.body.offsetWidth * 1.5
+  }px`;
+  workZoneHolder.style.height = `${
+    workZone.offsetHeight + document.body.offsetHeight * 1.5
+  }px`;
+  //initial scroll position, scroll can be setted up only if workZoneHolder with and haight are configured
+  everythingHolder.scrollTop =
+    workZoneHolder.offsetHeight / 2 - everythingHolder.offsetHeight / 2;
+  everythingHolder.scrollLeft =
+    workZoneHolder.offsetWidth / 2 - everythingHolder.offsetWidth / 2;
 })

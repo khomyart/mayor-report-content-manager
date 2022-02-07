@@ -56,6 +56,7 @@ const srpConfig = {
 
 const slidesConfig = {
     getList: function(isRebuildNeeded = false) {
+        console.log('done')
         if (isRebuildNeeded) {
             this.rebuildSlidesList(this.slideList)
             this.select(this.selectedSlideNumber, false);
