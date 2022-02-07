@@ -3058,7 +3058,7 @@ function submitArticleData() {
 
 
   var articleText = element('#article_text').value;
-  var replaceWith = '<div class="col-12 col-md-10 col-xxl-8 mb-4"><canvas class="__article_id___chart"></canvas></div>';
+  var replaceWith = '<div class="col-12 col-md-12 col-xxl-11 mb-4"><canvas class="__article_id___chart"></canvas></div>';
   var re = /@@@/ig;
   var formData = new FormData();
   formData.append('report_id', element('#report_id').value);

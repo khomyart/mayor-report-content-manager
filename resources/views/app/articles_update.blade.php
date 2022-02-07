@@ -11,8 +11,7 @@
 @endphp
 
 @section('content')
-<script src="https://cdn.ckeditor.com/ckeditor5/31.0.0/classic/ckeditor.js"></script>
-
+<script src="{{asset('article_text_editor/ckeditor.js')}}"></script>
 
 <div class="articles container-fluid p-0 d-flex flex-column align-items-center col-12" style="height: 100%">
     <nav class="button-holder col-12 d-flex justify-content-between p-3">
@@ -271,18 +270,9 @@ let incomingArticle = {!! json_encode($article) !!}
 
 ClassicEditor
     .create( document.querySelector( '#article_text' ), {
-        toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
-        heading: {
-            options: [
-                { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-                { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
-                { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' }
-            ]
-        }
     })
     .then( newEditor => {
         editor = newEditor;
-        // console.log(Array.from( editor.ui.componentFactory.names()))
     })
     .catch( error => {
         console.error( error );

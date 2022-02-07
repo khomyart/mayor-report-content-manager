@@ -1009,7 +1009,7 @@ function submitArticleData() {
 
     /* Replacer for article text '@@@' -> replaceWith variable value */
     let articleText = element('#article_text').value
-    let replaceWith = '<div class="col-12 col-md-10 col-xxl-8 mb-4"><canvas class="__article_id___chart"></canvas></div>'
+    let replaceWith = '<div class="col-12 col-md-12 col-xxl-11 mb-4"><canvas class="__article_id___chart"></canvas></div>'
     let re = /@@@/ig;
 
     let formData = new FormData();

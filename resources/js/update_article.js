@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const chartSpawner = '<div class="col-12 col-md-10 col-xxl-8 mb-4"><canvas class="__article_id___chart"></canvas></div>'
-const chartSpawnerPattern = /<div class="col-12 col-md-10 col-xxl-8 mb-4"><canvas class="__article_id___chart"><\/canvas><\/div>/gi
+const chartSpawner = '<div class="col-12 col-md-12 col-xxl-11 mb-4"><canvas class="__article_id___chart"></canvas></div>'
+const chartSpawnerPattern = /<div class="col-12 col-md-12 col-xxl-11 mb-4"><canvas class="__article_id___chart"><\/canvas><\/div>/gi
 
 function datasetHTMLTemplate(currentChartDataset) {
     return `

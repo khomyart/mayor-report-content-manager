@@ -2121,8 +2121,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 
-var chartSpawner = '<div class="col-12 col-md-10 col-xxl-8 mb-4"><canvas class="__article_id___chart"></canvas></div>';
-var chartSpawnerPattern = /<div class="col-12 col-md-10 col-xxl-8 mb-4"><canvas class="__article_id___chart"><\/canvas><\/div>/gi;
+var chartSpawner = '<div class="col-12 col-md-12 col-xxl-11 mb-4"><canvas class="__article_id___chart"></canvas></div>';
+var chartSpawnerPattern = /<div class="col-12 col-md-12 col-xxl-11 mb-4"><canvas class="__article_id___chart"><\/canvas><\/div>/gi;
 
 function datasetHTMLTemplate(currentChartDataset) {
   return "\n    <div class=\"row mb-3 d-flex align-items-end dataset\" id=\"dataset_".concat(currentChartDataset, "\">\n        <div class=\"col-4\">\n            <label for=\"label_").concat(currentChartDataset, "\" class=\"form-label\">\u041D\u0430\u0437\u0432\u0430 \u043F\u043E\u043B\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element dataset_label\" id=\"label_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-5\">\n            <label for=\"value_").concat(currentChartDataset, "\" class=\"form-label\">\u0417\u043D\u0430\u0447\u0435\u043D\u043D\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element dataset_value\" id=\"value_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-3\">\n            <button class=\"btn btn-primary col-12\" onclick=\"document.querySelector('#dataset_").concat(currentChartDataset, "').remove()\">\n                \u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438\n            </button>\n        </div>\n    </div>\n    ");
