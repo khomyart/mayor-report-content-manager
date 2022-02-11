@@ -19,7 +19,7 @@ class Templates extends Controller
         [
             'presentationId' => null,
             'reportId' => $id,
-            'serverUrl' => url('/'),
+            'serverUrl' => env('APP_URL'),
             'presentationName' => null,
             'slides' => $report->templates->toArray(),
             'images' => Images::getConvertedImageList($report->templateImages->toArray()),

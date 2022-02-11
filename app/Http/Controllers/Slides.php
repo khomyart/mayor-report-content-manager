@@ -20,7 +20,7 @@ class Slides extends Controller
             [
                 'presentationId' => $id,
                 'reportId' => $presentation->report_id,
-                'serverUrl' => url('/'),
+                'serverUrl' => env('APP_URL'),
                 'presentationName' => $presentation->name,
                 'slides' => $presentation->slides->toArray(),
                 'images' => Images::getConvertedImageList($presentation->images->toArray()),

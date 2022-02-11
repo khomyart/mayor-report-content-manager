@@ -385,7 +385,7 @@ const slidesConfig = {
             console.log(errors)
             alert('Сталася помилка')
         })
-
+        
         console.log('sent')
     }
 }

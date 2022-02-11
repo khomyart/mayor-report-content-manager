@@ -766,7 +766,6 @@
         CONFIG.reportId = {!! json_encode($reportId) !!};
         CONFIG.CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         CONFIG.UI.itemTemplates.imageSrcTemplate = `${CONFIG.serverUrl}/storage/image_placeholder.png`,
-        
         CONFIG.mode = {!! json_encode($mode) !!};
 
         slidesConfig.slideList = {!! json_encode($slides) !!}; 
