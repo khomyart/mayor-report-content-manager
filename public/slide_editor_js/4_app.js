@@ -116,11 +116,11 @@ workZoneHolder.onmousewheel = (e) => {
   if (e.ctrlKey) {
     e.preventDefault();
 
-    if (e.deltaY == 100) {
+    if (e.deltaY > 0) {
       zoom("out", CONFIG.UI.zoomStep);
     }
 
-    if (e.deltaY == -100) {
+    if (e.deltaY < 0) {
       zoom("in", CONFIG.UI.zoomStep);
     }
   }
@@ -158,24 +158,6 @@ workZoneHolder.onmousedown = (e) => {
   });
 };
 
-// let incomingJson = {
-//     cabinet: {
-//         number: 221,
-//         items: [
-//             {
-//                 code: '1011123331',
-//                 name: 'Принтер 1',
-//                 description: 'Не друкує'
-//             },
-//             {
-//                 code: '1011123332',
-//                 name: 'Монітор philips))',
-//                 description: 'Показує добренько'
-//             }
-//         ]
-//     }
-// }
-
 let variableWidthHTML;
 
 const goToPresentationsButton = document.getElementById('goToPresentations');
@@ -200,7 +182,7 @@ setInterval(()=>{
   )
 
   if (slidesConfig.slideList.length != 0) {
-    currentSlideContentContainer.innerHTML = 
+    currentSlideContentContainer.innerHTML =
     slidesConfig.slideList[slidesConfig.selectedSlideNumber].content
     .replace(/field-item/gi, '')
     .replace(/selected-item/gi, '');
@@ -213,7 +195,7 @@ setInterval(()=>{
 window.addEventListener('load', function() {
   srpConfig.panels.slideList.show();
   slidesConfig.getList(true);
-  
+
   sideBarsAndMainFieldHolder.style.height = `${container.offsetHeight - (CONFIG.UI.defaultWorkZoneItemsOffsets.height + CONFIG.UI.itemsPanel.defaultDistanceFromWorkZoneItem)}px`;
   workZoneHolder.style.width = `${
     workZone.offsetWidth + document.body.offsetWidth * 1.5

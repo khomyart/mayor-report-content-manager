@@ -33,6 +33,7 @@ module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
     var requestData = config.data;
     var requestHeaders = config.headers;
+    var responseType = config.responseType;
 
     if (utils.isFormData(requestData)) {
       delete requestHeaders['Content-Type']; // Let the browser set it
@@ -53,23 +54,14 @@ module.exports = function xhrAdapter(config) {
     // Set the request timeout in MS
     request.timeout = config.timeout;
 
-    // Listen for ready state
-    request.onreadystatechange = function handleLoad() {
-      if (!request || request.readyState !== 4) {
+    function onloadend() {
+      if (!request) {
         return;
       }
-
-      // The request errored out and we didn't get a response, this will be
-      // handled by onerror instead
-      // With one exception: request that using file: protocol, most browsers
-      // will return status as 0 even though it's a successful request
-      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
-        return;
-      }
-
       // Prepare the response
       var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
-      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var responseData = !responseType || responseType === 'text' ||  responseType === 'json' ?
+        request.responseText : request.response;
       var response = {
         data: responseData,
         status: request.status,
@@ -83,7 +75,30 @@ module.exports = function xhrAdapter(config) {
 
       // Clean up request
       request = null;
-    };
+    }
+
+    if ('onloadend' in request) {
+      // Use onloadend if available
+      request.onloadend = onloadend;
+    } else {
+      // Listen for ready state to emulate onloadend
+      request.onreadystatechange = function handleLoad() {
+        if (!request || request.readyState !== 4) {
+          return;
+        }
+
+        // The request errored out and we didn't get a response, this will be
+        // handled by onerror instead
+        // With one exception: request that using file: protocol, most browsers
+        // will return status as 0 even though it's a successful request
+        if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+          return;
+        }
+        // readystate handler is calling before onerror or ontimeout handlers,
+        // so we should call onloadend on the next 'tick'
+        setTimeout(onloadend);
+      };
+    }
 
     // Handle browser request cancellation (as opposed to a manual cancellation)
     request.onabort = function handleAbort() {
@@ -113,7 +128,10 @@ module.exports = function xhrAdapter(config) {
       if (config.timeoutErrorMessage) {
         timeoutErrorMessage = config.timeoutErrorMessage;
       }
-      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+      reject(createError(
+        timeoutErrorMessage,
+        config,
+        config.transitional && config.transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
         request));
 
       // Clean up request
@@ -153,16 +171,8 @@ module.exports = function xhrAdapter(config) {
     }
 
     // Add responseType to request if needed
-    if (config.responseType) {
-      try {
-        request.responseType = config.responseType;
-      } catch (e) {
-        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
-        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
-        if (config.responseType !== 'json') {
-          throw e;
-        }
-      }
+    if (responseType && responseType !== 'json') {
+      request.responseType = config.responseType;
     }
 
     // Handle progress if needed
@@ -263,7 +273,7 @@ axios.isAxiosError = __webpack_require__(/*! ./helpers/isAxiosError */ "./node_m
 module.exports = axios;
 
 // Allow use of default import syntax in TypeScript
-module.exports.default = axios;
+module.exports["default"] = axios;
 
 
 /***/ }),
@@ -396,7 +406,9 @@ var buildURL = __webpack_require__(/*! ../helpers/buildURL */ "./node_modules/ax
 var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ "./node_modules/axios/lib/core/InterceptorManager.js");
 var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ "./node_modules/axios/lib/core/dispatchRequest.js");
 var mergeConfig = __webpack_require__(/*! ./mergeConfig */ "./node_modules/axios/lib/core/mergeConfig.js");
+var validator = __webpack_require__(/*! ../helpers/validator */ "./node_modules/axios/lib/helpers/validator.js");
 
+var validators = validator.validators;
 /**
  * Create a new instance of Axios
  *
@@ -436,20 +448,71 @@ Axios.prototype.request = function request(config) {
     config.method = 'get';
   }
 
-  // Hook up interceptors middleware
-  var chain = [dispatchRequest, undefined];
-  var promise = Promise.resolve(config);
+  var transitional = config.transitional;
 
+  if (transitional !== undefined) {
+    validator.assertOptions(transitional, {
+      silentJSONParsing: validators.transitional(validators.boolean, '1.0.0'),
+      forcedJSONParsing: validators.transitional(validators.boolean, '1.0.0'),
+      clarifyTimeoutError: validators.transitional(validators.boolean, '1.0.0')
+    }, false);
+  }
+
+  // filter out skipped interceptors
+  var requestInterceptorChain = [];
+  var synchronousRequestInterceptors = true;
   this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
-    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+    if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
+      return;
+    }
+
+    synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+
+    requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
   });
 
+  var responseInterceptorChain = [];
   this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
-    chain.push(interceptor.fulfilled, interceptor.rejected);
+    responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
   });
 
-  while (chain.length) {
-    promise = promise.then(chain.shift(), chain.shift());
+  var promise;
+
+  if (!synchronousRequestInterceptors) {
+    var chain = [dispatchRequest, undefined];
+
+    Array.prototype.unshift.apply(chain, requestInterceptorChain);
+    chain = chain.concat(responseInterceptorChain);
+
+    promise = Promise.resolve(config);
+    while (chain.length) {
+      promise = promise.then(chain.shift(), chain.shift());
+    }
+
+    return promise;
+  }
+
+
+  var newConfig = config;
+  while (requestInterceptorChain.length) {
+    var onFulfilled = requestInterceptorChain.shift();
+    var onRejected = requestInterceptorChain.shift();
+    try {
+      newConfig = onFulfilled(newConfig);
+    } catch (error) {
+      onRejected(error);
+      break;
+    }
+  }
+
+  try {
+    promise = dispatchRequest(newConfig);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+
+  while (responseInterceptorChain.length) {
+    promise = promise.then(responseInterceptorChain.shift(), responseInterceptorChain.shift());
   }
 
   return promise;
@@ -511,10 +574,12 @@ function InterceptorManager() {
  *
  * @return {Number} An ID used to remove interceptor later
  */
-InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+InterceptorManager.prototype.use = function use(fulfilled, rejected, options) {
   this.handlers.push({
     fulfilled: fulfilled,
-    rejected: rejected
+    rejected: rejected,
+    synchronous: options ? options.synchronous : false,
+    runWhen: options ? options.runWhen : null
   });
   return this.handlers.length - 1;
 };
@@ -647,7 +712,8 @@ module.exports = function dispatchRequest(config) {
   config.headers = config.headers || {};
 
   // Transform request data
-  config.data = transformData(
+  config.data = transformData.call(
+    config,
     config.data,
     config.headers,
     config.transformRequest
@@ -673,7 +739,8 @@ module.exports = function dispatchRequest(config) {
     throwIfCancellationRequested(config);
 
     // Transform response data
-    response.data = transformData(
+    response.data = transformData.call(
+      config,
       response.data,
       response.headers,
       config.transformResponse
@@ -686,7 +753,8 @@ module.exports = function dispatchRequest(config) {
 
       // Transform response data
       if (reason && reason.response) {
-        reason.response.data = transformData(
+        reason.response.data = transformData.call(
+          config,
           reason.response.data,
           reason.response.headers,
           config.transformResponse
@@ -898,6 +966,7 @@ module.exports = function settle(resolve, reject, response) {
 
 
 var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var defaults = __webpack_require__(/*! ./../defaults */ "./node_modules/axios/lib/defaults.js");
 
 /**
  * Transform the data for a request or a response
@@ -908,9 +977,10 @@ var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/util
  * @returns {*} The resulting transformed data
  */
 module.exports = function transformData(data, headers, fns) {
+  var context = this || defaults;
   /*eslint no-param-reassign:0*/
   utils.forEach(fns, function transform(fn) {
-    data = fn(data, headers);
+    data = fn.call(context, data, headers);
   });
 
   return data;
@@ -926,11 +996,12 @@ module.exports = function transformData(data, headers, fns) {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-/* provided dependency */ var process = __webpack_require__(/*! process/browser */ "./node_modules/process/browser.js");
+/* provided dependency */ var process = __webpack_require__(/*! process/browser.js */ "./node_modules/process/browser.js");
 
 
 var utils = __webpack_require__(/*! ./utils */ "./node_modules/axios/lib/utils.js");
 var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ "./node_modules/axios/lib/helpers/normalizeHeaderName.js");
+var enhanceError = __webpack_require__(/*! ./core/enhanceError */ "./node_modules/axios/lib/core/enhanceError.js");
 
 var DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencoded'
@@ -954,12 +1025,35 @@ function getDefaultAdapter() {
   return adapter;
 }
 
+function stringifySafely(rawValue, parser, encoder) {
+  if (utils.isString(rawValue)) {
+    try {
+      (parser || JSON.parse)(rawValue);
+      return utils.trim(rawValue);
+    } catch (e) {
+      if (e.name !== 'SyntaxError') {
+        throw e;
+      }
+    }
+  }
+
+  return (encoder || JSON.stringify)(rawValue);
+}
+
 var defaults = {
+
+  transitional: {
+    silentJSONParsing: true,
+    forcedJSONParsing: true,
+    clarifyTimeoutError: false
+  },
+
   adapter: getDefaultAdapter(),
 
   transformRequest: [function transformRequest(data, headers) {
     normalizeHeaderName(headers, 'Accept');
     normalizeHeaderName(headers, 'Content-Type');
+
     if (utils.isFormData(data) ||
       utils.isArrayBuffer(data) ||
       utils.isBuffer(data) ||
@@ -976,20 +1070,32 @@ var defaults = {
       setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
       return data.toString();
     }
-    if (utils.isObject(data)) {
-      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
-      return JSON.stringify(data);
+    if (utils.isObject(data) || (headers && headers['Content-Type'] === 'application/json')) {
+      setContentTypeIfUnset(headers, 'application/json');
+      return stringifySafely(data);
     }
     return data;
   }],
 
   transformResponse: [function transformResponse(data) {
-    /*eslint no-param-reassign:0*/
-    if (typeof data === 'string') {
+    var transitional = this.transitional;
+    var silentJSONParsing = transitional && transitional.silentJSONParsing;
+    var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
+    var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
+
+    if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
       try {
-        data = JSON.parse(data);
-      } catch (e) { /* Ignore */ }
+        return JSON.parse(data);
+      } catch (e) {
+        if (strictJSONParsing) {
+          if (e.name === 'SyntaxError') {
+            throw enhanceError(e, this, 'E_JSON_PARSE');
+          }
+          throw e;
+        }
+      }
     }
+
     return data;
   }],
 
@@ -1472,6 +1578,122 @@ module.exports = function spread(callback) {
 
 /***/ }),
 
+/***/ "./node_modules/axios/lib/helpers/validator.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/validator.js ***!
+  \*****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var pkg = __webpack_require__(/*! ./../../package.json */ "./node_modules/axios/package.json");
+
+var validators = {};
+
+// eslint-disable-next-line func-names
+['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach(function(type, i) {
+  validators[type] = function validator(thing) {
+    return typeof thing === type || 'a' + (i < 1 ? 'n ' : ' ') + type;
+  };
+});
+
+var deprecatedWarnings = {};
+var currentVerArr = pkg.version.split('.');
+
+/**
+ * Compare package versions
+ * @param {string} version
+ * @param {string?} thanVersion
+ * @returns {boolean}
+ */
+function isOlderVersion(version, thanVersion) {
+  var pkgVersionArr = thanVersion ? thanVersion.split('.') : currentVerArr;
+  var destVer = version.split('.');
+  for (var i = 0; i < 3; i++) {
+    if (pkgVersionArr[i] > destVer[i]) {
+      return true;
+    } else if (pkgVersionArr[i] < destVer[i]) {
+      return false;
+    }
+  }
+  return false;
+}
+
+/**
+ * Transitional option validator
+ * @param {function|boolean?} validator
+ * @param {string?} version
+ * @param {string} message
+ * @returns {function}
+ */
+validators.transitional = function transitional(validator, version, message) {
+  var isDeprecated = version && isOlderVersion(version);
+
+  function formatMessage(opt, desc) {
+    return '[Axios v' + pkg.version + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
+  }
+
+  // eslint-disable-next-line func-names
+  return function(value, opt, opts) {
+    if (validator === false) {
+      throw new Error(formatMessage(opt, ' has been removed in ' + version));
+    }
+
+    if (isDeprecated && !deprecatedWarnings[opt]) {
+      deprecatedWarnings[opt] = true;
+      // eslint-disable-next-line no-console
+      console.warn(
+        formatMessage(
+          opt,
+          ' has been deprecated since v' + version + ' and will be removed in the near future'
+        )
+      );
+    }
+
+    return validator ? validator(value, opt, opts) : true;
+  };
+};
+
+/**
+ * Assert object's properties type
+ * @param {object} options
+ * @param {object} schema
+ * @param {boolean?} allowUnknown
+ */
+
+function assertOptions(options, schema, allowUnknown) {
+  if (typeof options !== 'object') {
+    throw new TypeError('options must be an object');
+  }
+  var keys = Object.keys(options);
+  var i = keys.length;
+  while (i-- > 0) {
+    var opt = keys[i];
+    var validator = schema[opt];
+    if (validator) {
+      var value = options[opt];
+      var result = value === undefined || validator(value, opt, options);
+      if (result !== true) {
+        throw new TypeError('option ' + opt + ' must be ' + result);
+      }
+      continue;
+    }
+    if (allowUnknown !== true) {
+      throw Error('Unknown option ' + opt);
+    }
+  }
+}
+
+module.exports = {
+  isOlderVersion: isOlderVersion,
+  assertOptions: assertOptions,
+  validators: validators
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/axios/lib/utils.js":
 /*!*****************************************!*\
   !*** ./node_modules/axios/lib/utils.js ***!
@@ -1482,8 +1704,6 @@ module.exports = function spread(callback) {
 
 
 var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/axios/lib/helpers/bind.js");
-
-/*global toString:true*/
 
 // utils is a library of generic helper functions non-specific to axios
 
@@ -1668,7 +1888,7 @@ function isURLSearchParams(val) {
  * @returns {String} The String freed of excess whitespace
  */
 function trim(str) {
-  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+  return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
 }
 
 /**
@@ -2026,6 +2246,17 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 
+/***/ }),
+
+/***/ "./node_modules/axios/package.json":
+/*!*****************************************!*\
+  !*** ./node_modules/axios/package.json ***!
+  \*****************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"name":"axios","version":"0.21.4","description":"Promise based HTTP client for the browser and node.js","main":"index.js","scripts":{"test":"grunt test","start":"node ./sandbox/server.js","build":"NODE_ENV=production grunt build","preversion":"npm test","version":"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json","postversion":"git push && git push --tags","examples":"node ./examples/server.js","coveralls":"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js","fix":"eslint --fix lib/**/*.js"},"repository":{"type":"git","url":"https://github.com/axios/axios.git"},"keywords":["xhr","http","ajax","promise","node"],"author":"Matt Zabriskie","license":"MIT","bugs":{"url":"https://github.com/axios/axios/issues"},"homepage":"https://axios-http.com","devDependencies":{"coveralls":"^3.0.0","es6-promise":"^4.2.4","grunt":"^1.3.0","grunt-banner":"^0.6.0","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.1.0","grunt-contrib-watch":"^1.0.0","grunt-eslint":"^23.0.0","grunt-karma":"^4.0.0","grunt-mocha-test":"^0.13.3","grunt-ts":"^6.0.0-beta.19","grunt-webpack":"^4.0.2","istanbul-instrumenter-loader":"^1.0.0","jasmine-core":"^2.4.1","karma":"^6.3.2","karma-chrome-launcher":"^3.1.0","karma-firefox-launcher":"^2.1.0","karma-jasmine":"^1.1.1","karma-jasmine-ajax":"^0.1.13","karma-safari-launcher":"^1.0.0","karma-sauce-launcher":"^4.3.6","karma-sinon":"^1.0.5","karma-sourcemap-loader":"^0.3.8","karma-webpack":"^4.0.2","load-grunt-tasks":"^3.5.2","minimist":"^1.2.0","mocha":"^8.2.1","sinon":"^4.5.0","terser-webpack-plugin":"^4.2.3","typescript":"^4.0.5","url-search-params":"^0.10.0","webpack":"^4.44.2","webpack-dev-server":"^3.11.0"},"browser":{"./lib/adapters/http.js":"./lib/adapters/xhr.js"},"jsdelivr":"dist/axios.min.js","unpkg":"dist/axios.min.js","typings":"./index.d.ts","dependencies":{"follow-redirects":"^1.14.0"},"bundlesize":[{"path":"./dist/axios.min.js","threshold":"5kB"}]}');
+
 /***/ })
 
 /******/ 	});
@@ -2107,44 +2338,32 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
 function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 var chartSpawner = '<div class="col-12 col-md-12 col-xxl-11 mb-4"><canvas class="__article_id___chart"></canvas></div>';
 var chartSpawnerPattern = /<div class="col-12 col-md-12 col-xxl-11 mb-4"><canvas class="__article_id___chart"><\/canvas><\/div>/gi;
-
 function datasetHTMLTemplate(currentChartDataset) {
   return "\n    <div class=\"row mb-3 d-flex align-items-end dataset\" id=\"dataset_".concat(currentChartDataset, "\">\n        <div class=\"col-4\">\n            <label for=\"label_").concat(currentChartDataset, "\" class=\"form-label\">\u041D\u0430\u0437\u0432\u0430 \u043F\u043E\u043B\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element dataset_label\" id=\"label_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-5\">\n            <label for=\"value_").concat(currentChartDataset, "\" class=\"form-label\">\u0417\u043D\u0430\u0447\u0435\u043D\u043D\u044F</label>\n            <input type=\"text\" class=\"form-control dataset_element dataset_value\" id=\"value_").concat(currentChartDataset, "\">\n        </div>\n        <div class=\"col-3\">\n            <button class=\"btn btn-primary col-12\" onclick=\"document.querySelector('#dataset_").concat(currentChartDataset, "').remove()\">\n                \u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438\n            </button>\n        </div>\n    </div>\n    ");
 }
-
 var isValidationEnabled = true;
 var datasetContainer = document.querySelector('#datasets_container');
 var editDatasetContainer = document.querySelector('#edit_datasets_container');
 var currentChartDataset = 0;
-
 document.querySelector('#add_dataset_button').onclick = function () {
   datasetContainer.innerHTML += datasetHTMLTemplate(currentChartDataset);
   currentChartDataset += 1;
 };
-
 document.querySelector('#edit_add_dataset_button').onclick = function () {
   editDatasetContainer.innerHTML += datasetHTMLTemplate(currentChartDataset);
   currentChartDataset += 1;
 };
+
 /* ************************************************************************ */
-
-
 var articleFieldsIDs = ['report_id', 'article_name', 'article_text', 'additional_file'];
 var chartFieldsIDs = ['chart_title', 'chart_legend', 'chart_type', 'chart_axis_x', 'chart_axis_y', 'chart_sufix', 'chart_verbal_rounding', 'chart_verbal_rounding_when_hovered'];
 var editChartFieldsIDs = ['edit_chart_id', 'edit_chart_title', 'edit_chart_legend', 'edit_chart_type', 'edit_chart_axis_x', 'edit_chart_axis_y', 'edit_chart_sufix', 'edit_chart_verbal_rounding', 'edit_chart_verbal_rounding_when_hovered'];
@@ -2228,11 +2447,9 @@ var elementsForChartEditValidation = [{
   rules: ['datasets'],
   errorMessage: 'Додайте хоча б один набір данних!'
 }];
-
 function chartHTMLTemplate(chartArrayId) {
-  return "\n    <div class=\"col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder\"> \n        <div class=\"chart-menu-buttons-holder d-flex flex-column shadow p-2 rounded\">\n            <button class=\"btn btn-primary edit-chart-button mb-2\" chart_array_id=\"".concat(chartArrayId, "\">\u0420\u0435\u0434\u0430\u0433\u0443\u0432\u0430\u0442\u0438</button>\n            <button class=\"btn btn-danger remove-chart-button mb-2\" chart_array_id=\"").concat(chartArrayId, "\">\u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438</button>\n            <div class=\"col-12 d-flex justify-content-around\">\n                <button class=\"col-5 btn btn-primary up-chart-button\" chart_array_id=\"").concat(chartArrayId, "\">+</button>\n                <button class=\"col-5 btn btn-danger down-chart-button\" chart_array_id=\"").concat(chartArrayId, "\">-</button>\n            </div>\n        </div>\n        <canvas class=\"__article_id___chart\"></canvas> \n    </div>\n    <hr class=\"mb-3\"/>\n    ");
+  return "\n    <div class=\"col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder\">\n        <div class=\"chart-menu-buttons-holder d-flex flex-column shadow p-2 rounded\">\n            <button class=\"btn btn-primary edit-chart-button mb-2\" chart_array_id=\"".concat(chartArrayId, "\">\u0420\u0435\u0434\u0430\u0433\u0443\u0432\u0430\u0442\u0438</button>\n            <button class=\"btn btn-danger remove-chart-button mb-2\" chart_array_id=\"").concat(chartArrayId, "\">\u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438</button>\n            <div class=\"col-12 d-flex justify-content-around\">\n                <button class=\"col-5 btn btn-primary up-chart-button\" chart_array_id=\"").concat(chartArrayId, "\">+</button>\n                <button class=\"col-5 btn btn-danger down-chart-button\" chart_array_id=\"").concat(chartArrayId, "\">-</button>\n            </div>\n        </div>\n        <canvas class=\"__article_id___chart\"></canvas>\n    </div>\n    <hr class=\"mb-3\"/>\n    ");
 }
-
 var chartSelectors = {
   chartContainer: '.charts-container',
   chart: '.__article_id___chart',
@@ -2243,27 +2460,25 @@ var chartSelectors = {
 };
 var charts = [];
 var articleChartsInstances = [];
-/**
- * Cuts incoming string into pieces with length wich are close to "symbolsPerLine" number and places them into array 
- * 
- * @param {number} symbolsPerLine 
- * @param {string} string 
- * @returns 
- */
 
+/**
+ * Cuts incoming string into pieces with length wich are close to "symbolsPerLine" number and places them into array
+ *
+ * @param {number} symbolsPerLine
+ * @param {string} string
+ * @returns
+ */
 function stringCut(symbolsPerLine, string) {
   function findClosestSpaceToSymbolsPerLineNumberInString(lengthPerLine, string) {
     var spaceIndexes = [];
     var closestSpaces = [];
     var previousDifference;
     var currentClosestSpaceIndex;
-
     for (var i = 0; i < string.length; i++) {
       if (string[i] === ' ') {
         spaceIndexes.push(i);
       }
     }
-
     var _loop = function _loop(_i) {
       lengthPerLine = lengthPerLine * _i;
       spaceIndexes.forEach(function (spaceIndex, index) {
@@ -2276,104 +2491,85 @@ function stringCut(symbolsPerLine, string) {
         }
       });
     };
-
     for (var _i = 1; spaceIndexes[spaceIndexes.length - 1] > lengthPerLine; _i++) {
       _loop(_i);
-    } //deletes last space
-
-
+    }
+    //deletes last space
     closestSpaces.pop();
     return closestSpaces;
   }
-
   function devideStringBySpaceIndexes(closestSpaceIndexes, string) {
     var devidedString = [];
     var tempString;
     closestSpaceIndexes.unshift(0);
     closestSpaceIndexes.push(string.length);
-
     for (var i = 0; i < closestSpaceIndexes.length - 1; i++) {
       tempString = '';
-
       for (var j = i == 0 ? closestSpaceIndexes[i] : closestSpaceIndexes[i] + 1; j < closestSpaceIndexes[i + 1]; j++) {
         tempString += string[j];
       }
-
       devidedString[i] = tempString;
     }
-
     return devidedString;
   }
-
   if (string.length < symbolsPerLine * 1.5) {
     return string;
   } else {
     return devideStringBySpaceIndexes(findClosestSpaceToSymbolsPerLineNumberInString(symbolsPerLine, string), string);
   }
 }
-
 function moveChart(direction, chartArrayIndex) {
   chartArrayIndex = parseInt(chartArrayIndex);
-
   switch (direction) {
     case 'up':
       console.log('up');
       console.log(charts);
       console.log(chartArrayIndex);
-
       if (chartArrayIndex > 0) {
         var previousChart = charts[chartArrayIndex - 1];
-        var currentChart = charts[chartArrayIndex]; //reasign charts
-
+        var currentChart = charts[chartArrayIndex];
+        //reasign charts
         articleChartsInstances[chartArrayIndex - 1] = currentChart;
         articleChartsInstances[chartArrayIndex] = previousChart;
         charts[chartArrayIndex - 1] = currentChart;
         charts[chartArrayIndex] = previousChart;
         console.log(charts);
       }
-
       break;
-
     case 'down':
       console.log('down');
       console.log(charts);
       console.log(chartArrayIndex);
-
       if (chartArrayIndex < charts.length - 1) {
         var nextChart = charts[chartArrayIndex + 1];
-        var _currentChart = charts[chartArrayIndex]; //reasign charts
-
+        var _currentChart = charts[chartArrayIndex];
+        //reasign charts
         articleChartsInstances[chartArrayIndex + 1] = _currentChart;
         articleChartsInstances[chartArrayIndex] = nextChart;
         charts[chartArrayIndex + 1] = _currentChart;
         charts[chartArrayIndex] = nextChart;
       }
-
       break;
   }
 }
-
 function removeElementFromChartArray(chartArrayIndex) {
   charts.splice(chartArrayIndex, 1);
   articleChartsInstances.splice(chartArrayIndex, 1);
 }
+
 /**
  * Show edit chart modal with filled inputs
- * 
+ *
  * @param {number} id id of a particular chart in charts array
  */
-
-
 function showEditChartModal(id) {
   function element(selector) {
     return document.querySelector(selector);
   }
-
   var modal = new bootstrap.Modal(document.getElementById('editChartModal'));
   var chartElement = charts[id];
   modal.show();
   var chartTitle = '';
-
   if (_typeof(chartElement.title) == 'object') {
     chartElement.title.forEach(function (titleFragment, index) {
       chartTitle += index == 0 ? titleFragment : ' ' + titleFragment;
@@ -2381,7 +2577,6 @@ function showEditChartModal(id) {
   } else {
     chartTitle = chartElement.title;
   }
-
   element('#edit_chart_id').value = id;
   element('#edit_chart_title').value = chartTitle;
   element('#edit_chart_legend').value = chartElement.legend;
@@ -2402,15 +2597,14 @@ function showEditChartModal(id) {
     element.value = chartElement.dataset[index].value;
   });
 }
+
 /**
- * 
+ *
  * @param {string} chartHTMLTemplate template for chart's canvas, actually chart holder template
  * @param {object} selectors object which contains selectors for main elements
  * @param {array} chartsArray array with charts params like title, legend, values, etc
- * @returns 
+ * @returns
  */
-
-
 function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
   var chartContainer = document.querySelector(selectors.chartContainer);
   chartContainer.innerHTML = '';
@@ -2418,7 +2612,6 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
     chartContainer.innerHTML += chartHTMLTemplate(index);
   });
   /* ITEMS FOR CHART DISPLAYING */
-
   var ChartPrototype = function ChartPrototype() {
     this.type = '';
     this.data = {
@@ -2431,7 +2624,6 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
       }]
     };
   };
-
   function optimizeCanvasSize(canvas, chartData) {
     function optimizeCanvasHeight(chartHeight, multiplier) {
       if (chartData.type === 'pie' || chartData.type === 'doughnut') {
@@ -2448,7 +2640,6 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
         }
       }
     }
-
     var chartsDefaultHeight = {
       more0less300: 55,
       more300less370: 55,
@@ -2458,36 +2649,28 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
       more768less1365: 55,
       more1365: 55
     };
-
     if (window.innerWidth > 0 && window.innerWidth <= 300) {
       optimizeCanvasHeight(chartsDefaultHeight.more0less300, 4);
     }
-
     if (window.innerWidth > 300 && window.innerWidth <= 370) {
       optimizeCanvasHeight(chartsDefaultHeight.more300less370, 4);
     }
-
     if (window.innerWidth > 370 && window.innerWidth <= 450) {
       optimizeCanvasHeight(chartsDefaultHeight.more370less450, 4);
     }
-
     if (window.innerWidth > 450 && window.innerWidth <= 580) {
       optimizeCanvasHeight(chartsDefaultHeight.more450less580, 3);
     }
-
     if (window.innerWidth > 580 && window.innerWidth <= 768) {
       optimizeCanvasHeight(chartsDefaultHeight.more580less768, 3);
     }
-
     if (window.innerWidth > 768 && window.innerWidth <= 1365) {
       optimizeCanvasHeight(chartsDefaultHeight.more768less1365, 3);
     }
-
     if (window.innerWidth > 1365) {
       optimizeCanvasHeight(chartsDefaultHeight.more1365, 3);
     }
   }
-
   function getRandomColor() {
     var r = Math.floor(Math.random() * 256);
     var g = Math.floor(Math.random() * 256);
@@ -2498,19 +2681,18 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
       b: b
     };
   }
-
   function proceedAdditionalOptionsToChart(chartInstance, chartData) {
     var type = chartInstance.type,
-        legend = chartData.legend,
-        name = stringCut(35, chartData.title),
-        axisNames = chartData.axis,
-        dataLabelSuffix = chartData.suffix,
-        arrayWithData = chartInstance.data.datasets[0].data.map(function (element) {
-      return parseInt(element);
-    }),
-        showVerbalRounding = chartData.isVerbalRoundingEnabled === 'true',
-        showVerbalRoundingForHoveredLabels = chartData.isVerbalRoundingEnabledForHoveredLabels === 'true',
-        barsBackgroundsColors = [];
+      legend = chartData.legend,
+      name = stringCut(35, chartData.title),
+      axisNames = chartData.axis,
+      dataLabelSuffix = chartData.suffix,
+      arrayWithData = chartInstance.data.datasets[0].data.map(function (element) {
+        return parseInt(element);
+      }),
+      showVerbalRounding = chartData.isVerbalRoundingEnabled === 'true',
+      showVerbalRoundingForHoveredLabels = chartData.isVerbalRoundingEnabledForHoveredLabels === 'true',
+      barsBackgroundsColors = [];
     chartInstance.data.datasets[0].barPercentage = 0.7;
     chartInstance.type = type;
     chartInstance.data.datasets[0].label = legend;
@@ -2531,16 +2713,15 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
         callbacks: {
           label: function label(tooltipItem, data) {
             var currentItemIndex = tooltipItem.index,
-                currentItemData = data.datasets[0].data[currentItemIndex],
-                label = "".concat(data.labels[currentItemIndex], ": ");
-
+              currentItemData = data.datasets[0].data[currentItemIndex],
+              label = "".concat(data.labels[currentItemIndex], ": ");
             if (showVerbalRoundingForHoveredLabels == 'true' || showVerbalRoundingForHoveredLabels == true) {
               if (currentItemData >= 1000 && currentItemData < 1000000) {
-                return "".concat(label).concat((currentItemData / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
+                return "".concat(label).concat((currentItemData / 1000).toFixed(1), " \u0442\u0438\u0441").concat(dataLabelSuffix);
               } else if (currentItemData >= 1000000 && currentItemData < 1000000000) {
-                return "".concat(label).concat((currentItemData / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
+                return "".concat(label).concat((currentItemData / 1000000).toFixed(1), " \u043C\u043B\u043D").concat(dataLabelSuffix);
               } else if (currentItemData >= 1000000000) {
-                return "".concat(label).concat((currentItemData / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+                return "".concat(label).concat((currentItemData / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434").concat(dataLabelSuffix);
               } else {
                 return "".concat(label).concat(currentItemData).concat(dataLabelSuffix);
               }
@@ -2567,11 +2748,11 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
           formatter: function formatter(value, context) {
             if (showVerbalRounding == 'true' || showVerbalRounding == true) {
               if (value >= 1000 && value < 1000000) {
-                return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
+                return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441").concat(dataLabelSuffix);
               } else if (value >= 1000000 && value < 1000000000) {
-                return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
+                return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D").concat(dataLabelSuffix);
               } else if (value >= 1000000000) {
-                return "".concat((value / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+                return "".concat((value / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434").concat(dataLabelSuffix);
               } else {
                 return "".concat(value).concat(dataLabelSuffix);
               }
@@ -2587,42 +2768,33 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
         }
       }
     };
-
     if (chartInstance.type === 'line') {
       chartInstance.data.datasets[0].fill = false;
       /*
       fill chart elements with color according to amount of incoming data
           */
-
       for (var i = 0; i < arrayWithData.length; i++) {
         chartInstance.data.datasets[0].pointBorderColor.push('rgba(0, 0, 0, 1)');
         chartInstance.data.datasets[0].pointBackgroundColor.push('rgba(255, 99, 132, 1)');
         chartInstance.data.datasets[0].borderColor.push('rgba(255, 99, 132, 1)');
       }
-
       chartInstance.data.datasets[0].pointBorderWidth = 2;
     }
-
     if (chartInstance.type === 'bar' || chartInstance.type === 'horizontalBar') {
       for (var _i2 = 0; _i2 < arrayWithData.length; _i2++) {
         chartInstance.data.datasets[0].backgroundColor.push('rgba(255, 0, 0, 1)');
       }
-
       chartInstance.data.datasets[0].borderWidth = 0;
     }
-
     if (chartInstance.type === 'doughnut' || chartInstance.type === 'pie') {
       chartInstance.options.legend.position = window.innerWidth < 768 ? 'top' : 'top';
-
       for (var _i3 = 0; _i3 < arrayWithData.length; _i3++) {
         var randomColor = getRandomColor();
         chartInstance.data.datasets[0].backgroundColor.push("rgba(".concat(randomColor.r, ",").concat(randomColor.g, ",").concat(randomColor.b, ", 0.4)"));
         chartInstance.data.datasets[0].borderColor.push("rgba(".concat(randomColor.r, ",").concat(randomColor.g, ",").concat(randomColor.b, ", 0.8)"));
       }
-
       chartInstance.data.datasets[0].borderWidth = 1;
     }
-
     if (chartInstance.type === 'bar' || chartInstance.type === 'horizontalBar' || chartInstance.type === 'line') {
       chartInstance.options.scales = {
         xAxes: [{
@@ -2640,14 +2812,13 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
               if (chartInstance.type != 'horizontalBar') {
                 return value;
               }
-
               if (showVerbalRounding == 'true' || showVerbalRounding == true) {
                 if (value >= 1000 && value < 1000000) {
-                  return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
+                  return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441").concat(dataLabelSuffix);
                 } else if (value >= 1000000 && value < 1000000000) {
-                  return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
+                  return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D").concat(dataLabelSuffix);
                 } else if (value >= 1000000000) {
-                  return "".concat((value / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+                  return "".concat((value / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434").concat(dataLabelSuffix);
                 } else {
                   return "".concat(value).concat(dataLabelSuffix);
                 }
@@ -2674,14 +2845,13 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
               if (chartInstance.type == 'horizontalBar') {
                 return value;
               }
-
               if (showVerbalRounding == 'true' || showVerbalRounding == true) {
                 if (value >= 1000 && value < 1000000) {
-                  return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441.").concat(dataLabelSuffix);
+                  return "".concat((value / 1000).toFixed(1), " \u0442\u0438\u0441").concat(dataLabelSuffix);
                 } else if (value >= 1000000 && value < 1000000000) {
-                  return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D.").concat(dataLabelSuffix);
+                  return "".concat((value / 1000000).toFixed(1), " \u043C\u043B\u043D").concat(dataLabelSuffix);
                 } else if (value >= 1000000000) {
-                  return "".concat((value / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434.").concat(dataLabelSuffix);
+                  return "".concat((value / 1000000000).toFixed(3), " \u043C\u043B\u0440\u0434").concat(dataLabelSuffix);
                 } else {
                   return "".concat(value).concat(dataLabelSuffix);
                 }
@@ -2697,37 +2867,35 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
       };
     }
   }
-
   var chartCanvases = document.querySelectorAll(selectors.chart),
-      articleChartsInstances = [];
+    articleChartsInstances = [];
+
   /*
       Building a chart according to amount of datasets
   */
-
   chartsArray.forEach(function (currentChartData, index) {
     var canvas = chartCanvases[index],
-        chart = new ChartPrototype();
+      chart = new ChartPrototype();
     chart.type = currentChartData.type;
     chart.data.datasets[0].label = currentChartData.label;
     /*
         optimizing canvas size depends on incoming data and other information,
         before assigning it as a chart holder
     */
-
     optimizeCanvasSize(canvas, currentChartData);
     /*
         fills chart prototype with data according to it's structure
     */
-
     currentChartData.dataset.forEach(function (data) {
       chart.data.datasets[0].data.push(data.value); //[data1,data2,data3,...,dataN]
-
       chart.data.labels.push(data.label); //[label1,label2,label3,...,labelN]
     });
+
     proceedAdditionalOptionsToChart(chart, currentChartData);
     articleChartsInstances.push(new Chart(canvas, chart));
-  }); //assign to chart keys some actions (edit, remove, etc)
+  });
 
+  //assign to chart keys some actions (edit, remove, etc)
   if (articleChartsInstances.length > 0) {
     //remove button asignment
     document.querySelectorAll('.remove-chart-button').forEach(function (button) {
@@ -2735,21 +2903,24 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
         removeElementFromChartArray(event.target.getAttribute('chart_array_id'));
         buildCharts(chartHTMLTemplate, selectors, charts);
       };
-    }); //edit button asignment
+    });
 
+    //edit button asignment
     document.querySelectorAll('.edit-chart-button').forEach(function (button) {
       button.onclick = function (event) {
         showEditChartModal(event.target.getAttribute('chart_array_id'));
       };
-    }); //up button asignment
+    });
 
+    //up button asignment
     document.querySelectorAll('.up-chart-button').forEach(function (button) {
       button.onclick = function (event) {
         moveChart('up', event.target.getAttribute('chart_array_id'));
         buildCharts(chartHTMLTemplate, selectors, charts);
       };
-    }); //down button asignment
+    });
 
+    //down button asignment
     document.querySelectorAll('.down-chart-button').forEach(function (button) {
       button.onclick = function (event) {
         moveChart('down', event.target.getAttribute('chart_array_id'));
@@ -2757,22 +2928,20 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
       };
     });
   }
-
   return articleChartsInstances;
 }
+
 /**
  * do errors validation of html inputs
- * 
+ *
  * 1) gets all fields wich are needed to be validated
  * 2) checks it value, if it match required rule (basically regexp based)
  * 3) fills error array with invalid inputs IDs and error messages
  * 4) returns this array to further proceed
  */
-
-
 function doFieldsValidation(elementsForValidation, rules) {
   var errors = [],
-      nodesFromHTML;
+    nodesFromHTML;
   elementsForValidation.forEach(function (element) {
     nodesFromHTML = document.querySelectorAll(element.selector);
     nodesFromHTML.forEach(function (node) {
@@ -2791,13 +2960,12 @@ function doFieldsValidation(elementsForValidation, rules) {
   });
   return errors;
 }
+
 /**
- * Removes old error displaying, generate new depends on needs 
- * 
+ * Removes old error displaying, generate new depends on needs
+ *
  * returns true, if errors is still on the page, false - if there is no errors left
  */
-
-
 function handleErrorDisplaying(errors, errorsContainerSelector) {
   var chartErrorsContainer = document.querySelector(errorsContainerSelector);
   chartErrorsContainer.hidden = true;
@@ -2805,7 +2973,6 @@ function handleErrorDisplaying(errors, errorsContainerSelector) {
   document.querySelectorAll('.is-invalid').forEach(function (errorNode) {
     errorNode.classList.remove('is-invalid');
   });
-
   if (errors.length > 0) {
     chartErrorsContainer.hidden = false;
     errors.forEach(function (error) {
@@ -2817,7 +2984,6 @@ function handleErrorDisplaying(errors, errorsContainerSelector) {
     return false;
   }
 }
-
 function clearCreateChartModal() {
   chartFieldsIDs.forEach(function (ID) {
     if (ID == 'chart_verbal_rounding' || ID == 'chart_verbal_rounding_when_hovered') {
@@ -2836,7 +3002,6 @@ function clearCreateChartModal() {
   var modal = bootstrap.Modal.getInstance(myModalEl);
   modal.hide();
 }
-
 function clearEditChartModal() {
   editChartFieldsIDs.forEach(function (ID) {
     if (ID == 'edit_chart_verbal_rounding' || ID == 'edit_chart_verbal_rounding_when_hovered') {
@@ -2853,34 +3018,29 @@ function clearEditChartModal() {
   editDatasetContainer.innerHTML = '';
   var modalEl = document.getElementById('editChartModal');
   var modal = bootstrap.Modal.getInstance(modalEl);
-  modal.hide(); //clear black backscreens
+  modal.hide();
 
+  //clear black backscreens
   document.querySelectorAll('.modal-backdrop').forEach(function (element) {
     element.remove();
   });
 }
-
 function submitChartData(mode, chartID) {
   switch (mode) {
     case 'create':
       if (isValidationEnabled == true && handleErrorDisplaying(doFieldsValidation(elementsForChartCreateValidation, rules), '#chart_errors')) {
         return false;
       }
-
       break;
-
     case 'edit':
       if (isValidationEnabled == true && handleErrorDisplaying(doFieldsValidation(elementsForChartEditValidation, rules), '#edit_chart_errors')) {
         return false;
       }
-
       break;
   }
+
   /* Defining and filling chart fields with values */
-
-
   var chartFields = {};
-
   switch (mode) {
     case 'create':
       chartFieldsIDs.every(function (ID) {
@@ -2888,37 +3048,31 @@ function submitChartData(mode, chartID) {
           chartFields[ID] = document.querySelector("#".concat(ID)).checked ? 'true' : 'false';
           return true;
         }
-
         if (ID == 'chart_verbal_rounding_when_hovered') {
           chartFields[ID] = document.querySelector("#".concat(ID)).checked ? 'true' : 'false';
           return true;
         }
-
         chartFields[ID] = document.querySelector("#".concat(ID)).value;
         return true;
       });
       break;
-
     case 'edit':
       editChartFieldsIDs.every(function (ID) {
         if (ID == 'edit_chart_verbal_rounding') {
           chartFields[ID] = document.querySelector("#".concat(ID)).checked ? 'true' : 'false';
           return true;
         }
-
         if (ID == 'edit_chart_verbal_rounding_when_hovered') {
           chartFields[ID] = document.querySelector("#".concat(ID)).checked ? 'true' : 'false';
           return true;
         }
-
         chartFields[ID] = document.querySelector("#".concat(ID)).value;
         return true;
       });
       break;
   }
+
   /* Defining and filling chart datasets with values */
-
-
   var dataset = [];
   var datasetElement = {};
   var datasetElements = document.querySelectorAll('.dataset_element');
@@ -2926,7 +3080,6 @@ function submitChartData(mode, chartID) {
     if (index % 2 == 0) {
       datasetElement.label = element.value;
     }
-
     if (index % 2 == 1) {
       datasetElement.value = element.value;
       dataset.push(datasetElement);
@@ -2934,7 +3087,6 @@ function submitChartData(mode, chartID) {
     }
   });
   var chartInstance = {};
-
   switch (mode) {
     case 'create':
       chartInstance = null;
@@ -2955,7 +3107,6 @@ function submitChartData(mode, chartID) {
       charts.push(chartInstance);
       clearCreateChartModal();
       break;
-
     case 'edit':
       chartInstance = null;
       chartInstance = {
@@ -2976,7 +3127,8 @@ function submitChartData(mode, chartID) {
       clearEditChartModal();
       break;
   }
-  /* 
+
+  /*
   charts = [
      {
           title: ['Виконання бюджету', 'виконання бюджету'],
@@ -3000,8 +3152,7 @@ function submitChartData(mode, chartID) {
               {label: 'Міжбюджетні трансферти', value: '492900000'},
               {label: 'Спеціальний фонд', value: '134200000'},
               {label: 'Бюджет розвитку', value: '33000000'}
-              
-          ] 
+           ]
       },
       {
           title: 'Назва діаграми',
@@ -3017,7 +3168,7 @@ function submitChartData(mode, chartID) {
           dataset: [
               {label: 'Назва діаграми', value: '123'},
               {label: 'Назва діаграми 2', value: '321'},
-          ] 
+          ]
       },
       {
           title: 'Виконання бюджету',
@@ -3035,29 +3186,23 @@ function submitChartData(mode, chartID) {
               {label: 'Міжбюджетні трансферти', value: '492900000'},
               {label: 'Спеціальний фонд', value: '134200000'},
               {label: 'Бюджет розвитку', value: '33000000'}
-          ] 
+          ]
       }
   ]
    /* */
-
-
   articleChartsInstances = buildCharts(chartHTMLTemplate, chartSelectors, charts);
 }
-
 function submitArticleData() {
   // editor.getData()
   function element(selector) {
     return document.querySelector(selector);
   }
-
   editor.updateSourceElement();
-
   if (isValidationEnabled == true && handleErrorDisplaying(doFieldsValidation(elementsForArticlesValidation, rules), '#article_errors')) {
     return false;
   }
+
   /* Replacer for article text '@@@' -> replaceWith variable value */
-
-
   var articleText = element('#article_text').value;
   var replaceWith = chartSpawner;
   var re = /@@@/ig;
@@ -3074,45 +3219,40 @@ function submitArticleData() {
     }
   };
   axios__WEBPACK_IMPORTED_MODULE_0___default().post("/article/update/".concat(incomingArticle.id), formData, options).then(function (response) {
-    console.log(response); // document.location.reload();
-
+    console.log(response);
+    // document.location.reload();
     window.location.href = url;
   })["catch"](function (errors) {
     console.log(errors);
   });
 }
-
 document.querySelector('#submit_chart_data').onclick = function () {
   submitChartData('create');
 };
-
 document.querySelector('#submit_edited_chart_data').onclick = function () {
   submitChartData('edit', document.querySelector('#edit_chart_id').value);
 };
+
 /* Submiting article */
-
-
 document.querySelector('#submit_article_data').onclick = function (event) {
   event.preventDefault();
   submitArticleData();
   console.log(charts);
 };
-/* UPDATE ARTICLE BLOCK */
 
+/* UPDATE ARTICLE BLOCK */
 
 var isFileDeleted = false;
 var fileRemoveButton;
+
 /**
  * init incoming data from backend to update article frontend
  */
-
 function initIncomingData(incomingArticle) {
   function element(selector) {
     return document.querySelector(selector);
   }
-
   charts = incomingArticle.charts;
-
   if (charts.length > 0) {
     charts.map(function (el) {
       el.dataset = el.datasets;
@@ -3125,20 +3265,19 @@ function initIncomingData(incomingArticle) {
       return el;
     });
   }
-
   var replaceWith = "@@@";
   var re = chartSpawnerPattern;
   element('#article_name').value = incomingArticle.name;
   editor.setData(incomingArticle.content.replace(re, replaceWith));
   buildCharts(chartHTMLTemplate, chartSelectors, charts);
 }
+initIncomingData(incomingArticle);
 
-initIncomingData(incomingArticle); // if (document.querySelector('#1234455')) {
+// if (document.querySelector('#1234455')) {
+
 // }
-
 try {
   fileRemoveButton = document.querySelector('#existing_additional_file_remove_button');
-
   fileRemoveButton.onclick = function () {
     document.querySelector('#existing_additional_file_holder').remove();
     delete incomingArticle.path_to_additional_content;

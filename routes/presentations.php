@@ -39,6 +39,3 @@ Route::post('/presentation/{presentationId}/image/{imageId}/delete', [Images::cl
 
 Route::post('/presentation/{presentationId}/image/{imageId}/rename', [Images::class, 'rename'])
 ->whereNumber('presentationId')->whereNumber('imageId')->middleware('auth');
-
-// Route::post('/presentation/{presentationId}/image/get', [Images::class, 'getList'])
-// ->middleware('auth');

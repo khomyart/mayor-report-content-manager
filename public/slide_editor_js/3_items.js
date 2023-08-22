@@ -9,7 +9,7 @@ function fillItemPanelWithItems(itemPanel, objectWithItems) {
     //specific item panel element creation
     let itemPanelWorkSpaceElement = document.createElement('div');
     let itemPanelElementContainer = document.createElement('div');
-    
+
     itemPanelElement.appendChild(document.createElement('img'));
 
     //adding some things to specific element
@@ -33,7 +33,7 @@ function fillItemPanelWithItems(itemPanel, objectWithItems) {
 }
 
 /**
- * @param {mouse event} event 
+ * @param {mouse event} event
  * @param {element} rootItem basis for new item wich will be created after performing a function
  */
 function createNewItem(event, rootItem) {
@@ -78,8 +78,8 @@ function createNewItem(event, rootItem) {
 
 /**
  * Method calculates style params for particular item depends on its attributes
- * 
- * @param {object} item - html object which we are working on  
+ *
+ * @param {object} item - html object which we are working on
  * @returns {object} - object with item params like: height, width, etc
  */
 function calculateItemParams(item) {
@@ -88,7 +88,7 @@ function calculateItemParams(item) {
     let width = `${(widthUnit * widthMultiplier).toFixed(5)}`;
 
     let widthInverted = `${((item.offsetWidth / workZone.offsetWidth) * 100).toFixed(5)}`;
-    
+
     let heightUnit = workZone.offsetHeight / 100;
     let heightMultiplier = item.getAttribute('heightMultiplier');
     let height = `${(heightUnit * heightMultiplier).toFixed(5)}`;
@@ -125,7 +125,7 @@ function calculateItemParams(item) {
     transform, anchorShiftX, anchorShiftY;
     if (item.hasAttribute('cAnchor')) {
         cAnchorParam = item.getAttribute('cAnchor').replace(anchorRegexSpaces, '').replace(anchorRegexPersentages, '').split(',');
-        transform = `translate(${cAnchorParam[0]}%, ${cAnchorParam[1]}%)`; 
+        transform = `translate(${cAnchorParam[0]}%, ${cAnchorParam[1]}%)`;
         anchorShiftX = Math.abs(parseInt(item.offsetWidth * (cAnchorParam[0] / 100)));
         anchorShiftY = Math.abs(parseInt(item.offsetHeight * (cAnchorParam[1] / 100)));
     }
@@ -150,7 +150,7 @@ function calculateItemParams(item) {
 }
 
 /**
- * 
+ *
  * @returns object with highest and lowest zIndexes of the .field-items
  */
 function getZIndexes() {
@@ -165,11 +165,11 @@ function getZIndexes() {
             highest: highestZIndex,
             lowest: lowestZIndex,
         };
-    } 
+    }
 
     fieldItems.forEach((item, index) => {
         let currentItemZindex = parseInt(window.getComputedStyle(item, null).zIndex)
-        
+
         if (index == 0) {
             console.log('what the fuck')
             highestZIndex = currentItemZindex;
@@ -192,7 +192,7 @@ function getZIndexes() {
 
 /**
  * Add drag and dtop to item and also adds some features like context menu by releasing lmb
- * @param {object} item selected item 
+ * @param {object} item selected item
  */
 function addDragAndDropToItem(item) {
     item.onmousedown = (event) => {
@@ -213,13 +213,13 @@ function addDragAndDropToItem(item) {
  */
 function itemDragActions(item, event) {
     item.onmouseup = () => {
-        if (event.buttons == 2) {   
+        if (event.buttons == 2) {
             if(item.getAttribute('i-is-selectable') == 'true') {
                 showContextMenuOfItem(item, event);
                 currentItem = null
             }
         }
-        if (event.buttons == 1) {   
+        if (event.buttons == 1) {
             if(item.getAttribute('i-is-selectable') == 'true') {
                 clearItemSelection();
                 selectItem(item)
@@ -249,7 +249,7 @@ function itemDragActions(item, event) {
     shiftY = event.pageY - item.getBoundingClientRect().top + workZone.getBoundingClientRect().top - calculateItemParams(item).anchorShiftY;
 
     // if (!currentItem) {
-    //     currentItem = 
+    //     currentItem =
     //     document.elementFromPoint(event.clientX, event.clientY).closest('.work-space-container-item');
     // }
 
@@ -257,12 +257,12 @@ function itemDragActions(item, event) {
         clientX: null,
         clientY: null
     };
-    
+
     document.body.onmousemove = (event) => {
         if (item.getAttribute('lockType') != 'none') {
             return
         }
-        
+
         if (event.buttons == 1) {
             enableItemPositionCalculationMethod = true;
 
@@ -273,7 +273,7 @@ function itemDragActions(item, event) {
             newScrollPosition.y = everythingHolder.scrollTop;
             newScrollPosition.x = everythingHolder.scrollLeft;
 
-            if (newScrollPosition.x != initialScrollPosition.x 
+            if (newScrollPosition.x != initialScrollPosition.x
                 || newScrollPosition.y != initialScrollPosition.y) {
                 mouseEvent.clientX = event.clientX + (newScrollPosition.x - initialScrollPosition.x);
                 mouseEvent.clientY = event.clientY + (newScrollPosition.y - initialScrollPosition.y);
@@ -286,26 +286,26 @@ function itemDragActions(item, event) {
                 item = currentItem
                 shiftX = event.pageX - item.getBoundingClientRect().left + workZone.getBoundingClientRect().left - calculateItemParams(item).anchorShiftX;
                 shiftY = event.pageY - item.getBoundingClientRect().top + workZone.getBoundingClientRect().top - calculateItemParams(item).anchorShiftY;
-                item.className = 'field-item' 
+                item.className = 'field-item'
                 workZone.append(item)
                 calculatePositionForItems(item)
                 item.style.width = `${CONFIG.UI.defaultWorkZoneItemsOffsets.width * CONFIG.UI.workZoneCurrentScale}px`;
                 item.style.height = `${CONFIG.UI.defaultWorkZoneItemsOffsets.height * CONFIG.UI.workZoneCurrentScale}px`;
                 item.style.borderRadius = `${CONFIG.UI.defaultWorkZoneItemBorderRadius * CONFIG.UI.workZoneCurrentScale}px`;
-                moveAt(event, item, shiftX, shiftY);   
+                moveAt(event, item, shiftX, shiftY);
                 currentItem = null
             }
 
             item.onmouseup = null
             // mouseEvent.clientX = x;
             // mouseEvent.clientY = y;
-            moveAt(mouseEvent, item, shiftX, shiftY);           
-            //To get information about what we have under the item wich moving with cursor, we should do checking when actual item 
+            moveAt(mouseEvent, item, shiftX, shiftY);
+            //To get information about what we have under the item wich moving with cursor, we should do checking when actual item
             //is invisible, so in this case we will get correct information for workFieldSelectedAsDropTarget variable
             item.style.display = 'none';
-            workFieldSelectedAsDropTarget = 
+            workFieldSelectedAsDropTarget =
             document.elementFromPoint(event.clientX, event.clientY).closest('#main_field');
-           
+
             item.style.display = 'block';
         }
     }
@@ -317,7 +317,7 @@ function itemDragActions(item, event) {
 
 /**
  * Decides how item should behave when mouse moving is done and lmb has been released
- * @param {*} item 
+ * @param {*} item
  */
 function itemDropActions(item, event) {
     item.setAttribute('newly-created', false)
@@ -325,7 +325,7 @@ function itemDropActions(item, event) {
     item.setAttribute('i-is-selectable', 'true');
 
     if (workZone.getBoundingClientRect().left > item.getBoundingClientRect().right
-    || workZone.getBoundingClientRect().right < item.getBoundingClientRect().left 
+    || workZone.getBoundingClientRect().right < item.getBoundingClientRect().left
     || workZone.getBoundingClientRect().top > item.getBoundingClientRect().bottom
     || workZone.getBoundingClientRect().bottom < item.getBoundingClientRect().top) {
         enableItemPositionCalculationMethod = false;
@@ -335,24 +335,24 @@ function itemDropActions(item, event) {
         item.remove();
 
         console.log('item should be deleted')
-    } 
+    }
 
     if (enableItemPositionCalculationMethod == true) {
         calculatePositionForItems(item)
     }
 
-    if(selectedItemForModification && event.buttons == 1) {
+    if(selectedItemForModification && event.buttons == 0) {
         clearItemSelection();
         selectItem(item);
     }
-    
+
     enableItemPositionCalculationMethod = false;
     document.body.onmousemove = null;
     document.body.onmouseup = null;
 }
 
 /**
- * 
+ *
  * @param {object} item item which has been clicked
  */
 function selectItem(item) {
@@ -381,8 +381,8 @@ function clearItemSelection() {
 }
 
 /**
- * Showing context menu with content wich is releted to selected item 
- * @param {selected item} item 
+ * Showing context menu with content wich is releted to selected item
+ * @param {selected item} item
  */
 function showContextMenuOfItem(item, event) {
     removeContextMenu()

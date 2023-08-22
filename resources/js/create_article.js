@@ -85,91 +85,91 @@ let rules = {
 
 let elementsForArticlesValidation = [
     {
-        selector: '#report_id', 
-        rules: ['requeried'], 
+        selector: '#report_id',
+        rules: ['requeried'],
         errorMessage: 'Оберіть звіт, до якого відноситься стаття'
     },
     {
-        selector: '#article_name', 
-        rules: ['requeried'], 
+        selector: '#article_name',
+        rules: ['requeried'],
         errorMessage: 'Поле "Назва статті" повинно бути заповнене'
     },
     {
-        selector: '#article_text', 
-        rules: ['requeried'], 
+        selector: '#article_text',
+        rules: ['requeried'],
         errorMessage: 'Заповніть текст статті'
     },
 ];
 
 let elementsForChartCreateValidation = [
     {
-        selector: '#chart_title', 
-        rules: ['requeried'], 
+        selector: '#chart_title',
+        rules: ['requeried'],
         errorMessage: 'Поле "Назва графіка" повинно бути заповнене'
     },
     {
-        selector: '#chart_legend', 
-        rules: ['requeried'], 
+        selector: '#chart_legend',
+        rules: ['requeried'],
         errorMessage: 'Поле "Додаткова назва графіка" повинне бути заповнене'
     },
     {
-        selector: '#chart_type', 
-        rules: ['requeried'], 
+        selector: '#chart_type',
+        rules: ['requeried'],
         errorMessage: 'Необхідно обрати тип графіку'
     },
     {
-        selector: '.dataset_label', 
-        rules: ['requeried'], 
+        selector: '.dataset_label',
+        rules: ['requeried'],
         errorMessage: 'Назва набору даних повнинна бути заповнена'
     },
     {
-        selector: '.dataset_value', 
-        rules: ['requeried', 'numbers'], 
+        selector: '.dataset_value',
+        rules: ['requeried', 'numbers'],
         errorMessage: 'Значення набору даних повинне бути заповнене та містити лише цифри'
     },
     {
-        selector: '#add_dataset_button', 
-        rules: ['datasets'], 
+        selector: '#add_dataset_button',
+        rules: ['datasets'],
         errorMessage: 'Додайте хоча б один набір данних!'
     },
 ]
 
 let elementsForChartEditValidation = [
     {
-        selector: '#edit_chart_title', 
-        rules: ['requeried'], 
+        selector: '#edit_chart_title',
+        rules: ['requeried'],
         errorMessage: 'Поле "Назва графіка" повинно бути заповнене'
     },
     {
-        selector: '#edit_chart_legend', 
-        rules: ['requeried'], 
+        selector: '#edit_chart_legend',
+        rules: ['requeried'],
         errorMessage: 'Поле "Додаткова назва графіка" повинне бути заповнене'
     },
     {
-        selector: '#edit_chart_type', 
-        rules: ['requeried'], 
+        selector: '#edit_chart_type',
+        rules: ['requeried'],
         errorMessage: 'Необхідно обрати тип графіку'
     },
     {
-        selector: '.dataset_label', 
-        rules: ['requeried'], 
+        selector: '.dataset_label',
+        rules: ['requeried'],
         errorMessage: 'Назва набору даних повнинна бути заповнена'
     },
     {
-        selector: '.dataset_value', 
-        rules: ['requeried', 'numbers'], 
+        selector: '.dataset_value',
+        rules: ['requeried', 'numbers'],
         errorMessage: 'Значення набору даних повинне бути заповнене та містити лише цифри'
     },
     {
-        selector: '#edit_add_dataset_button', 
-        rules: ['datasets'], 
+        selector: '#edit_add_dataset_button',
+        rules: ['datasets'],
         errorMessage: 'Додайте хоча б один набір данних!'
     },
 ]
 
 function chartHTMLTemplate (chartArrayId) {
     return `
-    <div class="col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder"> 
+    <div class="col-12 col-md-10 col-xxl-8 ms-4 px-3 py-4 shadow chart-holder">
         <div class="chart-menu-buttons-holder d-flex flex-column shadow p-2 rounded">
             <button class="btn btn-primary edit-chart-button mb-2" chart_array_id="${chartArrayId}">Редагувати</button>
             <button class="btn btn-danger remove-chart-button mb-2" chart_array_id="${chartArrayId}">Видалити</button>
@@ -178,7 +178,7 @@ function chartHTMLTemplate (chartArrayId) {
                 <button class="col-5 btn btn-danger down-chart-button" chart_array_id="${chartArrayId}">-</button>
             </div>
         </div>
-        <canvas class="__article_id___chart"></canvas> 
+        <canvas class="__article_id___chart"></canvas>
     </div>
     <hr class="mb-3"/>
     `
@@ -197,11 +197,11 @@ let charts = [];
 let articleChartsInstances = [];
 
 /**
- * Cuts incoming string into pieces with length wich are close to "symbolsPerLine" number and places them into array 
- * 
- * @param {number} symbolsPerLine 
- * @param {string} string 
- * @returns 
+ * Cuts incoming string into pieces with length wich are close to "symbolsPerLine" number and places them into array
+ *
+ * @param {number} symbolsPerLine
+ * @param {string} string
+ * @returns
  */
  function stringCut(symbolsPerLine, string) {
     function findClosestSpaceToSymbolsPerLineNumberInString(lengthPerLine, string) {
@@ -209,18 +209,18 @@ let articleChartsInstances = [];
         let closestSpaces = [];
         let previousDifference;
         let currentClosestSpaceIndex;
-    
+
         for (let i = 0; i < string.length; i++) {
             if (string[i] === ' ') {
                 spaceIndexes.push(i);
             }
         }
-    
+
         for (let i = 1; spaceIndexes[spaceIndexes.length-1] > lengthPerLine; i++) {
             lengthPerLine = lengthPerLine * i;
             spaceIndexes.forEach((spaceIndex, index)=>{
                 if (index == 0) { previousDifference = Math.abs(lengthPerLine - spaceIndex) }
-                else if (previousDifference > Math.abs(lengthPerLine - spaceIndex)) { 
+                else if (previousDifference > Math.abs(lengthPerLine - spaceIndex)) {
                     currentClosestSpaceIndex = spaceIndex;
                     previousDifference = Math.abs(lengthPerLine - spaceIndex);
                     closestSpaces[i-1] = spaceIndex;
@@ -229,30 +229,30 @@ let articleChartsInstances = [];
         }
         //deletes last space
         closestSpaces.pop();
-    
+
         return closestSpaces;
     }
-    
+
     function devideStringBySpaceIndexes(closestSpaceIndexes, string) {
         let devidedString = [];
         let tempString;
         closestSpaceIndexes.unshift(0)
         closestSpaceIndexes.push(string.length)
-    
+
         for (let i = 0; i < closestSpaceIndexes.length - 1; i++) {
             tempString = '';
-    
+
             for (let j = i == 0 ? closestSpaceIndexes[i] : closestSpaceIndexes[i] + 1; j < closestSpaceIndexes[i+1]; j++) {
                 tempString += string[j]
             }
-    
+
             devidedString[i] = tempString
         }
-    
+
         return devidedString;
     }
 
-    if (string.length < symbolsPerLine * 1.5) 
+    if (string.length < symbolsPerLine * 1.5)
     {
         return string
     } else {
@@ -280,7 +280,7 @@ function moveChart(direction, chartArrayIndex) {
                 console.log(charts)
             }
             break;
-    
+
         case 'down':
             console.log('down')
             console.log(charts)
@@ -306,7 +306,7 @@ function removeElementFromChartArray(chartArrayIndex) {
 
 /**
  * Show edit chart modal with filled inputs
- * 
+ *
  * @param {number} id id of a particular chart in charts array
  */
 function showEditChartModal(id) {
@@ -336,15 +336,15 @@ function showEditChartModal(id) {
     element('#edit_chart_axis_y').value = chartElement.axis.y;
     element('#edit_chart_sufix').value = chartElement.suffix;
 
-    element('#edit_chart_verbal_rounding').checked = 
+    element('#edit_chart_verbal_rounding').checked =
     chartElement.isVerbalRoundingEnabled == 'true' ? true : false
-    element('#edit_chart_verbal_rounding_when_hovered').checked = 
+    element('#edit_chart_verbal_rounding_when_hovered').checked =
     chartElement.isVerbalRoundingEnabledForHoveredLabels == 'true' ? true : false
-    
+
     editDatasetContainer.innerHTML = '';
     chartElement.dataset.forEach((data, index)=>{
         editDatasetContainer.innerHTML += datasetHTMLTemplate(index);
-    })  
+    })
 
     document.querySelectorAll('.dataset_label').forEach((element, index) => {
         element.value = chartElement.dataset[index].label
@@ -356,11 +356,11 @@ function showEditChartModal(id) {
 }
 
 /**
- * 
+ *
  * @param {string} chartHTMLTemplate template for chart's canvas, actually chart holder template
  * @param {object} selectors object wich contains selectors for main elements
  * @param {array} chartsArray array with charts params like title, legend, values, etc
- * @returns 
+ * @returns
  */
 function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
     let chartContainer = document.querySelector(selectors.chartContainer)
@@ -481,11 +481,11 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                         if (showVerbalRoundingForHoveredLabels == 'true' ||
                             showVerbalRoundingForHoveredLabels == true) {
                             if (currentItemData >= 1000 && currentItemData < 1000000) {
-                                return `${label}${(currentItemData/1000).toFixed(1)} тис.${dataLabelSuffix}`;
+                                return `${label}${(currentItemData/1000).toFixed(1)} тис${dataLabelSuffix}`;
                             } else if (currentItemData >= 1000000 && currentItemData < 1000000000) {
-                                return `${label}${(currentItemData/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
+                                return `${label}${(currentItemData/1000000).toFixed(1)} млн${dataLabelSuffix}`;
                             } else if (currentItemData >= 1000000000) {
-                                return `${label}${(currentItemData/1000000000).toFixed(3)} млрд.${dataLabelSuffix}`;
+                                return `${label}${(currentItemData/1000000000).toFixed(3)} млрд${dataLabelSuffix}`;
                             } else {
                                 return `${label}${currentItemData}${dataLabelSuffix}`;
                             }
@@ -514,11 +514,11 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                         if (showVerbalRounding == 'true' ||
                             showVerbalRounding == true) {
                             if (value >= 1000 && value < 1000000) {
-                                return `${(value/1000).toFixed(1)} тис.${dataLabelSuffix}`;
+                                return `${(value/1000).toFixed(1)} тис${dataLabelSuffix}`;
                             } else if (value >= 1000000 && value < 1000000000) {
-                                return `${(value/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
+                                return `${(value/1000000).toFixed(1)} млн${dataLabelSuffix}`;
                             } else if (value >= 1000000000) {
-                                return `${(value/1000000000).toFixed(3)} млрд.${dataLabelSuffix}`;
+                                return `${(value/1000000000).toFixed(3)} млрд${dataLabelSuffix}`;
                             } else {
                                 return `${value}${dataLabelSuffix}`;
                             }
@@ -586,11 +586,11 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                             if (showVerbalRounding == 'true' ||
                                 showVerbalRounding == true) {
                                 if (value >= 1000 && value < 1000000) {
-                                    return `${(value/1000).toFixed(1)} тис.${dataLabelSuffix}`;
+                                    return `${(value/1000).toFixed(1)} тис${dataLabelSuffix}`;
                                 } else if (value >= 1000000 && value < 1000000000) {
-                                    return `${(value/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
+                                    return `${(value/1000000).toFixed(1)} млн${dataLabelSuffix}`;
                                 } else if (value >= 1000000000) {
-                                    return `${(value/1000000000).toFixed(3)} млрд.${dataLabelSuffix}`;
+                                    return `${(value/1000000000).toFixed(3)} млрд${dataLabelSuffix}`;
                                 } else {
                                     return `${value}${dataLabelSuffix}`;
                                 }
@@ -621,11 +621,11 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
                             if (showVerbalRounding == 'true' ||
                                 showVerbalRounding == true) {
                                 if (value >= 1000 && value < 1000000) {
-                                    return `${(value/1000).toFixed(1)} тис.${dataLabelSuffix}`;
+                                    return `${(value/1000).toFixed(1)} тис${dataLabelSuffix}`;
                                 } else if (value >= 1000000 && value < 1000000000) {
-                                    return `${(value/1000000).toFixed(1)} млн.${dataLabelSuffix}`;
+                                    return `${(value/1000000).toFixed(1)} млн${dataLabelSuffix}`;
                                 } else if (value >= 1000000000) {
-                                    return `${(value/1000000000).toFixed(3)} млрд.${dataLabelSuffix}`;
+                                    return `${(value/1000000000).toFixed(3)} млрд${dataLabelSuffix}`;
                                 } else {
                                     return `${value}${dataLabelSuffix}`;
                                 }
@@ -710,7 +710,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
 
 /**
  * do errors validation of html inputs
- * 
+ *
  * 1) gets all fields wich are needed to be validated
  * 2) checks it value, if it match required rule (basically regexp based)
  * 3) fills error array with invalid inputs IDs and error messages
@@ -725,15 +725,15 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
         nodesFromHTML.forEach(node => {
 
             element.rules.every(rule => {
-                
+
                 if (!rules[rule](node.value)) {
                     errors.push({nodeID:node.id, message:element.errorMessage})
                     return false;
                 } else {
                     return true;
                 }
-            }) 
-            
+            })
+
         })
 
     });
@@ -742,8 +742,8 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
 }
 
 /**
- * Removes old error displaying, generate new depends on needs 
- * 
+ * Removes old error displaying, generate new depends on needs
+ *
  * returns true, if errors is still on the page, false - if there is no errors left
  */
  function handleErrorDisplaying (errors, errorsContainerSelector) {
@@ -767,7 +767,7 @@ function buildCharts(chartHTMLTemplate, selectors, chartsArray) {
     }
 }
 
-function clearCreateChartModal() {  
+function clearCreateChartModal() {
     chartFieldsIDs.forEach(ID => {
         if (ID == 'chart_verbal_rounding' || ID == 'chart_verbal_rounding_when_hovered') {
             document.querySelector(`#${ID}`).checked = false;
@@ -789,7 +789,7 @@ function clearCreateChartModal() {
     modal.hide();
 }
 
-function clearEditChartModal() {  
+function clearEditChartModal() {
     editChartFieldsIDs.forEach(ID => {
         if (ID == 'edit_chart_verbal_rounding' || ID == 'edit_chart_verbal_rounding_when_hovered') {
             document.querySelector(`#${ID}`).checked = false;
@@ -842,11 +842,11 @@ function submitChartData(mode, chartID) {
                 if (ID == 'chart_verbal_rounding_when_hovered') {
                     chartFields[ID] = document.querySelector(`#${ID}`).checked  ? 'true' : 'false';
                     return true
-                } 
-        
+                }
+
                 chartFields[ID] = document.querySelector(`#${ID}`).value;
                 return true
-            });      
+            });
             break;
         case 'edit':
             editChartFieldsIDs.every(ID => {
@@ -857,11 +857,11 @@ function submitChartData(mode, chartID) {
                 if (ID == 'edit_chart_verbal_rounding_when_hovered') {
                     chartFields[ID] = document.querySelector(`#${ID}`).checked  ? 'true' : 'false';
                     return true
-                } 
-        
+                }
+
                 chartFields[ID] = document.querySelector(`#${ID}`).value;
                 return true
-            }); 
+            });
             break;
 
     }
@@ -880,7 +880,7 @@ function submitChartData(mode, chartID) {
             datasetElement.value = element.value;
             dataset.push(datasetElement);
             datasetElement = {};
-        }        
+        }
     });
 
     let chartInstance = {}
@@ -927,7 +927,7 @@ function submitChartData(mode, chartID) {
             break;
     }
 
-    /* 
+    /*
     charts = [
        {
             title: ['Виконання бюджету', 'виконання бюджету'],
@@ -951,8 +951,8 @@ function submitChartData(mode, chartID) {
                 {label: 'Міжбюджетні трансферти', value: '492900000'},
                 {label: 'Спеціальний фонд', value: '134200000'},
                 {label: 'Бюджет розвитку', value: '33000000'}
-                
-            ] 
+
+            ]
         },
         {
             title: 'Назва діаграми',
@@ -968,7 +968,7 @@ function submitChartData(mode, chartID) {
             dataset: [
                 {label: 'Назва діаграми', value: '123'},
                 {label: 'Назва діаграми 2', value: '321'},
-            ] 
+            ]
         },
         {
             title: 'Виконання бюджету',
@@ -986,13 +986,13 @@ function submitChartData(mode, chartID) {
                 {label: 'Міжбюджетні трансферти', value: '492900000'},
                 {label: 'Спеціальний фонд', value: '134200000'},
                 {label: 'Бюджет розвитку', value: '33000000'}
-            ] 
+            ]
         }
     ]
      /* */
     console.log(charts)
 
-    articleChartsInstances = buildCharts(chartHTMLTemplate, chartSelectors, charts);    
+    articleChartsInstances = buildCharts(chartHTMLTemplate, chartSelectors, charts);
 }
 
 function submitArticleData() {
@@ -1016,7 +1016,7 @@ function submitArticleData() {
     formData.append('report_id', element('#report_id').value)
     formData.append('article_name', element('#article_name').value)
     formData.append('article_text', articleText.replace(re, replaceWith))
-    formData.append('additional_file', 
+    formData.append('additional_file',
                     element('#additional_file').files[0] == undefined ? null : element('#additional_file').files[0])
     formData.append('charts', JSON.stringify(charts))
 
