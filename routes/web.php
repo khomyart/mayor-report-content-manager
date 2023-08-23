@@ -23,6 +23,10 @@ Route::get('/login', function () {
     return redirect('/');
 });
 
+Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('logout');
+
 Route::get('/dashboard', function () {
     return view('app.dashboard');
 })->middleware('auth')->name('dashboard');

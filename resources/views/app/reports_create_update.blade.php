@@ -20,6 +20,7 @@
         </ol>
     </nav>
     <div class="col-8 p-4">
+        {{url()->current()}}
         <form action="{{ isset($data) ? url('/reports/update/'.$data['id']) : route('create_report_action') }}" method="POST" class="mt-5 col-12" enctype="multipart/form-data">
             @csrf
             <div class="row mb-3">
@@ -61,10 +62,10 @@
                     </div>
                 </div>
             @endif
-  
+
             <div class="d-flex flex-row mt-3 align-items-center justify-content-start">
 
-                <button type="submit" class="btn btn-primary">Зберегти {{ isset($data) ? 'зміни' : '' }}</button> 
+                <button type="submit" class="btn btn-primary">Зберегти {{ isset($data) ? 'зміни' : '' }}</button>
                 <div class="form-check ps-5">
                     <label class="form-check-label" for="is_active">
                         Активний

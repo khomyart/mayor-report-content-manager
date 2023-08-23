@@ -23,7 +23,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      *
-     * @param  \App\Http\Requests\Auth\LoginRequest  $request
+     * @param  \App\Http\Requests\Auth\CustomLoginRequest $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(CustomLoginRequest $request)
@@ -43,7 +43,9 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
-        Auth::guard('web')->logout();
+        return response(123);
+        // Auth::guard('web')->logout();
+        Auth::logout();
 
         $request->session()->invalidate();
 

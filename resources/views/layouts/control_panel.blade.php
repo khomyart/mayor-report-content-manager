@@ -15,7 +15,7 @@ $menu = [
     [
         "display_name" => 'Презентації',
         "redirects_to" => 'presentations',
-    ],     
+    ],
 ];
 @endphp
 
@@ -43,23 +43,24 @@ $menu = [
     <title>@section('title') Редактор звітів міського голови @show</title>
 </head>
 <body>
-    
+
     <div class="container-fluid d-flex flex-row col-12 p-0" style="height: 100%;">
-        <div class="menu">
+        <div class="menu d-flex flex-column justify-content-between pb-4">
             <div class="d-flex flex-column">
                 <div class="logo">
-
+                    <img style="width: 100%; height: auto;" src="{{ asset('img/lutsk_logo.png') }}" alt="Логотип Луцька">
                 </div>
                 @foreach ($menu as $menu_item)
                     <a class="{{$currentPage == $menu_item['redirects_to'] ? 'active-menu-element' : 'menu-element'}}" href="{{ route($menu_item['redirects_to']) }}">
                         {{$menu_item['display_name']}}
                     </a>
                 @endforeach
-                </div>
+            </div>
+            <a class="menu-element" href="{{ route('logout') }}">Вийти</a>
         </div>
         <div class="content-container">
             @yield('content')
         </div>
-    </div>   
+    </div>
 </body>
 </html>
